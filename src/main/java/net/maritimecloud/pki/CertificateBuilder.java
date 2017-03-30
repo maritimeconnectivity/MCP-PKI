@@ -84,7 +84,7 @@ public class CertificateBuilder {
      * the given issuer-private-key. The issuer and subject will be identified in the strings provided.
      *
      * @return A signed X509Certificate
-     * @throws Exception
+     * @throws Exception Throws exception on certificate generation errors.
      */
     public X509Certificate buildAndSignCert(BigInteger serialNumber, PrivateKey signerPrivateKey, PublicKey signerPublicKey, PublicKey subjectPublicKey, X500Name issuer, X500Name subject,
                                             Map<String, String> customAttrs, String type, String ocspUrl, String crlUrl) throws Exception {
@@ -142,10 +142,12 @@ public class CertificateBuilder {
         DistributionPoint[] distPoints = new DistributionPoint[1];
         distPoints[0] = new DistributionPoint(distPointOne, null, null);
         certV3Bldr.addExtension(Extension.cRLDistributionPoints, false, new CRLDistPoint(distPoints));
-        // OCSP endpoint
-        GeneralName ocspName = new GeneralName(GeneralName.uniformResourceIdentifier, ocspUrl);
-        AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess(X509ObjectIdentifiers.ocspAccessMethod, ocspName);
-        certV3Bldr.addExtension(Extension.authorityInfoAccess, false, authorityInformationAccess);
+        // OCSP endpoint - is not available for the root CA
+        if (ocspUrl != null) {
+            GeneralName ocspName = new GeneralName(GeneralName.uniformResourceIdentifier, ocspUrl);
+            AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess(X509ObjectIdentifiers.ocspAccessMethod, ocspName);
+            certV3Bldr.addExtension(Extension.authorityInfoAccess, false, authorityInformationAccess);
+        }
         // Create the key signer
         JcaContentSignerBuilder builder = new JcaContentSignerBuilder(SIGNER_ALGORITHM);
         builder.setProvider(BC_PROVIDER_NAME);

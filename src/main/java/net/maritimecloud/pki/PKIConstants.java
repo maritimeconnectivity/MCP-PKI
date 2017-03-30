@@ -19,8 +19,7 @@ package net.maritimecloud.pki;
 public class PKIConstants {
 
     public static final int CERT_EXPIRE_YEAR = 2025;
-    public static final String ROOT_CERT_ALIAS = "rootcert";
-    public static final String INTERMEDIATE_CERT_ALIAS = "imcert";
+    public static final String ROOT_CERT_ALIAS = "urn:mrn:mcl:ca:maritimecloud";
     public static final String BC_PROVIDER_NAME = "BC";
     public static final String KEYSTORE_TYPE = "jks";
     public static final String SIGNER_ALGORITHM = "SHA256withECDSA";

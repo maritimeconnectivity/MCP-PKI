@@ -18,12 +18,10 @@ package net.maritimecloud.pki;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 public class PKIIdentity {
-    private String uid;
+    private String mrn;
     private String dn;
     private String cn;
     private String sn;

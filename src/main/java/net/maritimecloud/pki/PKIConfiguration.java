@@ -24,22 +24,22 @@ public class PKIConfiguration {
 
     // Values below are loaded from application.yaml
     //@Value("${net.maritimecloud.pki.mcidreg-cert-x500-name}")
-    public String mcidregCertX500Name;
-
-    //@Value("${net.maritimecloud.pki.crl-url}")
-    //private String crlUrl;
-
-    //@Value("${net.maritimecloud.pki.ocsp-url}")
-    //private String ocspUrl;
+    //public String mcidregCertX500Name;
 
     //@Value("${net.maritimecloud.pki.root-keystore}")
     private String rootCaKeystorePath;
 
+    //@Value("${net.maritimecloud.pki.keystore-password}")
+    private String rootCaKeystorePassword;
+
+    private String rootCaKeyPassword;
+
     //@Value("${net.maritimecloud.pki.it-keystore}")
     private String subCaKeystorePath;
 
-    //@Value("${net.maritimecloud.pki.keystore-password}")
-    private String keystorePassword;
+    private String subCaKeystorePassword;
+
+    private String subCaKeyPassword;
 
     //@Value("${net.maritimecloud.pki.truststore}")
     private String truststorePath;

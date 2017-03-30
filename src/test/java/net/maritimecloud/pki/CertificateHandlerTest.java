@@ -18,18 +18,86 @@ package net.maritimecloud.pki;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertPathValidatorException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import static net.maritimecloud.pki.TestUtils.getEcdisCertPem;
-import static net.maritimecloud.pki.TestUtils.getMyBoatCert;
-import static net.maritimecloud.pki.TestUtils.getMyBoatCertPem;
+import static net.maritimecloud.pki.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 
 public class CertificateHandlerTest {
+
+    //@Test
+    void verifyCertificateChain1() {
+        X509Certificate cert = getMyBoatCert();
+        PKIConfiguration pkiConf = new PKIConfiguration();
+        pkiConf.setTruststorePassword("changeit");
+        pkiConf.setTruststorePath("src/test/resources/mc-truststore-password-is-changeit.jks");
+        KeystoreHandler kh = new KeystoreHandler(pkiConf);
+
+        boolean valid = false;
+        try {
+            valid = CertificateHandler.verifyCertificateChain(cert, kh.getTrustStore());
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        } catch (CertPathValidatorException e) {
+            e.printStackTrace();
+        }
+        assertTrue(valid);
+    }
+
+    @Test
+    void verifyCertificateChain2() {
+        X509Certificate cert = getEcdisCert();
+        PKIConfiguration pkiConf = new PKIConfiguration();
+        pkiConf.setTruststorePassword("changeit");
+        pkiConf.setTruststorePath("src/test/resources/mc-truststore-password-is-changeit.jks");
+        KeystoreHandler kh = new KeystoreHandler(pkiConf);
+
+        boolean valid = false;
+        String exception = "None";
+        String reason = "None";
+        try {
+            valid = CertificateHandler.verifyCertificateChain(cert, kh.getTrustStore());
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        } catch (CertPathValidatorException e) {
+            reason = e.getReason().toString();
+            //e.printStackTrace();
+            exception = "CertPathValidatorException";
+        }
+        assertFalse(valid);
+        assertEquals("CertPathValidatorException", exception);
+        assertEquals("NO_TRUST_ANCHOR", reason);
+    }
+
+
     @Test
     void verifyCertificate() {
+        X509Certificate cert = getMyBoatCert();
+        PKIConfiguration pkiConf = new PKIConfiguration();
+        pkiConf.setTruststorePassword("changeit");
+        pkiConf.setTruststorePath("src/test/resources/mc-truststore-password-is-changeit.jks");
+        KeystoreHandler kh = new KeystoreHandler(pkiConf);
 
+        boolean valid = CertificateHandler.verifyCertificate(kh.getPubKey("imcert"), cert);
+        assertTrue(valid);
     }
 
     @Test
@@ -68,7 +136,7 @@ public class CertificateHandlerTest {
         assertEquals("urn:mrn:mcl:org:dma", identity.getO());
         assertEquals("My Boat", identity.getCn());
         assertEquals("12345678", identity.getImoNumber());
-        assertEquals("urn:mrn:mcl:vessel:dma:myboat", identity.getUid());
+        assertEquals("urn:mrn:mcl:vessel:dma:myboat", identity.getMrn());
         assertEquals(null, identity.getPermissions());
     }
 

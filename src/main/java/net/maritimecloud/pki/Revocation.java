@@ -52,13 +52,8 @@ import static net.maritimecloud.pki.CertificateHandler.getPemFromEncoded;
 import static net.maritimecloud.pki.PKIConstants.BC_PROVIDER_NAME;
 import static net.maritimecloud.pki.PKIConstants.SIGNER_ALGORITHM;
 
-//@AllArgsConstructor
 @Slf4j
 public class Revocation {
-
-    //private KeystoreHandler keystoreHandler;
-    //private PKIConfiguration pkiConfiguration;
-
 
     public static int getCRLReasonFromString(String certReason) {
         int reason = CRLReason.unspecified;
@@ -74,7 +69,7 @@ public class Revocation {
             reason = CRLReason.superseded;
         } else if ("cessationofoperation".equals(certReason)) {
             reason = CRLReason.cessationOfOperation;
-        } else if ("certificateHold".equals(certReason)) {
+        } else if ("certificatehold".equals(certReason)) {
             reason = CRLReason.certificateHold;
         } else if ("removefromcrl".equals(certReason)) {
             reason = CRLReason.removeFromCRL;

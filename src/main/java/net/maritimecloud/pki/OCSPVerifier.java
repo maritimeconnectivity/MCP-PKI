@@ -15,11 +15,11 @@
  */
 package net.maritimecloud.pki;
 
-import net.maritimecloud.pki.ocsp.CertStatus;
 import net.maritimecloud.pki.ocsp.OCSPClient;
 import net.maritimecloud.pki.ocsp.OCSPValidationException;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.cert.ocsp.RevokedStatus;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -30,22 +30,10 @@ import java.security.cert.X509Certificate;
 public class OCSPVerifier {
 
     public static RevocationInfo verifyCertificateOCSP(X509Certificate cert, KeyStore trustStore) throws IOException, KeyStoreException, OCSPValidationException {
-        String certDN = cert.getSubjectDN().getName();
-        //System.out.println(certDN);
-        X500Name x500name = new X500Name(certDN);
-        String issuerAlias = CertificateHandler.getElement(x500name, BCStyle.O);
-        //System.out.println(issuerAlias);
-        X509Certificate issuerCert =  (X509Certificate) trustStore.getCertificate(PKIConstants.INTERMEDIATE_CERT_ALIAS);
-        OCSPClient ocspClient = new OCSPClient(issuerCert, cert);
-        RevocationInfo info = new RevocationInfo();
-        if (ocspClient.checkOCSP()) {
-            info.setStatus(ocspClient.getCertificateStatus());
-        } else {
-            info.setStatus(ocspClient.getCertificateStatus());
-            info.setRevokeReason(CRLReason.values()[ocspClient.getRevokedStatus().get().getRevocationReason()]);
-            info.setRevokedAt(ocspClient.getRevokedStatus().get().getRevocationTime());
-        }
-        return info;
+        X500Name x500name = new X500Name(cert.getIssuerDN().getName());
+        String issuerAlias = CertificateHandler.getElement(x500name, BCStyle.UID);
+        X509Certificate issuerCert =  (X509Certificate) trustStore.getCertificate(issuerAlias);
+        return verifyCertificateOCSP(cert, issuerCert);
     }
 
     public static RevocationInfo verifyCertificateOCSP(X509Certificate cert, X509Certificate issuerCert) throws IOException, OCSPValidationException {
@@ -55,8 +43,11 @@ public class OCSPVerifier {
             info.setStatus(ocspClient.getCertificateStatus());
         } else {
             info.setStatus(ocspClient.getCertificateStatus());
-            info.setRevokeReason(CRLReason.values()[ocspClient.getRevokedStatus().get().getRevocationReason()]);
-            info.setRevokedAt(ocspClient.getRevokedStatus().get().getRevocationTime());
+            if (ocspClient.getRevokedStatus().isPresent()) {
+                RevokedStatus rs = ocspClient.getRevokedStatus().get();
+                info.setRevokeReason(CRLReason.values()[rs.getRevocationReason()]);
+                info.setRevokedAt(rs.getRevocationTime());
+            }
         }
         return info;
     }

@@ -38,13 +38,27 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.cert.CertPath;
+import java.security.cert.CertPathValidator;
+import java.security.cert.CertPathValidatorException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateParsingException;
+import java.security.cert.PKIXCertPathValidatorResult;
+import java.security.cert.PKIXParameters;
+import java.security.cert.PKIXRevocationChecker;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 
 
@@ -79,11 +93,7 @@ public class CertificateHandler {
             log.error("Could not create JcaX509CertificateHolder", e);
             return false;
         }
-        /*PublicKey pubKey = rootCert.getPublicKey();
-        if (pubKey == null) {
-            log.error("Could not get public key of root certificate");
-            return false;
-        }*/
+
         ContentVerifierProvider contentVerifierProvider;
         try {
             contentVerifierProvider = new JcaContentVerifierProviderBuilder().setProvider(BC_PROVIDER_NAME).build(verificationPubKey);
@@ -105,6 +115,26 @@ public class CertificateHandler {
         }
         log.debug("Certificate does not seem to be valid!");
         return false;
+    }
+
+    public static boolean verifyCertificateChain(X509Certificate certificate, KeyStore ks) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, InvalidAlgorithmParameterException, CertPathValidatorException {
+
+        // Create the certificate path to verify - in this case just the given certificate
+        List<Certificate> certList = Collections.singletonList(certificate);
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        CertPath certPath = cf.generateCertPath(certList);
+
+        // Create validator and revocation checker
+        CertPathValidator validator = CertPathValidator.getInstance("PKIX");
+        PKIXRevocationChecker rc = (PKIXRevocationChecker)validator.getRevocationChecker();
+        rc.setOptions(EnumSet.of(PKIXRevocationChecker.Option.NO_FALLBACK));
+        PKIXParameters pkixp = new PKIXParameters(ks);
+        pkixp.addCertPathChecker(rc);
+        pkixp.setRevocationEnabled(false);
+
+        // Do the actual validation!
+        PKIXCertPathValidatorResult pcpvr =  (PKIXCertPathValidatorResult)validator.validate(certPath, pkixp);
+        return (pcpvr != null);
     }
 
     /**
@@ -132,14 +162,6 @@ public class CertificateHandler {
     }
 
     public static X509Certificate getCertFromNginxHeader(String certificateHeader) {
-        CertificateFactory certificateFactory;
-        try {
-            certificateFactory = CertificateFactory.getInstance("X.509");
-        } catch (CertificateException e) {
-            log.error("Exception while creating CertificateFactory", e);
-            return null;
-        }
-
         // nginx forwards the certificate in a header by replacing new lines with whitespaces
         // (2 or more). Also replace tabs, which nginx sometimes sends instead of whitespaces.
         String certificateContent = certificateHeader.replaceAll("\\s{2,}", System.lineSeparator()).replaceAll("\\t+", System.lineSeparator());
@@ -176,7 +198,7 @@ public class CertificateHandler {
         X500Name x500name = new X500Name(certDN);
         String name = getElement(x500name, BCStyle.CN);
         String uid = getElement(x500name, BCStyle.UID);
-        identity.setUid(uid);
+        identity.setMrn(uid);
         identity.setDn(certDN);
         identity.setCn(name);
         identity.setSn(name);
@@ -195,14 +217,14 @@ public class CertificateHandler {
         // Check that the certificate includes the SubjectAltName extension
         if (san != null) {
             // Use the type OtherName to search for the certified server name
-            String permissions = "";
+            StringBuilder permissions = new StringBuilder();
             for (List item : san) {
                 Integer type = (Integer) item.get(0);
                 if (type == 0) {
                     // Type OtherName found so return the associated value
                     ASN1InputStream decoder = null;
-                    String oid = "";
-                    String value = "";
+                    String oid;
+                    String value;
                     try {
                         // Value is encoded using ASN.1 so decode it to get it out again
                         decoder = new ASN1InputStream((byte[]) item.toArray()[1]);
@@ -226,6 +248,7 @@ public class CertificateHandler {
                             try {
                                 decoder.close();
                             } catch (IOException e) {
+                                e.printStackTrace();
                             }
                         }
                     }
@@ -251,14 +274,14 @@ public class CertificateHandler {
                             break;
                         case MC_OID_MRN:
                             // We only support 1 mrn
-                            identity.setUid(value);
+                            identity.setMrn(value);
                             break;
                         case MC_OID_PERMISSIONS:
                             if (value != null && !value.trim().isEmpty()) {
-                                if (permissions.isEmpty()) {
-                                    permissions = value;
+                                if (permissions.length() == 0) {
+                                    permissions = new StringBuilder(value);
                                 } else {
-                                    permissions += ',' + value;
+                                    permissions.append(',').append(value);
                                 }
                             }
                             break;
@@ -271,8 +294,8 @@ public class CertificateHandler {
                     log.warn("SubjectAltName of invalid type found: " + type);
                 }
             }
-            if (!permissions.isEmpty()) {
-                identity.setPermissions(permissions);
+            if (permissions.length() > 0) {
+                identity.setPermissions(permissions.toString());
             }
         }
         return identity;
@@ -281,13 +304,13 @@ public class CertificateHandler {
     /**
      * Extract a value from the DN extracted from a certificate
      *
-     * @param x500name
-     * @param style
-     * @return
+     * @param x500name The full DN from certificate
+     * @param objectId The Identifier to find
+     * @return the value of the identifier, or null if not found.
      */
-    public static String getElement(X500Name x500name, ASN1ObjectIdentifier style) {
+    public static String getElement(X500Name x500name, ASN1ObjectIdentifier objectId) {
         try {
-            RDN cn = x500name.getRDNs(style)[0];
+            RDN cn = x500name.getRDNs(objectId)[0];
             return valueToString(cn.getFirst().getValue());
         } catch (ArrayIndexOutOfBoundsException e) {
             return null;

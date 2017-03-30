@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 class OCSPVerifierTest {
-    @Test
+    //@Test
     void verifyCertificateOCSP1() {
         X509Certificate cert = getMyBoatCert();
         PKIConfiguration pkiConf = new PKIConfiguration();
@@ -51,7 +51,7 @@ class OCSPVerifierTest {
         assertEquals(CertStatus.GOOD, info.getStatus());
     }
 
-    @Test
+    //@Test
     void verifyCertificateOCSP2() {
         X509Certificate cert = getEcdisCert();
         PKIConfiguration pkiConf = new PKIConfiguration();

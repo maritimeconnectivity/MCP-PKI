@@ -16,8 +16,8 @@
 package net.maritimecloud.pki;
 
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,6 +26,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -34,11 +35,16 @@ import static net.maritimecloud.pki.PKIConstants.KEYSTORE_TYPE;
 import static net.maritimecloud.pki.PKIConstants.ROOT_CERT_ALIAS;
 
 @Slf4j
-@AllArgsConstructor
 public class KeystoreHandler {
 
     private PKIConfiguration pkiConfiguration;
 
+    public KeystoreHandler(PKIConfiguration pkiConfiguration) {
+        this.pkiConfiguration = pkiConfiguration;
+        // Set Bouncy Castle as Provider, used for Certificates.
+        Security.addProvider(new BouncyCastleProvider());
+
+    }
     /**
      * Loads the MaritimeCloud certificate used for signing from the (jks) keystore
      *
@@ -54,10 +60,9 @@ public class KeystoreHandler {
         KeyStore keystore;
         try {
             keystore = KeyStore.getInstance(KEYSTORE_TYPE);
-            keystore.load(is, pkiConfiguration.getKeystorePassword().toCharArray());
-            KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(pkiConfiguration.getKeystorePassword().toCharArray());
-            KeyStore.PrivateKeyEntry signingCertEntry = (KeyStore.PrivateKeyEntry) keystore.getEntry(alias, protParam);
-            return signingCertEntry;
+            keystore.load(is, pkiConfiguration.getSubCaKeystorePassword().toCharArray());
+            KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(pkiConfiguration.getSubCaKeyPassword().toCharArray());
+            return (KeyStore.PrivateKeyEntry) keystore.getEntry(alias, protParam);
 
         } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException | UnrecoverableEntryException e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -82,8 +87,7 @@ public class KeystoreHandler {
         try {
             keystore = KeyStore.getInstance(KEYSTORE_TYPE);
             keystore.load(is, pkiConfiguration.getTruststorePassword().toCharArray());
-            Certificate rootCert = keystore.getCertificate(alias);
-            return rootCert;
+            return keystore.getCertificate(alias);
 
         } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
             log.error("Could not load root certificate", e);
@@ -113,14 +117,12 @@ public class KeystoreHandler {
 
     public PublicKey getRootPubKey() {
         Certificate rootCert = getMCCertificate(ROOT_CERT_ALIAS);
-        PublicKey rootPubKey = rootCert.getPublicKey();
-        return rootPubKey;
+        return rootCert.getPublicKey();
     }
 
     public PublicKey getPubKey(String alias) {
         Certificate cert = getMCCertificate(alias);
-        PublicKey publicKey = cert.getPublicKey();
-        return publicKey;
+        return cert.getPublicKey();
     }
 
 }
