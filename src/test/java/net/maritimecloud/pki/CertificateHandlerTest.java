@@ -79,7 +79,6 @@ public class CertificateHandlerTest {
             e.printStackTrace();
         } catch (CertPathValidatorException e) {
             reason = e.getReason().toString();
-            //e.printStackTrace();
             exception = "CertPathValidatorException";
         }
         assertFalse(valid);
@@ -96,7 +95,7 @@ public class CertificateHandlerTest {
         pkiConf.setTruststorePath("src/test/resources/mc-truststore-password-is-changeit.jks");
         KeystoreHandler kh = new KeystoreHandler(pkiConf);
 
-        boolean valid = CertificateHandler.verifyCertificate(kh.getPubKey("imcert"), cert);
+        boolean valid = CertificateHandler.verifyCertificate(kh.getPubKey("imcert"), cert, null);
         assertTrue(valid);
     }
 

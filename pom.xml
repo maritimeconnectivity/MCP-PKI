@@ -67,21 +67,20 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-            <!--<plugin>
-                < !- - Build an executable JAR - - >
+            <plugin>
+                <!-- Can be triggered by running mvn javadoc:javadoc -->
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>net.maritimecloud.pki.Main</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>-->
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>javadoc</goal>
+                        </goals>
+                    <phase>site</phase>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.0.0</version>
@@ -123,6 +122,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

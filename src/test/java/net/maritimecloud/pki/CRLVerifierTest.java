@@ -21,17 +21,14 @@ package net.maritimecloud.pki;
 import net.maritimecloud.pki.ocsp.CertStatus;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.cert.CRLException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static net.maritimecloud.pki.CertificateHandler.getCertFromPem;
+import static net.maritimecloud.pki.TestUtils.getEcdisCert;
 import static net.maritimecloud.pki.TestUtils.getMyBoatCert;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -49,16 +46,49 @@ class CRLVerifierTest {
     }
 
     @org.junit.jupiter.api.Test
-    void verifyCertificateCRLs() {
-
+    void verifyCertificateCRL1() {
+        X509Certificate cert = getMyBoatCert();
+        RevocationInfo info = CRLVerifier.verifyCertificateCRL(cert);
+        assertNotNull(info);
+        assertEquals(CertStatus.GOOD, info.getStatus());
     }
 
     @org.junit.jupiter.api.Test
-    void verifyCertificateCRL() {
-        X509Certificate cert = getMyBoatCert();
-        RevocationInfo info = CRLVerifier.verifyCertificateCRLs(cert);
+    void verifyCertificateCRL2() {
+        X509Certificate cert = getEcdisCert();
+        RevocationInfo info = CRLVerifier.verifyCertificateCRL(cert);
         assertNotNull(info);
-        assertEquals(info.getStatus(), CertStatus.GOOD);
+        assertEquals(CertStatus.REVOKED, info.getStatus());
+    }
+
+    @org.junit.jupiter.api.Test
+    void verifyCertificateCRL3() {
+        X509Certificate cert = getMyBoatCert();
+        String crlFile = "src/test/resources/mc-2017-03-23.crl";
+        X509CRL crl = null;
+        try {
+            crl = CRLVerifier.loadCRLFromFile(crlFile);
+        } catch (IOException | CRLException | CertificateException e) {
+            e.printStackTrace();
+        }
+        RevocationInfo info = CRLVerifier.verifyCertificateCRL(cert, crl);
+        assertNotNull(info);
+        assertEquals(CertStatus.GOOD, info.getStatus());
+    }
+
+    @org.junit.jupiter.api.Test
+    void verifyCertificateCRL4() {
+        X509Certificate cert = getEcdisCert();
+        String crlFile = "src/test/resources/mc-2017-03-23.crl";
+        X509CRL crl = null;
+        try {
+            crl = CRLVerifier.loadCRLFromFile(crlFile);
+        } catch (IOException | CRLException | CertificateException e) {
+            e.printStackTrace();
+        }
+        RevocationInfo info = CRLVerifier.verifyCertificateCRL(cert, crl);
+        assertNotNull(info);
+        assertEquals(CertStatus.REVOKED, info.getStatus());
     }
 
     @org.junit.jupiter.api.Test
@@ -67,11 +97,7 @@ class CRLVerifierTest {
         X509CRL crl = null;
         try {
             crl = CRLVerifier.loadCRLFromFile(crlFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (CRLException e) {
-            e.printStackTrace();
-        } catch (CertificateException e) {
+        } catch (IOException | CRLException | CertificateException e) {
             e.printStackTrace();
         }
         assertNotNull(crl);
@@ -85,10 +111,7 @@ class CRLVerifierTest {
         List<String> crlDistPoints = null;
         try {
             crlDistPoints = CRLVerifier.getCrlDistributionPoints(cert);
-        } catch (CertificateParsingException e) {
-            e.printStackTrace();
-            fail("Extracting the CRL distribution point failed!");
-        } catch (IOException e) {
+        } catch (CertificateParsingException | IOException e) {
             e.printStackTrace();
             fail("Extracting the CRL distribution point failed!");
         }
