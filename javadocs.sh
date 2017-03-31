@@ -15,7 +15,7 @@ elif [ "$1" = "site" ]; then
     cp README.md target/
 
     git checkout gh-pages
-    cp -r target/site/apidocs/ apidocs
+    cp -r target/site/apidocs .
     cp target/README.md .
 
     git add apidocs/*
