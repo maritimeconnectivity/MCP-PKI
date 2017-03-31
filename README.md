@@ -7,6 +7,26 @@ Building using maven should be as simple as running `mvn install`.
 ## Using the lib
 The primary function of this software is to make it easy/easier to use the Maritime Cloud PKI for (Java) developers. 
 
+There is javadocs available here: https://maritimecloud.github.io/MC-PKI/apidocs/
+
+Use PKIConfiguration for setting up configuration about Keystore and/or Truststore, use KeystoreHandler to load them and the you most like want to use CertificateHandler to, well, handle certificates...
+
+A short example of use can be seen below:
+```java
+    // Setup MC PKI
+    PKIConfiguration pkiConf = new PKIConfiguration();
+    pkiConf.setTruststorePath("/path/to/mc-truststore.jks");
+    pkiConf.setTruststorePassword("changeit");
+    KeystoreHandler kh = new KeystoreHandler(pkiConf);
+    // Get the certificate that should be validated
+    X509Certificate cert = getUserCertificate();
+    // Validate certificate
+    CertificateHandler.verifyCertificateChain(cert, kh.getTrustStore());
+    // Extract Identity information from the certificate
+    PKIIdentity user = CertificateHandler.getIdentityFromCert(cert);
+
+```
+
 ## Commandline interface
 The secondary function of this software is to provide a (relatively) easy to use interface for the PKI manager. How to use is will be described below.
 
@@ -69,3 +89,10 @@ java -jar target/mc-pki-0.4.99-SNAPSHOT-jar-with-dependencies.jar \
     --crl-endpoint "https://localhost/x509/api/certificates/crl/urn:mrn:mcl:ca:maritimecloud-idreg" \
     --ocsp-endpoint "https://localhost/x509/api/certificates/ocsp/urn:mrn:mcl:ca:maritimecloud-idreg"
 ```
+
+The UID will be used as alias when stored in the truststore and subca-keystore. The root-keystore and truststore is expected to exists, while the subca-keystore will be created if it does not exists.
+
+## License
+This software is distributed under the Apache License, Version 2.0.
+
+This project includes code from the Apache Xcf project (Apache License, Version 2.0), and the [POReID project](https://github.com/poreid/poreid) (MIT License). 
