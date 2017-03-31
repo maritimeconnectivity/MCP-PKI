@@ -58,6 +58,7 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -77,15 +78,19 @@ import static org.bouncycastle.asn1.x500.style.IETFUtils.valueToString;
 @Slf4j
 public class CertificateHandler {
 
-    /*private KeystoreHandler keystoreHandler;
-
-    public CertificateHandler(KeystoreHandler keystoreHandler) {
-        this.keystoreHandler = keystoreHandler;
-    }*/
-
-
-    public static boolean verifyCertificate(PublicKey verificationPubKey, X509Certificate certToVerify) {
-        //Certificate rootCert = keystoreHandler.getMCCertificate(INTERMEDIATE_CERT_ALIAS);
+    /**
+     * Verify a single certificate against the public key of the issueing certificate. Does *not* check revocation
+     * status against CRL/OCSP.
+     * In most cases you should probably use
+     * {@link #verifyCertificateChain(X509Certificate, KeyStore) verifyCertificateChain} instead to verify the
+     * complete chain.
+     *
+     * @param verificationPubKey Public key of the issuing certificate
+     * @param certToVerify The certificate to verify
+     * @param verificationDate Date the certificate must be valid. If null the present day is used.
+     * @return true if valid else false
+     */
+    public static boolean verifyCertificate(PublicKey verificationPubKey, X509Certificate certToVerify, Date verificationDate) {
         JcaX509CertificateHolder certHolder;
         try {
             certHolder = new JcaX509CertificateHolder(certToVerify);
@@ -107,7 +112,12 @@ public class CertificateHandler {
         }
         try {
             if (certHolder.isSignatureValid(contentVerifierProvider)) {
-                return true;
+                if (verificationDate == null) {
+                    verificationDate = new Date();
+                }
+                if (verificationDate.after(certToVerify.getNotBefore()) && verificationDate.before(certToVerify.getNotAfter())) {
+                    return true;
+                }
             }
         } catch (CertException e) {
             log.error("Error when trying to validate signature", e);
@@ -117,6 +127,19 @@ public class CertificateHandler {
         return false;
     }
 
+    /**
+     * Verify a single certificate against trust chain in the keystore. If the certificate is invalid a
+     * CertPathValidatorException is thrown. Checks certificate validity and revocation status.
+     *
+     * @param certificate The certificate to verify
+     * @param ks The truststore that contains the trust chain
+     * @return true if valid.
+     * @throws KeyStoreException Thrown if keystore loading fails
+     * @throws NoSuchAlgorithmException Thrown if PKIX initialization fails
+     * @throws CertificateException Thrown if certificate cannot be loaded
+     * @throws InvalidAlgorithmParameterException Thrown if keystore loading fails
+     * @throws CertPathValidatorException Thrown if certificate is invalid.
+     */
     public static boolean verifyCertificateChain(X509Certificate certificate, KeyStore ks) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, InvalidAlgorithmParameterException, CertPathValidatorException {
 
         // Create the certificate path to verify - in this case just the given certificate
@@ -133,7 +156,7 @@ public class CertificateHandler {
         pkixp.setRevocationEnabled(false);
 
         // Do the actual validation!
-        PKIXCertPathValidatorResult pcpvr =  (PKIXCertPathValidatorResult)validator.validate(certPath, pkixp);
+        PKIXCertPathValidatorResult pcpvr = (PKIXCertPathValidatorResult)validator.validate(certPath, pkixp);
         return (pcpvr != null);
     }
 
@@ -161,6 +184,12 @@ public class CertificateHandler {
         return pemFormat;
     }
 
+    /**
+     * Extract a certificate from a nginx header containing a PEM formatet certificate
+     *
+     * @param certificateHeader The header containing the certificate
+     * @return The extracted certificate. Returns null on failure.
+     */
     public static X509Certificate getCertFromNginxHeader(String certificateHeader) {
         // nginx forwards the certificate in a header by replacing new lines with whitespaces
         // (2 or more). Also replace tabs, which nginx sometimes sends instead of whitespaces.
@@ -172,6 +201,12 @@ public class CertificateHandler {
         return getCertFromPem(certificateContent);
     }
 
+    /**
+     * Converts a PEM encoded certificate to a X509Certificate
+     *
+     * @param pemCertificate String containing the PEM encoded certificate
+     * @return The converted certificate
+     */
     public static X509Certificate getCertFromPem(String pemCertificate) {
         CertificateFactory certificateFactory;
         try {
@@ -192,6 +227,12 @@ public class CertificateHandler {
         return userCertificate;
     }
 
+    /**
+     * Extracts a PKIIdentity from a certificate using the MC PKI certificate "format"
+     *
+     * @param userCertificate The certificate
+     * @return The extracted identity
+     */
     public static PKIIdentity getIdentityFromCert(X509Certificate userCertificate) {
         PKIIdentity identity = new PKIIdentity();
         String certDN = userCertificate.getSubjectDN().getName();

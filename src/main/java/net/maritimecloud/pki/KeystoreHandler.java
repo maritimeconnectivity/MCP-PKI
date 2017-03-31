@@ -48,7 +48,8 @@ public class KeystoreHandler {
     /**
      * Loads the MaritimeCloud certificate used for signing from the (jks) keystore
      *
-     * @return a keyStore containing
+     * @param alias Alias of the signing certificate
+     * @return a PrivateKeyEntry of the signing certificate
      */
     public KeyStore.PrivateKeyEntry getSigningCertEntry(String alias) {
         FileInputStream is;
@@ -71,6 +72,7 @@ public class KeystoreHandler {
 
     /**
      * Returns a Maritime Cloud certificate from the truststore
+     *
      * @param alias Either ROOT_CERT_ALIAS or INTERMEDIATE_CERT_ALIAS
      * @return a certificate
      */
@@ -95,6 +97,11 @@ public class KeystoreHandler {
         }
     }
 
+    /**
+     * Returns the truststore defined in PKIConfiguration.
+     *
+     * @return a truststore
+     */
     public KeyStore getTrustStore() {
         FileInputStream is;
         try {
@@ -115,11 +122,22 @@ public class KeystoreHandler {
         }
     }
 
+    /**
+     * Returns the public key of the root certificate
+     *
+     * @return public key
+     */
     public PublicKey getRootPubKey() {
         Certificate rootCert = getMCCertificate(ROOT_CERT_ALIAS);
         return rootCert.getPublicKey();
     }
 
+    /**
+     * Returns the public key of the sub CA certificate with the given alias
+     *
+     * @param alias Alias of a sub CA
+     * @return
+     */
     public PublicKey getPubKey(String alias) {
         Certificate cert = getMCCertificate(alias);
         return cert.getPublicKey();

@@ -81,9 +81,11 @@ public final class CRLVerifier {
      * Extracts the CRL distribution points from the certificate (if available)
      * and checks the certificate revocation status against the CRLs coming from
      * the distribution points. Supports HTTP, HTTPS, FTP and LDAP based URLs.
+     *
+     * @param cert Certificate to verify
+     * @return a RevocationInfo object with the validation result
      */
-
-    public static RevocationInfo verifyCertificateCRLs(X509Certificate cert) {
+    public static RevocationInfo verifyCertificateCRL(X509Certificate cert) {
         try {
             List<String> crlDistPoints = getCrlDistributionPoints(cert);
             for (String crlDP : crlDistPoints) {
@@ -100,6 +102,13 @@ public final class CRLVerifier {
         }
     }
 
+    /**
+     * Verifies the revocation status of a certificate against a CRL
+     *
+     * @param cert The certificate to verify
+     * @param crl The CRL to use for verifying
+     * @return a RevocationInfo object with the validation result
+     */
     public static RevocationInfo verifyCertificateCRL(X509Certificate cert, X509CRL crl) {
         try {
             if (crl.isRevoked(cert)) {
@@ -115,10 +124,9 @@ public final class CRLVerifier {
     }
 
     /**
-     * Downloads CRL from given URL. Supports http, https, ftp and ldap based
-     * URLs.
+     * Downloads CRL from given URL. Supports http, https, ftp and ldap based URLs.
      */
-    private static X509CRL downloadCRL(String crlURL) throws IOException, CertificateException, NamingException, CRLException {
+    public static X509CRL downloadCRL(String crlURL) throws IOException, CertificateException, NamingException, CRLException {
         if (crlURL.startsWith("http://") || crlURL.startsWith("https://") || crlURL.startsWith("ftp://")) {
             return downloadCRLFromWeb(crlURL);
         } else if (crlURL.startsWith("ldap://")) {

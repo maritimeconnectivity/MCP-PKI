@@ -103,8 +103,8 @@ public class Main {
         pkiConfiguration.setRootCaKeystorePassword(cmd.getOptionValue(ROOT_KEYSTORE_PASSWORD));
         pkiConfiguration.setRootCaKeyPassword(cmd.getOptionValue(ROOT_KEY_PASSWORD));
         pkiConfiguration.setSubCaKeystorePath(cmd.getOptionValue(SUBCA_KEYSTORE));
-        pkiConfiguration.setRootCaKeystorePassword(cmd.getOptionValue(SUBCA_KEYSTORE_PASSWORD));
-        pkiConfiguration.setRootCaKeyPassword(cmd.getOptionValue(SUBCA_KEY_PASSWORD));
+        pkiConfiguration.setSubCaKeystorePassword(cmd.getOptionValue(SUBCA_KEYSTORE_PASSWORD));
+        pkiConfiguration.setSubCaKeyPassword(cmd.getOptionValue(SUBCA_KEY_PASSWORD));
 
         KeystoreHandler keystoreHandler = new KeystoreHandler(pkiConfiguration);
         CertificateBuilder certificateBuilder = new CertificateBuilder(keystoreHandler);

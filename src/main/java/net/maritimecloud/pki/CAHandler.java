@@ -58,6 +58,16 @@ public class CAHandler {
     private CertificateBuilder certificateBuilder;
     private PKIConfiguration pkiConfiguration;
 
+    /**
+     * Creates a sub Certificate Authority for the MC PKI. The certificate and keypair is placed in a "SubCaKeystore"
+     * defined in PKIConfiguration and in the truststore, also defined in PKIConfiguration. The SubCaKeystore will be
+     * created if it does not exist already, but the truststore is expected to exists already. It is also expected that
+     * a RootCaKeystore is defined in PKIConfiguration and exists.
+     *
+     * @param subCaCertDN The DN of the new sub CA certificate.
+     * @param crlUrl CRL endpoint for the new sub CA certificate.
+     * @param ocspUrl OCSP endpoint for the new sub CA certificate.
+     */
     public void createSubCa(String subCaCertDN,String crlUrl, String ocspUrl) {
 
         // Open the various keystores
@@ -146,8 +156,12 @@ public class CAHandler {
     }
 
     /**
-     * Generates a self-signed certificate based on the keypair and saves it in the keystore.
-     * Should only be used to init the root CA.
+     * Generates a self-signed certificate and saves it in the keystore and truststore.
+     * Should only be used to init the root CA. It is expected that info about the root keystore and the truststore
+     * is available in PKIConfiguration. If they already exists they will be overwritten!
+     *
+     * @param rootCertX500Name The DN of the new root CA Certificate
+     * @param crlUrl CRL endpoint
      */
     public void initRootCA(String rootCertX500Name, String crlUrl) {
         KeyPair cakp = CertificateBuilder.generateKeyPair();
@@ -167,11 +181,6 @@ public class CAHandler {
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
-            System.out.println("org x500-name: " + rootCertX500Name);
-            System.out.println("out x500-name: " + (new X500Name(rootCertX500Name)).toString());
-            System.out.println("out x500-name: " + cacert.getSubjectDN().getName());
-            //System.out.println("out x500-name: " + cacert.getSubjectX500Principal().getName());
-            System.out.println("out x500-name: " + new JcaX509CertificateHolder(cacert).getSubject());
 
             Certificate[] certChain = new Certificate[1];
             certChain[0] = cacert;
@@ -214,6 +223,16 @@ public class CAHandler {
         }
     }
 
+    /**
+     * Loads a CSV file with information about revoked certificates into a RevocationInfo list.
+     * The CSV file must use semi-colon for separation and in the format:
+     * serial-number;revocation-reason;date
+     * An example:
+     * 345678954765889809876543;cacompromise;2017-04-31
+     *
+     * @param revocationFile Path to the file that should be loaded.
+     * @return List of certificates that has been/should be revoked.
+     */
     public List<RevocationInfo> loadRevocationFile(String revocationFile) {
         String csvLine;
         String cvsSplitBy = ";";
@@ -249,11 +268,18 @@ public class CAHandler {
         return revocationInfos;
     }
 
+    /**
+     * Generates a CRL for the root CA. It is expected that
+     * a RootCaKeystore is defined in PKIConfiguration and exists.
+     *
+     * @param outputCaCrlPath Output path where to place the CRL.
+     * @param revocationFile Path to the CSV file which contains revocation info.
+     */
     public void generateRootCRL(String outputCaCrlPath, String revocationFile) {
         List<RevocationInfo> revocationInfos = loadRevocationFile(revocationFile);
 
         try {
-            KeyStore rootks = KeyStore.getInstance("JKS");
+            KeyStore rootks = KeyStore.getInstance(KEYSTORE_TYPE);
             InputStream readStream = new FileInputStream(pkiConfiguration.getRootCaKeystorePath());
             rootks.load(readStream, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
             KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(pkiConfiguration.getRootCaKeystorePassword().toCharArray());

@@ -55,6 +55,12 @@ import static net.maritimecloud.pki.PKIConstants.SIGNER_ALGORITHM;
 @Slf4j
 public class Revocation {
 
+    /**
+     * Returns the int value associated with a revocation status
+     *
+     * @param certReason The string representation of the status. Should be lowercase with no spaces or underscore
+     * @return The int value associated with the revocation status
+     */
     public static int getCRLReasonFromString(String certReason) {
         int reason = CRLReason.unspecified;
         if ("unspecified".equals(certReason)) {
@@ -85,22 +91,22 @@ public class Revocation {
      * Creates a Certificate RevocationInfo List (CRL) for the certificate serialnumbers given.
      *
      * @param revokedCerts  List of the serialnumbers that should be revoked.
-     * @return a X509 certificate
+     * @param keyEntry Private key to sign the CRL
+     * @param signCertX500Name DN name of the signing certificate
+     * @return a CRL
      */
-    public static X509CRL generateCRL(List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, String mcidregCertX500Name) {
+    public static X509CRL generateCRL(List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, String signCertX500Name) {
         Date now = new Date();
         Calendar cal = Calendar.getInstance();
         cal.setTime(now);
         cal.add(Calendar.DATE, 7);
-        X509v2CRLBuilder crlBuilder = new X509v2CRLBuilder(new X500Name(mcidregCertX500Name), now);
+        X509v2CRLBuilder crlBuilder = new X509v2CRLBuilder(new X500Name(signCertX500Name), now);
         crlBuilder.setNextUpdate(new Date(now.getTime() + 24 * 60 * 60 * 1000 * 7)); // The next CRL is next week (dummy value)
         for (RevocationInfo cert : revokedCerts) {
             crlBuilder.addCRLEntry(cert.getSerialNumber(), cert.getRevokedAt(), cert.getRevokeReason().ordinal());
         }
         //crlBuilder.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
         //crlBuilder.addExtension(X509Extensions.CRLNumber, false, new CRLNumber(BigInteger.valueOf(1)));
-
-        //KeyStore.PrivateKeyEntry keyEntry = keystoreHandler.getSigningCertEntry();
 
         JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder(SIGNER_ALGORITHM);
         signBuilder.setProvider(BC_PROVIDER_NAME);
@@ -129,7 +135,10 @@ public class Revocation {
     /**
      * Creates a Certificate RevocationInfo List (CRL) for the certificate serialnumbers given.
      *
+     * @param signName DN name of the signing certificate
      * @param revokedCerts  List of the serialnumbers that should be revoked.
+     * @param keyEntry Private key to sign the CRL
+     * @param outputCaCrlPath Where to place the CRL
      */
     public static void generateRootCACRL(String signName, List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, String outputCaCrlPath) {
         Date now = new Date();
@@ -182,6 +191,13 @@ public class Revocation {
         }
     }
 
+    /**
+     * Generate a BasicOCSPRespBuilder.
+     *
+     * @param request The incoming request.
+     * @param publicKey Public key of the issuer.
+     * @return a BasicOCSPRespBuilder
+     */
     public static BasicOCSPRespBuilder initOCSPRespBuilder(OCSPReq request, PublicKey publicKey) {
         SubjectPublicKeyInfo keyinfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
         BasicOCSPRespBuilder respBuilder;
@@ -199,6 +215,13 @@ public class Revocation {
         return respBuilder;
     }
 
+    /**
+     * Generates a OCSPResp.
+     *
+     * @param respBuilder A BasicOCSPRespBuilder
+     * @param signingCert PrivateKeyEntry of the signing certificate.
+     * @return a OCSPResp
+     */
     public static OCSPResp generateOCSPResponse(BasicOCSPRespBuilder respBuilder, KeyStore.PrivateKeyEntry signingCert) {
         try {
             ContentSigner contentSigner = new JcaContentSignerBuilder(SIGNER_ALGORITHM).setProvider(BC_PROVIDER_NAME).build(signingCert.getPrivateKey());

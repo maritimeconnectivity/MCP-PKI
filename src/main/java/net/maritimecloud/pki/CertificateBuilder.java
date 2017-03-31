@@ -64,9 +64,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static net.maritimecloud.pki.PKIConstants.BC_PROVIDER_NAME;
-import static net.maritimecloud.pki.PKIConstants.CERT_EXPIRE_YEAR;
-import static net.maritimecloud.pki.PKIConstants.SIGNER_ALGORITHM;
+import static net.maritimecloud.pki.PKIConstants.*;
 
 @Slf4j
 public class CertificateBuilder {
@@ -83,6 +81,16 @@ public class CertificateBuilder {
      * Builds and signs a certificate. The certificate will be build on the given subject-public-key and signed with
      * the given issuer-private-key. The issuer and subject will be identified in the strings provided.
      *
+     * @param serialNumber The serialnumber of the new certificate.
+     * @param signerPrivateKey Private key for signing the certificate
+     * @param signerPublicKey Public key of the signing certificate
+     * @param subjectPublicKey Public key for the new certificate
+     * @param issuer DN of the signing certificate
+     * @param subject DN of the new certificate
+     * @param customAttrs The custom MC attributes to include in the certificate
+     * @param type Type of certificate, can be "ROOT", "INTERMEDIATE" or "ENTITY".
+     * @param ocspUrl OCSP endpoint
+     * @param crlUrl CRL endpoint - can be null
      * @return A signed X509Certificate
      * @throws Exception Throws exception on certificate generation errors.
      */
@@ -201,7 +209,7 @@ public class CertificateBuilder {
      * @return The generated keypair
      */
     public static KeyPair generateKeyPair() {
-        ECGenParameterSpec ecGenSpec = new ECGenParameterSpec("secp384r1");
+        ECGenParameterSpec ecGenSpec = new ECGenParameterSpec(ELLIPTIC_CURVE);
         KeyPairGenerator g;
         try {
             g = KeyPairGenerator.getInstance("ECDSA", BC_PROVIDER_NAME);

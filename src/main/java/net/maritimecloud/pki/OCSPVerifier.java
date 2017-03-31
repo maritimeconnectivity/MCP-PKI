@@ -29,6 +29,18 @@ import java.security.cert.X509Certificate;
 
 public class OCSPVerifier {
 
+    /**
+     * Verifies a certificate against a its issuer using OCSP. In most cases you should probably use
+     * {@link CertificateHandler#verifyCertificateChain(X509Certificate, KeyStore) verifyCertificateChain}
+     * instead to verify the complete chain.
+     *
+     * @param cert Certificate to validate
+     * @param trustStore Truststore containing the issuer certificate
+     * @return
+     * @throws IOException
+     * @throws KeyStoreException
+     * @throws OCSPValidationException
+     */
     public static RevocationInfo verifyCertificateOCSP(X509Certificate cert, KeyStore trustStore) throws IOException, KeyStoreException, OCSPValidationException {
         X500Name x500name = new X500Name(cert.getIssuerDN().getName());
         String issuerAlias = CertificateHandler.getElement(x500name, BCStyle.UID);
@@ -36,6 +48,17 @@ public class OCSPVerifier {
         return verifyCertificateOCSP(cert, issuerCert);
     }
 
+    /**
+     * Verifies a certificate against a its issuer using OCSP. In most cases you should probably use
+     * {@link CertificateHandler#verifyCertificateChain(X509Certificate, KeyStore) verifyCertificateChain}
+     * instead to verify the complete chain.
+     *
+     * @param cert Certificate to validate
+     * @param issuerCert The issuer certificate
+     * @return
+     * @throws IOException
+     * @throws OCSPValidationException
+     */
     public static RevocationInfo verifyCertificateOCSP(X509Certificate cert, X509Certificate issuerCert) throws IOException, OCSPValidationException {
         OCSPClient ocspClient = new OCSPClient(issuerCert, cert);
         RevocationInfo info = new RevocationInfo();
