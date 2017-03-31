@@ -4,7 +4,7 @@ if [ "$1" = "docs" ]; then
     mvn javadoc:javadoc
     exit
 elif [ "$1" = "site" ]; then
-    echo "Checking for changes to the manual"
+    echo "Checking for changes."
     git status
     if ! git diff-index --quiet HEAD --; then
         echo "There are uncommitted changes"
@@ -12,12 +12,14 @@ elif [ "$1" = "site" ]; then
     fi
     rm -rf target/site
     mvn javadoc:javadoc
-    
+    cp README.md target/
+
     git checkout gh-pages
     cp -r target/site/apidocs/ apidocs
+    cp target/README.md .
 
     git add apidocs/*
-    git commit -m "update javadocs"
+    git commit -a -m "update pages"
     git push
     git checkout master
     exit   
