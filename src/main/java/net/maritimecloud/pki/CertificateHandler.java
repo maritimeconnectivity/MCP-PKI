@@ -150,7 +150,7 @@ public class CertificateHandler {
         // Create validator and revocation checker
         CertPathValidator validator = CertPathValidator.getInstance("PKIX");
         PKIXRevocationChecker rc = (PKIXRevocationChecker)validator.getRevocationChecker();
-        rc.setOptions(EnumSet.of(PKIXRevocationChecker.Option.NO_FALLBACK));
+        rc.setOptions(EnumSet.of(PKIXRevocationChecker.Option.SOFT_FAIL));
         PKIXParameters pkixp = new PKIXParameters(ks);
         pkixp.addCertPathChecker(rc);
         pkixp.setRevocationEnabled(false);

@@ -230,7 +230,7 @@ public class CertificateBuilder {
      * @return a unique serialnumber
      */
     public BigInteger generateSerialNumber() {
-        // BigInteger => NUMERICAL(50) MySQL ?
+        // BigInteger => NUMERICAL(50) MySQL
         // Max number supported in X509 serial number 2^159-1 = 730750818665451459101842416358141509827966271487
         BigInteger maxValue = new BigInteger("730750818665451459101842416358141509827966271487");
         // Min number 2^32-1 = 4294967296 - we set a minimum value to avoid collisions with old certificates that has used seq numbers

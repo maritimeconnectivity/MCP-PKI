@@ -7,7 +7,7 @@ Building using maven should be as simple as running `mvn install`.
 ## Using the lib
 The primary function of this software is to make it easy/easier to use the Maritime Cloud PKI for (Java) developers. 
 
-There is javadocs available here: https://maritimecloud.github.io/MC-PKI/apidocs/
+There is javadocs available here: <https://maritimecloud.github.io/MC-PKI/apidocs/>
 
 Use PKIConfiguration for setting up configuration about Keystore and/or Truststore, use KeystoreHandler to load them and the you most like want to use CertificateHandler to, well, handle certificates...
 
@@ -24,7 +24,6 @@ A short example of use can be seen below:
     CertificateHandler.verifyCertificateChain(cert, kh.getTrustStore());
     // Extract Identity information from the certificate
     PKIIdentity user = CertificateHandler.getIdentityFromCert(cert);
-
 ```
 
 ## Commandline interface
@@ -37,9 +36,9 @@ To use the PKI we must first initialize it, which means create a root Certificat
 ```sh
 java -jar mc-pki-0.4.99-SNAPSHOT-jar-with-dependencies.jar \
     --init \
-    --truststore mc-truststore.jks \
+    --truststore-path mc-truststore.jks \
     --truststore-password changeit \
-    --root-keystore root-ca-keystore.jks \
+    --root-keystore-path root-ca-keystore.jks \
     --root-keystore-password changeit \
     --root-key-password changeit \
     --x500-name "C=DK, ST=Denmark, L=Copenhagen, O=MaritimeCloud Test, OU=MaritimeCloud Test, CN=MaritimeCloud Test Root Certificate, E=info@maritimecloud.net" \
@@ -75,7 +74,7 @@ Remember to keep the list of revoked sub ca. Each time a new sub CA is revoked y
 ### Create sub CA
 Create a sub CA like this:
 ```sh
-java -jar target/mc-pki-0.4.99-SNAPSHOT-jar-with-dependencies.jar \
+java -jar mc-pki-0.4.99-SNAPSHOT-jar-with-dependencies.jar \
     --create-subca \
     --root-keystore-path root-ca-keystore.jks \
     --root-keystore-password changeit \

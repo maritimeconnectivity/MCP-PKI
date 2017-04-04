@@ -17,9 +17,11 @@ package net.maritimecloud.pki;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class PKIConfiguration {
 
     // Values below are loaded from application.yaml
