@@ -24,6 +24,7 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
@@ -150,7 +151,7 @@ public class CertificateBuilder {
         DistributionPoint[] distPoints = new DistributionPoint[1];
         distPoints[0] = new DistributionPoint(distPointOne, null, null);
         certV3Bldr.addExtension(Extension.cRLDistributionPoints, false, new CRLDistPoint(distPoints));
-        // OCSP endpoint - is not available for the root CA
+        // OCSP endpoint - is not available for the CAs
         if (ocspUrl != null) {
             GeneralName ocspName = new GeneralName(GeneralName.uniformResourceIdentifier, ocspUrl);
             AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess(X509ObjectIdentifiers.ocspAccessMethod, ocspName);
@@ -172,9 +173,10 @@ public class CertificateBuilder {
      * @param callName The name of the entity
      * @param email The email of the entity
      * @param publickey The public key of the entity
+     * @param baseCrlOcspURI The base URI used for the CRL and OCSP endpoint. This will be prepended: (ocsp|crl)/urn:mrn:mcl:ca:...
      * @return Returns a signed X509Certificate
      */
-    public X509Certificate generateCertForEntity(BigInteger serialNumber, String country, String orgName, String type, String callName, String email, String uid, PublicKey publickey, Map<String, String> customAttr, String signingAlias) throws Exception {
+    public X509Certificate generateCertForEntity(BigInteger serialNumber, String country, String orgName, String type, String callName, String email, String uid, PublicKey publickey, Map<String, String> customAttr, String signingAlias, String baseCrlOcspURI) throws Exception {
         KeyStore.PrivateKeyEntry signingCertEntry = keystoreHandler.getSigningCertEntry(signingAlias);
         Certificate signingCert = signingCertEntry.getCertificate();
         X509Certificate signingX509Cert = (X509Certificate) signingCert;
@@ -196,11 +198,13 @@ public class CertificateBuilder {
         if (email != null && !email.isEmpty()) {
             orgSubjectDn += ", E=" + email;
         }
-        String ocspUrl  = OCSPClient.getOcspUrlFromCertificate(signingX509Cert).toString();
-        List<String> crlUrls = CRLVerifier.getCrlDistributionPoints(signingX509Cert);
+        X500Name subCaCertX500Name = new X500Name(signingX509Cert.getSubjectDN().getName());
+        String alias = CertificateHandler.getElement(subCaCertX500Name, BCStyle.UID);
+        String ocspUrl  = baseCrlOcspURI + "ocsp/" + alias;
+        String crlUrl = baseCrlOcspURI + "crl/" + alias;
         return buildAndSignCert(serialNumber, signingCertEntry.getPrivateKey(), signingX509Cert.getPublicKey(),
                     publickey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(orgSubjectDn), customAttr, "ENTITY",
-                    ocspUrl, crlUrls.get(0));
+                    ocspUrl, crlUrl);
     }
 
     /**

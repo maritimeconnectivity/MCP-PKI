@@ -21,7 +21,6 @@ public class Main {
     private static final String ROOT_KEYSTORE = "root-keystore-path";
     private static final String ROOT_KEYSTORE_PASSWORD = "root-keystore-password";
     private static final String ROOT_KEY_PASSWORD = "root-key-password";
-    private static final String OCSP_ENDPOINT = "ocsp-endpoint";
     private static final String CRL_ENDPOINT = "crl-endpoint";
     private static final String X500_NAME = "x500-name";
     private static final String GENERATE_ROOT_CRL = "generate-root-crl";
@@ -40,14 +39,13 @@ public class Main {
         options.addOption("h", HELP, false, "Show this help message");
 
         // CA root init
-        options.addOption("i", INIT, false, "Initialize PKI - creates root CA. Requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD, ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD, X500_NAME, OCSP_ENDPOINT, CRL_ENDPOINT));
+        options.addOption("i", INIT, false, "Initialize PKI - creates root CA. Requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD, ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD, X500_NAME, CRL_ENDPOINT));
         options.addOption("t",TRUSTSTORE, true, "Output truststore path.");
         options.addOption("tp",TRUSTSTORE_PASSWORD, true, "Truststore password");
         options.addOption("rk", ROOT_KEYSTORE, true, "Output keystore path.");
         options.addOption("rkp", ROOT_KEYSTORE_PASSWORD, true, "Keystore password.");
         options.addOption("kp", ROOT_KEY_PASSWORD, true, "Key password.");
         options.addOption("xn", X500_NAME, true, "Key password.");
-        options.addOption("ocsp", OCSP_ENDPOINT, true, "OCSP endpoint");
         options.addOption("crl", CRL_ENDPOINT, true, "CRL endpoint");
 
         // Generate root CRL
@@ -56,7 +54,7 @@ public class Main {
         options.addOption("rsf", REVOKED_SUBCA_FILE, true, "CSV file containing a semi-colon separated list (serialnumber;reason;date) of revoked sub-CAs.");
 
         // Create sub CA
-        options.addOption("csca", CREATE_SUBCA, false, "Create sub CA. Requires the parameters: " + String.join(", ", ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD, TRUSTSTORE, TRUSTSTORE_PASSWORD, SUBCA_KEYSTORE, SUBCA_KEYSTORE_PASSWORD, SUBCA_KEY_PASSWORD, X500_NAME, OCSP_ENDPOINT, CRL_ENDPOINT));
+        options.addOption("csca", CREATE_SUBCA, false, "Create sub CA. Requires the parameters: " + String.join(", ", ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD, TRUSTSTORE, TRUSTSTORE_PASSWORD, SUBCA_KEYSTORE, SUBCA_KEYSTORE_PASSWORD, SUBCA_KEY_PASSWORD, X500_NAME));
         options.addOption("sk", SUBCA_KEYSTORE, true, "Sub CA keystore path.");
         options.addOption("skp", SUBCA_KEYSTORE_PASSWORD, true, "Sub CA keystore password.");
         options.addOption("sp", SUBCA_KEY_PASSWORD, true, "Sub CA key password.");
@@ -119,7 +117,7 @@ public class Main {
         CertificateBuilder certificateBuilder = new CertificateBuilder(keystoreHandler);
         CAHandler caHandler = new CAHandler(certificateBuilder, pkiConfiguration);
 
-        caHandler.createSubCa(cmd.getOptionValue(X500_NAME), cmd.getOptionValue(OCSP_ENDPOINT), cmd.getOptionValue(CRL_ENDPOINT));
+        caHandler.createSubCa(cmd.getOptionValue(X500_NAME));
     }
 
     public void verifyCertificate(CommandLine cmd) {
@@ -150,7 +148,10 @@ public class Main {
             System.out.println("Certificate is valid!");
         } catch (Exception e) {
             System.out.println("Certificate is not valid!\n" + e);
+            return;
         }
+        PKIIdentity identity = CertificateHandler.getIdentityFromCert(cert);
+        System.out.println(identity);
     }
 
     public static void main(String[] args) {

@@ -41,6 +41,7 @@ import java.security.cert.CRLReason;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -49,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static net.maritimecloud.pki.CRLVerifier.getCrlDistributionPoints;
 import static net.maritimecloud.pki.PKIConstants.*;
 
 @Slf4j
@@ -65,10 +67,8 @@ public class CAHandler {
      * a RootCaKeystore is defined in PKIConfiguration and exists.
      *
      * @param subCaCertDN The DN of the new sub CA certificate.
-     * @param crlUrl CRL endpoint for the new sub CA certificate.
-     * @param ocspUrl OCSP endpoint for the new sub CA certificate.
      */
-    public void createSubCa(String subCaCertDN, String ocspUrl, String crlUrl) {
+    public void createSubCa(String subCaCertDN) {
 
         // Open the various keystores
         KeyStore rootKeystore;
@@ -109,10 +109,17 @@ public class CAHandler {
         KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(pkiConfiguration.getRootCaKeystorePassword().toCharArray());
         KeyStore.PrivateKeyEntry rootCertEntry;
         X500Name rootCertX500Name;
+        String crlUrl;
         try {
             rootCertEntry = (KeyStore.PrivateKeyEntry) rootKeystore.getEntry(ROOT_CERT_ALIAS, protParam);
             rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject();
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            List<String> crlPoints = CRLVerifier.getCrlDistributionPoints((X509Certificate) rootCertEntry.getCertificate());
+            crlUrl = crlPoints.get(0);
+        } catch (CertificateParsingException | IOException e) {
             throw new RuntimeException(e);
         }
 
@@ -126,7 +133,7 @@ public class CAHandler {
         }
         try {
             subCaCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(), rootCertEntry.getPrivateKey(), rootCertEntry.getCertificate().getPublicKey(),
-                    subCaKeyPair.getPublic(), rootCertX500Name, subCaCertX500Name, null, "INTERMEDIATE", ocspUrl, crlUrl);
+                    subCaKeyPair.getPublic(), rootCertX500Name, subCaCertX500Name, null, "INTERMEDIATE", null, crlUrl);
         } catch (Exception e) {
             throw new RuntimeException("Could not create sub CA certificate!", e);
         }

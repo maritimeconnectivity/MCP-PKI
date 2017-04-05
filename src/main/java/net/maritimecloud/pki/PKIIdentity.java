@@ -17,9 +17,11 @@ package net.maritimecloud.pki;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class PKIIdentity {
     private String mrn;
     private String dn;

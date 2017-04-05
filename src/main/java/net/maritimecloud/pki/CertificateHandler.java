@@ -153,7 +153,7 @@ public class CertificateHandler {
         rc.setOptions(EnumSet.of(PKIXRevocationChecker.Option.SOFT_FAIL));
         PKIXParameters pkixp = new PKIXParameters(ks);
         pkixp.addCertPathChecker(rc);
-        pkixp.setRevocationEnabled(false);
+        pkixp.setRevocationEnabled(true);
 
         // Do the actual validation!
         PKIXCertPathValidatorResult pcpvr = (PKIXCertPathValidatorResult)validator.validate(certPath, pkixp);
