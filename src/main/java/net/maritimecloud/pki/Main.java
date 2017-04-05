@@ -7,6 +7,11 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.cert.X509Certificate;
+
 public class Main {
 
     private static final String HELP = "help";
@@ -26,6 +31,7 @@ public class Main {
     private static final String SUBCA_KEYSTORE = "subca-keystore";
     private static final String SUBCA_KEYSTORE_PASSWORD = "subca-keystore-password";
     private static final String SUBCA_KEY_PASSWORD = "subca-key-password";
+    private static final String VERIFY_CERTIFICATE = "verify-certificate";
 
     private Options setupOptions() {
         // Create Options object
@@ -54,6 +60,9 @@ public class Main {
         options.addOption("sk", SUBCA_KEYSTORE, true, "Sub CA keystore path.");
         options.addOption("skp", SUBCA_KEYSTORE_PASSWORD, true, "Sub CA keystore password.");
         options.addOption("sp", SUBCA_KEY_PASSWORD, true, "Sub CA key password.");
+
+        // Verify certificate in PEM format
+        options.addOption("vc", VERIFY_CERTIFICATE, true, "Verify a certificate. Requires a path to a certificate in PEM format amd the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD));
         return options;
     }
 
@@ -113,6 +122,37 @@ public class Main {
         caHandler.createSubCa(cmd.getOptionValue(X500_NAME), cmd.getOptionValue(OCSP_ENDPOINT), cmd.getOptionValue(CRL_ENDPOINT));
     }
 
+    public void verifyCertificate(CommandLine cmd) {
+        if (!cmd.hasOption(TRUSTSTORE) || !cmd.hasOption(TRUSTSTORE_PASSWORD)) {
+            System.err.println("The init requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD));
+            return;
+        }
+        PKIConfiguration pkiConfiguration = new PKIConfiguration();
+        pkiConfiguration.setTruststorePath(cmd.getOptionValue(TRUSTSTORE));
+        pkiConfiguration.setTruststorePassword(cmd.getOptionValue(TRUSTSTORE_PASSWORD));
+
+        String certPath = cmd.getOptionValue(VERIFY_CERTIFICATE);
+        String pemCert;
+        try {
+            pemCert = new String(Files.readAllBytes(Paths.get(certPath)));
+        } catch (IOException e) {
+            System.err.println("Could not load certificate from " + certPath);
+            return;
+        }
+        X509Certificate cert = CertificateHandler.getCertFromPem(pemCert);
+        if (cert == null) {
+            System.err.println("Could not load certificate, is it in valid PEM format?");
+            return;
+        }
+        KeystoreHandler keystoreHandler = new KeystoreHandler(pkiConfiguration);
+        try {
+            CertificateHandler.verifyCertificateChain(cert, keystoreHandler.getTrustStore());
+            System.out.println("Certificate is valid!");
+        } catch (Exception e) {
+            System.out.println("Certificate is not valid!\n" + e);
+        }
+    }
+
     public static void main(String[] args) {
         Main main = new Main();
 
@@ -135,6 +175,10 @@ public class Main {
         // Create sub ca
         } else if (cmd.hasOption(CREATE_SUBCA)) {
             main.createSubCA(cmd);
+
+        // Verify certificate
+        } else if (cmd.hasOption(VERIFY_CERTIFICATE)) {
+            main.verifyCertificate(cmd);
 
         // Default to show the help message
         } else {

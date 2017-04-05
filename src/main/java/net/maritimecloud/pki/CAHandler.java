@@ -68,7 +68,7 @@ public class CAHandler {
      * @param crlUrl CRL endpoint for the new sub CA certificate.
      * @param ocspUrl OCSP endpoint for the new sub CA certificate.
      */
-    public void createSubCa(String subCaCertDN,String crlUrl, String ocspUrl) {
+    public void createSubCa(String subCaCertDN, String ocspUrl, String crlUrl) {
 
         // Open the various keystores
         KeyStore rootKeystore;
