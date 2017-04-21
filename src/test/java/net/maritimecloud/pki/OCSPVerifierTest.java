@@ -74,7 +74,7 @@ class OCSPVerifierTest {
     @Test
     void getOcspUrl1() {
         X509Certificate cert = getMyBoatCert();
-        URL ocspUrl = ocspUrl = OCSPClient.getOcspUrlFromCertificate(cert);
+        URL ocspUrl = OCSPClient.getOcspUrlFromCertificate(cert);
         assertNotNull(ocspUrl);
         assertEquals("https://api.maritimecloud.net/x509/api/certificates/ocsp", ocspUrl.toString());
     }
@@ -82,7 +82,7 @@ class OCSPVerifierTest {
     @Test
     void getOcspUrl2() {
         X509Certificate cert = getEcdisCert();
-        URL ocspUrl = ocspUrl = OCSPClient.getOcspUrlFromCertificate(cert);
+        URL ocspUrl = OCSPClient.getOcspUrlFromCertificate(cert);
         assertNotNull(ocspUrl);
         assertEquals("https://api.maritimecloud.net/x509/api/certificates/ocsp", ocspUrl.toString());
     }

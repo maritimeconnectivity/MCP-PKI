@@ -26,6 +26,7 @@ import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v2CRLBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CRLConverter;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
 import org.bouncycastle.cert.ocsp.BasicOCSPRespBuilder;
 import org.bouncycastle.cert.ocsp.CertificateID;
@@ -43,7 +44,9 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.PublicKey;
 import java.security.cert.CRLException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -92,14 +95,20 @@ public class Revocation {
      *
      * @param revokedCerts  List of the serialnumbers that should be revoked.
      * @param keyEntry Private key to sign the CRL
-     * @param signCertX500Name DN name of the signing certificate
      * @return a CRL
      */
-    public static X509CRL generateCRL(List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, String signCertX500Name) {
+    public static X509CRL generateCRL(List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry) {
         Date now = new Date();
         Calendar cal = Calendar.getInstance();
         cal.setTime(now);
         cal.add(Calendar.DATE, 7);
+        String signCertX500Name;
+        try {
+            signCertX500Name = new JcaX509CertificateHolder((X509Certificate) keyEntry.getCertificate()).getSubject().toString();
+        } catch (CertificateEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
         X509v2CRLBuilder crlBuilder = new X509v2CRLBuilder(new X500Name(signCertX500Name), now);
         crlBuilder.setNextUpdate(new Date(now.getTime() + 24 * 60 * 60 * 1000 * 7)); // The next CRL is next week (dummy value)
         for (RevocationInfo cert : revokedCerts) {

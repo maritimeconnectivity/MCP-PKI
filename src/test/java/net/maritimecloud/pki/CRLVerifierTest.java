@@ -15,10 +15,10 @@
  */
 package net.maritimecloud.pki;
 
-//import static org.junit.jupiter.api.Assertions.*;
-
-
 import net.maritimecloud.pki.ocsp.CertStatus;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.security.cert.CRLException;
@@ -35,17 +35,17 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class CRLVerifierTest {
-    @org.junit.jupiter.api.BeforeEach
+    @BeforeEach
     void setUp() {
 
     }
 
-    @org.junit.jupiter.api.AfterEach
+    @AfterEach
     void tearDown() {
 
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void verifyCertificateCRL1() {
         X509Certificate cert = getMyBoatCert();
         RevocationInfo info = CRLVerifier.verifyCertificateCRL(cert);
@@ -53,7 +53,7 @@ class CRLVerifierTest {
         assertEquals(CertStatus.GOOD, info.getStatus());
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void verifyCertificateCRL2() {
         X509Certificate cert = getEcdisCert();
         RevocationInfo info = CRLVerifier.verifyCertificateCRL(cert);
@@ -61,7 +61,7 @@ class CRLVerifierTest {
         assertEquals(CertStatus.REVOKED, info.getStatus());
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void verifyCertificateCRL3() {
         X509Certificate cert = getMyBoatCert();
         String crlFile = "src/test/resources/mc-2017-03-23.crl";
@@ -76,7 +76,7 @@ class CRLVerifierTest {
         assertEquals(CertStatus.GOOD, info.getStatus());
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void verifyCertificateCRL4() {
         X509Certificate cert = getEcdisCert();
         String crlFile = "src/test/resources/mc-2017-03-23.crl";
@@ -91,7 +91,7 @@ class CRLVerifierTest {
         assertEquals(CertStatus.REVOKED, info.getStatus());
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void loadCRLFromFile() {
         String crlFile = "src/test/resources/mc-2017-03-23.crl";
         X509CRL crl = null;
@@ -105,7 +105,7 @@ class CRLVerifierTest {
         assertEquals(176, crl.getRevokedCertificates().size());
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void getCrlDistributionPoints() {
         X509Certificate cert = getMyBoatCert();
         List<String> crlDistPoints = null;
