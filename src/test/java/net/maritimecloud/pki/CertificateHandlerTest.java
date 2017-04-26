@@ -106,7 +106,10 @@ public class CertificateHandlerTest {
 
     @Test
     void getCertFromNginxHeader() {
-
+        String nginxFormatedPemCert = TestUtils.loadTxtFile("src/test/resources/thc-cert-nginx-format.pem");
+        X509Certificate cert = CertificateHandler.getCertFromNginxHeader(nginxFormatedPemCert);
+        assertNotNull(cert);
+        assertEquals("EMAILADDRESS=thc@dma.dk, UID=urn:mrn:mcl:user:dma:thc, CN=Thomas Christensen, OU=user, O=urn:mrn:mcl:org:dma, C=DK", cert.getSubjectDN().getName());
     }
 
     @Test

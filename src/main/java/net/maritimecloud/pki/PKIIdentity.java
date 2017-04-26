@@ -29,8 +29,11 @@ public class PKIIdentity {
     private String sn;
     private String o;
     private String ou;
+    private String firstName;
+    private String lastName;
     private String permissions;
     private String country;
+    private String email;
     // The values below are only relevant for ships
     private String flagState;
     private String callSign;

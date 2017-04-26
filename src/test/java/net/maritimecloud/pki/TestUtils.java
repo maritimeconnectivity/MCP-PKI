@@ -29,49 +29,32 @@ public class TestUtils {
 
     public static String getMyBoatCertPem() {
         String certFile = "src/test/resources/Certificate_Myboat.pem";
-        String contents = null;
-        try {
-            contents = Files.lines(Paths.get(certFile)).collect(Collectors.joining("\n"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail("Loading Certificate from file failed!");
-        }
+        String contents = loadTxtFile(certFile);
         return contents;
     }
 
     public static X509Certificate getMyBoatCert() {
-        String certFile = "src/test/resources/Certificate_Myboat.pem";
-        String contents = null;
-        try {
-            contents = Files.lines(Paths.get(certFile)).collect(Collectors.joining("\n"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail("Loading Certificate from file failed!");
-        }
-        return getCertFromPem(contents);
+        return getCertFromPem(getMyBoatCertPem());
     }
 
     public static String getEcdisCertPem() {
         String certFile = "src/test/resources/Certificate_Ecdis.pem";
-        String contents = null;
-        try {
-            contents = Files.lines(Paths.get(certFile)).collect(Collectors.joining("\n"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail("Loading Certificate from file failed!");
-        }
+        String contents = loadTxtFile(certFile);
         return contents;
     }
+
     public static X509Certificate getEcdisCert() {
-        String certFile = "src/test/resources/Certificate_Ecdis.pem";
-        String contents = null;
+        return getCertFromPem(getEcdisCertPem());
+    }
+
+    public static String loadTxtFile(String path) {
         try {
-            contents = Files.lines(Paths.get(certFile)).collect(Collectors.joining("\n"));
+            return Files.lines(Paths.get(path)).collect(Collectors.joining("\n"));
         } catch (IOException e) {
             e.printStackTrace();
             fail("Loading Certificate from file failed!");
+            throw new RuntimeException(e);
         }
-        return getCertFromPem(contents);
     }
 
 

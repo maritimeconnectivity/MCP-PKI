@@ -191,9 +191,12 @@ public class CertificateHandler {
      * @return The extracted certificate. Returns null on failure.
      */
     public static X509Certificate getCertFromNginxHeader(String certificateHeader) {
-        // nginx forwards the certificate in a header by replacing new lines with whitespaces
-        // (2 or more). Also replace tabs, which nginx sometimes sends instead of whitespaces.
-        String certificateContent = certificateHeader.replaceAll("\\s{2,}", System.lineSeparator()).replaceAll("\\t+", System.lineSeparator());
+        // nginx forwards the certificate in a header by replacing new lines with whitespaces.
+        // Also replace tabs, which nginx sometimes sends instead of whitespaces.
+        String certificateContent = certificateHeader.replaceAll("\\s+", System.lineSeparator().replaceAll("\\t+", System.lineSeparator()));
+        // Restore some needed newlines
+        certificateContent = certificateContent.replace("-----BEGIN" + System.lineSeparator() + "CERTIFICATE-----", "-----BEGIN CERTIFICATE-----");
+        certificateContent = certificateContent.replace("-----END" + System.lineSeparator() + "CERTIFICATE-----", "-----END CERTIFICATE-----");
         if (certificateContent == null || certificateContent.length() < 10) {
             log.debug("No certificate content found");
             return null;
@@ -246,6 +249,18 @@ public class CertificateHandler {
         identity.setO(getElement(x500name, BCStyle.O));
         identity.setOu(getElement(x500name, BCStyle.OU));
         identity.setCountry(getElement(x500name, BCStyle.C));
+        identity.setEmail(getElement(x500name, BCStyle.EmailAddress));
+        // Extract first and last name from full name
+        String lastName = "";
+        String firstName = "";
+        if (name.split("\\w +\\w").length > 1) {
+            lastName = name.substring(name.lastIndexOf(" ")+1);
+            firstName = name.substring(0, name.lastIndexOf(' '));
+        } else {
+            firstName = name;
+        }
+        identity.setFirstName(firstName);
+        identity.setLastName(lastName);
         log.debug("Parsed certificate, name: " + name);
 
         // Extract info from Subject Alternative Name extension
