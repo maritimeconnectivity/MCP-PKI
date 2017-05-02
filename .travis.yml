@@ -9,4 +9,4 @@ services:
 
 install:
     # Build the spring boot app and copy the result to the docker folder
-    - mvn -U -Dspring.profiles.active=test clean install
+    - mvn -U -Dgpg.skip=true test install
