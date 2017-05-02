@@ -2,3 +2,7 @@ language: java
 
 jdk:
   - openjdk8
+
+install:
+    # Build the spring boot app and copy the result to the docker folder
+    - mvn -U -Dspring.profiles.active=test clean install && cp target/mc-endorsement-service-0.5.0-SNAPSHOT.war docker/
