@@ -45,7 +45,7 @@ class CRLVerifierTest {
 
     }
 
-    @Test
+    //@Test
     void verifyCertificateCRL1() {
         X509Certificate cert = getMyBoatCert();
         RevocationInfo info = CRLVerifier.verifyCertificateCRL(cert);
@@ -53,7 +53,7 @@ class CRLVerifierTest {
         assertEquals(CertStatus.GOOD, info.getStatus());
     }
 
-    @Test
+    //@Test
     void verifyCertificateCRL2() {
         X509Certificate cert = getEcdisCert();
         RevocationInfo info = CRLVerifier.verifyCertificateCRL(cert);

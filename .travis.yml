@@ -8,5 +8,5 @@ services:
     - docker
 
 install:
-    # Build the spring boot app and copy the result to the docker folder
-    - mvn -U -Dgpg.skip=true test install
+    # Build the code and run tests
+    - mvn -U test

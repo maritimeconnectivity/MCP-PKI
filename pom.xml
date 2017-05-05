@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.maritimecloud.pki</groupId>
     <artifactId>mc-pki</artifactId>
-    <version>0.5.0-beta</version>
+    <version>0.5.0</version>
     <packaging>jar</packaging>
     <name>mc-pki</name>
     <url>http://maritimecloud.net</url>
