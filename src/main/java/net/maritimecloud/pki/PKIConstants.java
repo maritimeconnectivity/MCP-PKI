@@ -36,4 +36,8 @@ public class PKIConstants {
     public static final String MC_OID_MRN              = "2.25.271477598449775373676560215839310464283";
     public static final String MC_OID_PERMISSIONS      = "2.25.174437629172304915481663724171734402331";
     public static final String MC_OID_PORT_OF_REGISTER = "2.25.285632790821948647314354670918887798603";
+
+    // Used to identify the DNSName attribute in the X509 Extension: Subject Alternative Name.
+    // String representation of org.bouncycastle.asn1.x509.GeneralName.dNSName
+    public static final String X509_SAN_DNSNAME = "2";
 }

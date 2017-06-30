@@ -97,3 +97,30 @@ The UID will be used as alias when stored in the truststore and subca-keystore. 
 This software is distributed under the Apache License, Version 2.0.
 
 This project includes code from the Apache Xcf project (Apache License, Version 2.0), and the [POReID project](https://github.com/poreid/poreid) (MIT License). 
+
+
+## Building
+Build the jar using maven like this:
+```sh
+mvn clean test install
+```
+
+Sign (requires a gpg key):
+```sh
+mvn -Dgpg.skip=false install
+```
+
+Deploy (requires a gpg key registered at sonatype):
+```sh
+mvn -Dgpg.skip=false clean deploy -Psonatype
+```
+
+Build the javadocs used for the documentation available at https://maritimecloud.github.io/MC-PKI/
+```sh
+./javadocs.sh docs
+```
+
+Build the javadocs used for the documentation available at https://maritimecloud.github.io/MC-PKI/ and push to github:
+```sh
+./javadocs.sh site
+```

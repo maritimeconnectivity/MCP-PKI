@@ -132,10 +132,14 @@ public class CertificateBuilder {
                 int idx = 0;
                 while (it.hasNext()) {
                     Map.Entry<String,String> pair = it.next();
-                    //genNames[idx] = new GeneralName(GeneralName.otherName, new DERUTF8String(pair.getKey() + ";" + pair.getValue()));
-                    DERSequence othernameSequence = new DERSequence(new ASN1Encodable[]{
-                            new ASN1ObjectIdentifier(pair.getKey()), new DERTaggedObject(true, 0, new DERUTF8String(pair.getValue()))});
-                    genNames[idx] = new GeneralName(GeneralName.otherName, othernameSequence);
+                    if (PKIConstants.X509_SAN_DNSNAME.equals(pair.getKey())) {
+                        genNames[idx] = new GeneralName(GeneralName.dNSName, pair.getValue());
+                    } else {
+                        //genNames[idx] = new GeneralName(GeneralName.otherName, new DERUTF8String(pair.getKey() + ";" + pair.getValue()));
+                        DERSequence othernameSequence = new DERSequence(new ASN1Encodable[]{
+                                new ASN1ObjectIdentifier(pair.getKey()), new DERTaggedObject(true, 0, new DERUTF8String(pair.getValue()))});
+                        genNames[idx] = new GeneralName(GeneralName.otherName, othernameSequence);
+                    }
                     idx++;
                 }
             }
