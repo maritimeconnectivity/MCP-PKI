@@ -107,12 +107,12 @@ mvn clean test install
 
 Sign (requires a gpg key):
 ```sh
-mvn -Dgpg.skip=false install
+mvn -Dskip.signing=false install
 ```
 
 Deploy (requires a gpg key registered at sonatype):
 ```sh
-mvn -Dgpg.skip=false clean deploy -Psonatype
+mvn -Dskip.signing=false clean deploy -Psonatype
 ```
 
 Build the javadocs used for the documentation available at https://maritimecloud.github.io/MC-PKI/
