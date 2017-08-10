@@ -17,11 +17,19 @@ package net.maritimecloud.pki;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableEntryException;
 import java.security.cert.CertPathValidatorException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
@@ -101,8 +109,113 @@ public class CertificateHandlerTest {
 
     @Test
     void getPemFromEncoded() {
+        X509Certificate cert = getMyBoatCert();
+        try {
+            String pemCertificate = CertificateHandler.getPemFromEncoded("CERTIFICATE", cert.getEncoded());
+            assertEquals(pemCertificate, "-----BEGIN CERTIFICATE-----\n" +
+                    "MIID6DCCA2+gAwIBAgICAMEwCgYIKoZIzj0EAwIwgdMxCzAJBgNVBAYTAkRLMRAw\n" +
+                    "DgYDVQQIDAdEZW5tYXJrMRMwEQYDVQQHDApDb3BlbmhhZ2VuMRYwFAYDVQQKDA1N\n" +
+                    "YXJpdGltZUNsb3VkMSgwJgYDVQQLDB9NYXJpdGltZUNsb3VkIElkZW50aXR5IFJl\n" +
+                    "Z2lzdHJ5MTQwMgYDVQQDDCtNYXJpdGltZUNsb3VkIElkZW50aXR5IFJlZ2lzdHJ5\n" +
+                    "IENlcnRpZmljYXRlMSUwIwYJKoZIhvcNAQkBFhZpbmZvQG1hcml0aW1lY2xvdWQu\n" +
+                    "bmV0MB4XDTE3MDExMzEwNTIyNVoXDTI1MDEwMTAwMDAwMFowfTELMAkGA1UEBhMC\n" +
+                    "REsxHDAaBgNVBAoME3Vybjptcm46bWNsOm9yZzpkbWExDzANBgNVBAsMBnZlc3Nl\n" +
+                    "bDEQMA4GA1UEAwwHTXkgQm9hdDEtMCsGCgmSJomT8ixkAQEMHXVybjptcm46bWNs\n" +
+                    "OnZlc3NlbDpkbWE6bXlib2F0MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEx8Dz55UD\n" +
+                    "4GzAHVOM7DB76/Abig+rQl8mLgEqFNCk8ZzbG8VryMmIWIq2j4dJqsGqwwAqFcJl\n" +
+                    "vchJdx5Hz1brSbffCBwGJ4QqhxJm85NQx4vU6iWiP3o0nDC11enk1lppo4IBaTCC\n" +
+                    "AWUwHwYDVR0jBBgwFoAUWDdhX43k8x4PdkyZx3OiZdl1FjIwHQYDVR0OBBYEFGYx\n" +
+                    "dChhVfJWPcQa6rx+Tj1vXRraMIGCBgNVHREEezB5oCIGFGmDtqOX2Juv+MfLmeyA\n" +
+                    "gKqu14oboAoMCDEyMzQ1Njc4oBoGFGmChru7yJuwqMfLntmAgKqu14oboAIMAKA3\n" +
+                    "BhRpg5i818Ce8PDHy6qdgICqrteKG6AfDB11cm46bXJuOm1jbDp2ZXNzZWw6ZG1h\n" +
+                    "Om15Ym9hdDBIBgNVHR8EQTA/MD2gO6A5hjdodHRwczovL2FwaS5tYXJpdGltZWNs\n" +
+                    "b3VkLm5ldC94NTA5L2FwaS9jZXJ0aWZpY2F0ZXMvY3JsMFQGCCsGAQUFBwEBBEgw\n" +
+                    "RjBEBggrBgEFBQcwAYY4aHR0cHM6Ly9hcGkubWFyaXRpbWVjbG91ZC5uZXQveDUw\n" +
+                    "OS9hcGkvY2VydGlmaWNhdGVzL29jc3AwCgYIKoZIzj0EAwIDZwAwZAIwIyCgTm1W\n" +
+                    "dc8VlwF5RNYVziG5KWJw+YVO5MirhcISDnPNkUAabZzDwNPUoIZImRaCAjB8MIF6\n" +
+                    "laWn9dLCvirTEuYJDSS3x9DJzIiQa/aJRSLSuFDu/g6Dw5TmQGbl5kg5Crs=\n" +
+                    "-----END CERTIFICATE-----\n");
+        } catch (CertificateEncodingException e) {
+            e.printStackTrace();
+            fail("Unexpected Exception");
+        }
 
     }
+
+    @Test
+    void createOutputKeystore1() {
+        FileInputStream is;
+        try {
+            is = new FileInputStream("src/test/resources/mc-sub-ca-keystore.jks");
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        KeyStore keystore;
+        X509Certificate cert;
+        PrivateKey privateKey;
+        try {
+            keystore = KeyStore.getInstance("JKS");
+            keystore.load(is, "changeit".toCharArray());
+            KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection("changeit".toCharArray());
+            KeyStore.PrivateKeyEntry key = (KeyStore.PrivateKeyEntry) keystore.getEntry("urn:mrn:mcl:ca:maritimecloud-idreg", protParam);
+            cert = (X509Certificate) key.getCertificate();
+            privateKey = key.getPrivateKey();
+        } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | UnrecoverableEntryException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+
+        byte[] p12Keystore = CertificateHandler.createOutputKeystore("PKCS12","urn:mrn:mcl:ca:maritimecloud-idreg", "changeit", privateKey, cert);
+        try {
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(p12Keystore);
+            keystore = KeyStore.getInstance("PKCS12");
+            keystore.load(inputStream, "changeit".toCharArray());
+            KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection("changeit".toCharArray());
+            KeyStore.PrivateKeyEntry key = (KeyStore.PrivateKeyEntry) keystore.getEntry("urn:mrn:mcl:ca:maritimecloud-idreg", protParam);
+            X509Certificate certP12 = (X509Certificate) key.getCertificate();
+            assertEquals(certP12.getSubjectDN().toString(), cert.getSubjectDN().toString());
+
+        } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | UnrecoverableEntryException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    @Test
+    void createOutputKeystore2() {
+        FileInputStream is;
+        try {
+            is = new FileInputStream("src/test/resources/mc-sub-ca-keystore.jks");
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        KeyStore keystore;
+        X509Certificate cert;
+        PrivateKey privateKey;
+        try {
+            keystore = KeyStore.getInstance("JKS");
+            keystore.load(is, "changeit".toCharArray());
+            KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection("changeit".toCharArray());
+            KeyStore.PrivateKeyEntry key = (KeyStore.PrivateKeyEntry) keystore.getEntry("urn:mrn:mcl:ca:maritimecloud-idreg", protParam);
+            cert = (X509Certificate) key.getCertificate();
+            privateKey = key.getPrivateKey();
+        } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | UnrecoverableEntryException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+
+        byte[] jksKeystore = CertificateHandler.createOutputKeystore("JKS","urn:mrn:mcl:ca:maritimecloud-idreg", "changeit", privateKey, cert);
+        try {
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(jksKeystore);
+            keystore = KeyStore.getInstance("JKS");
+            keystore.load(inputStream, "changeit".toCharArray());
+            KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection("changeit".toCharArray());
+            KeyStore.PrivateKeyEntry key = (KeyStore.PrivateKeyEntry) keystore.getEntry("urn:mrn:mcl:ca:maritimecloud-idreg", protParam);
+            X509Certificate certJks = (X509Certificate) key.getCertificate();
+            assertEquals(certJks.getSubjectDN().toString(), cert.getSubjectDN().toString());
+
+        } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | UnrecoverableEntryException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
 
     @Test
     void getCertFromNginxHeader() {

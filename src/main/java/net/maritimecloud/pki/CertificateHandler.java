@@ -35,13 +35,17 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.Key;
+import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
@@ -178,10 +182,34 @@ public class CertificateHandler {
             pemFormat = perStrWriter.toString();
             pemWrite.close();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         return pemFormat;
+    }
+
+    /**
+     * Place a cert/key in a PKCS12 or JKS keystore
+     *
+     * @param type The keystore type to use (PKCS12 or JKS)
+     * @param alias The alias of the certificate in the keystore
+     * @param password The password used to protect the key
+     * @param privateKey Private key of the certificate
+     * @param certificate The certificate
+     * @return Byte array of the p12 keystore.
+     */
+    public static byte[] createOutputKeystore(String type, String alias, String password, PrivateKey privateKey, X509Certificate certificate) {
+        // Put them into a JKS keystore and write it to a byte[]
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            KeyStore ks = KeyStore.getInstance(type);
+            ks.load(null);
+            ks.setKeyEntry(alias, privateKey, password.toCharArray(), new java.security.cert.Certificate[]{certificate});
+            ks.store(bos, password.toCharArray());
+            bos.close();
+            return bos.toByteArray();
+        } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
