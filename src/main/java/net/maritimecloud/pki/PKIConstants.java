@@ -34,6 +34,7 @@ public class PKIConstants {
     // See http://www.shipais.com/doc/Pifaq/1/22/ and https://help.marinetraffic.com/hc/en-us/articles/205579997-What-is-the-significance-of-the-AIS-SHIPTYPE-number-
     public static final String MC_OID_AIS_SHIPTYPE     = "2.25.107857171638679641902842130101018412315";
     public static final String MC_OID_MRN              = "2.25.271477598449775373676560215839310464283";
+    public static final String MC_OID_SHIP_MRN         = "2.25.268095117363717005222833833642941669792";
     public static final String MC_OID_PERMISSIONS      = "2.25.174437629172304915481663724171734402331";
     public static final String MC_OID_PORT_OF_REGISTER = "2.25.285632790821948647314354670918887798603";
 

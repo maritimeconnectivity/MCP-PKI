@@ -50,8 +50,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static net.maritimecloud.pki.CRLVerifier.getCrlDistributionPoints;
-import static net.maritimecloud.pki.PKIConstants.*;
+import static net.maritimecloud.pki.PKIConstants.KEYSTORE_TYPE;
+import static net.maritimecloud.pki.PKIConstants.ROOT_CERT_ALIAS;
 
 @Slf4j
 @AllArgsConstructor

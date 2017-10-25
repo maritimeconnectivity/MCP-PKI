@@ -17,7 +17,6 @@ package net.maritimecloud.pki;
 
 
 import lombok.extern.slf4j.Slf4j;
-import net.maritimecloud.pki.ocsp.OCSPClient;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
@@ -61,11 +60,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static net.maritimecloud.pki.PKIConstants.*;
+import static net.maritimecloud.pki.PKIConstants.BC_PROVIDER_NAME;
+import static net.maritimecloud.pki.PKIConstants.CERT_EXPIRE_YEAR;
+import static net.maritimecloud.pki.PKIConstants.ELLIPTIC_CURVE;
+import static net.maritimecloud.pki.PKIConstants.SIGNER_ALGORITHM;
 
 @Slf4j
 public class CertificateBuilder {

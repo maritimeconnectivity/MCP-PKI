@@ -34,12 +34,14 @@ public class PKIIdentity {
     private String permissions;
     private String country;
     private String email;
-    // The values below are only relevant for ships
+    // The values below are only relevant for ships and services
     private String flagState;
     private String callSign;
     private String imoNumber;
     private String mmsiNumber;
     private String aisShipType;
     private String portOfRegister;
+    // This value is only relevant to services that are linked to a vessel
+    private String shipMrn;
 
 }

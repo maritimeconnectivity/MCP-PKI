@@ -40,8 +40,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
-import java.security.Key;
-import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -59,23 +57,22 @@ import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.PKIXParameters;
 import java.security.cert.PKIXRevocationChecker;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
-
 import static net.maritimecloud.pki.PKIConstants.BC_PROVIDER_NAME;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_FLAGSTATE;
+import static net.maritimecloud.pki.PKIConstants.MC_OID_AIS_SHIPTYPE;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_CALLSIGN;
+import static net.maritimecloud.pki.PKIConstants.MC_OID_FLAGSTATE;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_IMO_NUMBER;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_MMSI_NUMBER;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_AIS_SHIPTYPE;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_MRN;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_PERMISSIONS;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_PORT_OF_REGISTER;
+import static net.maritimecloud.pki.PKIConstants.MC_OID_SHIP_MRN;
 import static org.bouncycastle.asn1.x500.style.IETFUtils.valueToString;
 
 
@@ -360,6 +357,8 @@ public class CertificateHandler {
                             // We only support 1 mrn
                             identity.setMrn(value);
                             break;
+                        case MC_OID_SHIP_MRN:
+                            identity.setShipMrn(value);
                         case MC_OID_PERMISSIONS:
                             if (value != null && !value.trim().isEmpty()) {
                                 if (permissions.length() == 0) {

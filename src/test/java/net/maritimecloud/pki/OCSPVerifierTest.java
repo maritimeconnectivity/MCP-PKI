@@ -27,7 +27,8 @@ import java.security.cert.X509Certificate;
 
 import static net.maritimecloud.pki.TestUtils.getEcdisCert;
 import static net.maritimecloud.pki.TestUtils.getMyBoatCert;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 class OCSPVerifierTest {

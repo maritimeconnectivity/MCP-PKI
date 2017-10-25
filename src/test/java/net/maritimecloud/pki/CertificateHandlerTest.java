@@ -33,8 +33,15 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import static net.maritimecloud.pki.TestUtils.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static net.maritimecloud.pki.TestUtils.getEcdisCert;
+import static net.maritimecloud.pki.TestUtils.getEcdisCertPem;
+import static net.maritimecloud.pki.TestUtils.getMyBoatCert;
+import static net.maritimecloud.pki.TestUtils.getMyBoatCertPem;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class CertificateHandlerTest {
