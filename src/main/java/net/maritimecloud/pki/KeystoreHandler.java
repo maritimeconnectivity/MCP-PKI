@@ -46,7 +46,7 @@ public class KeystoreHandler {
 
     }
     /**
-     * Loads the MaritimeCloud certificate used for signing from the (jks) keystore
+     * Loads the MCP certificate used for signing from the (jks) keystore
      *
      * @param alias Alias of the signing certificate
      * @return a PrivateKeyEntry of the signing certificate
@@ -71,7 +71,7 @@ public class KeystoreHandler {
     }
 
     /**
-     * Returns a Maritime Cloud certificate from the truststore
+     * Returns a MCP certificate from the truststore
      *
      * @param alias Either ROOT_CERT_ALIAS or INTERMEDIATE_CERT_ALIAS
      * @return a certificate
