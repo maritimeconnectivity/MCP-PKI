@@ -13,7 +13,7 @@
     <version>0.7.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>mc-pki</name>
-    <url>http://maritimecloud.net</url>
+    <url>http://maritimeconnectivity.net</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
