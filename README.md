@@ -1,13 +1,15 @@
-[![Build Status](https://travis-ci.org/MaritimeCloud/MC-PKI.svg?branch=master)](https://travis-ci.org/MaritimeCloud/MC-PKI)
+[![Build Status](https://travis-ci.org/MaritimeCloud/MCP-PKI.svg?branch=master)](https://travis-ci.org/MaritimeCloud/MCP-PKI)
 
-# Maritime Cloud PKI
+# Maritime Connectivity Platform PKI
 
-This is a library / cmdline tool used to manage and check certificates in the Maritime Cloud Public Key Infrastructure.
+This is a library / cmdline tool used to manage and check certificates in the MCP Public Key Infrastructure.
 
 Building using maven should be as simple as running `mvn install`.
 
+The Maritime Connectivity Platform was formerly known as the Maritime Cloud and therefore there might still be references to that in this project.  
+
 ## Using the lib
-The primary function of this software is to make it easy/easier to use the Maritime Cloud PKI for (Java) developers. 
+The primary function of this software is to make it easy/easier to use the MCP PKI for (Java) developers. 
 
 There is javadocs available here: <https://maritimecloud.github.io/MC-PKI/apidocs/>
 
@@ -43,7 +45,7 @@ java -jar mc-pki-0.4.99-SNAPSHOT-jar-with-dependencies.jar \
     --root-keystore-path root-ca-keystore.jks \
     --root-keystore-password changeit \
     --root-key-password changeit \
-    --x500-name "C=DK, ST=Denmark, L=Copenhagen, O=MaritimeCloud Test, OU=MaritimeCloud Test, CN=MaritimeCloud Test Root Certificate, E=info@maritimecloud.net" \
+    --x500-name "C=DK, ST=Denmark, L=Copenhagen, O=MCP Test, OU=MCP Test, CN=MCP Test Root Certificate, E=info@maritimecloud.net" \
     --crl-endpoint "https://localhost/x509/api/certificates/crl/urn:mrn:mcl:ca:maritimecloud"
 ```
 Note that the truststore and root-keystore will be overwritten! Also note that crl-endpoint should end with `urn:mrn:mcl:ca:maritimecloud`, as this is the expected by the Maritime Cloud Identity Registry!
