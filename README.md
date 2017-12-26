@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/MaritimeCloud/MCP-PKI.svg?branch=master)](https://travis-ci.org/MaritimeCloud/MCP-PKI)
+[![Build Status](https://travis-ci.org/MaritimeConnectivityPlatform/MCP-PKI.svg?branch=master)](https://travis-ci.org/MaritimeConnectivityPlatform/MCP-PKI)
 
 # Maritime Connectivity Platform PKI
 
