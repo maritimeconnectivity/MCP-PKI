@@ -31,6 +31,7 @@ public class Main {
     private static final String SUBCA_KEYSTORE_PASSWORD = "subca-keystore-password";
     private static final String SUBCA_KEY_PASSWORD = "subca-key-password";
     private static final String VERIFY_CERTIFICATE = "verify-certificate";
+    private static final String PRINT_OUT_CERTIFICATE = "print-certificate";
 
     private Options setupOptions() {
         // Create Options object
@@ -61,6 +62,9 @@ public class Main {
 
         // Verify certificate in PEM format
         options.addOption("vc", VERIFY_CERTIFICATE, true, "Verify a certificate. Requires a path to a certificate in PEM format amd the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD));
+
+        // Print out a certificate
+        options.addOption("pc", PRINT_OUT_CERTIFICATE, true, "Print out a certificate in human readable text");
         return options;
     }
 
@@ -154,6 +158,13 @@ public class Main {
         System.out.println(identity);
     }
 
+    public X509Certificate getCertificate(String certPath) throws IOException {
+        String pemCert = new String(Files.readAllBytes(Paths.get(certPath)));
+        X509Certificate cert = CertificateHandler.getCertFromPem(pemCert);
+
+        return cert;
+    }
+
     public static void main(String[] args) {
         Main main = new Main();
 
@@ -180,8 +191,17 @@ public class Main {
         // Verify certificate
         } else if (cmd.hasOption(VERIFY_CERTIFICATE)) {
             main.verifyCertificate(cmd);
+        } else if (cmd.hasOption(PRINT_OUT_CERTIFICATE)) {
+            String certPath = cmd.getOptionValue(PRINT_OUT_CERTIFICATE);
+            try {
+                PKIIdentity identity = CertificateHandler.getIdentityFromCert(main.getCertificate(certPath));
+                System.out.println(identity);
+            } catch (IOException e) {
+                System.err.println("Parsing of certificate failed. Reason: " + e.getMessage());
+                return;
+            }
 
-        // Default to show the help message
+            // Default to show the help message
         } else {
             // Automatically generate the help statement
             HelpFormatter formatter = new HelpFormatter();
