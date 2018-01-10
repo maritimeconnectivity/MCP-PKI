@@ -59,6 +59,7 @@ import java.security.spec.ECGenParameterSpec;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -195,11 +196,14 @@ public class CertificateBuilder {
                 break;
             }
         }
+
+        HashMap<String, String> commasConverted = convertCommas(orgName, type, callName, uid);
+
         String orgSubjectDn = "C=" + orgCountryCode + ", " +
-                "O=" + orgName + ", " +
-                "OU=" + type + ", " +
-                "CN=" + callName + ", " +
-                "UID=" + uid;
+                "O=" + commasConverted.get("orgName") + ", " +
+                "OU=" + commasConverted.get("type") + ", " +
+                "CN=" + commasConverted.get("callName") + ", " +
+                "UID=" + commasConverted.get("uid");
         if (email != null && !email.isEmpty()) {
             orgSubjectDn += ", E=" + email;
         }
@@ -246,5 +250,25 @@ public class CertificateBuilder {
         BigInteger minValue = new BigInteger("4294967296");
         return BigIntegers.createRandomInRange(minValue, maxValue, random);
         //return new BigInteger(159, random).abs();
+    }
+
+    /**
+     * Converts any commas in the given strings to something that looks like a comma, but isn't
+     *
+     * @return a HashMap of the converted strings
+     */
+    public HashMap<String, String> convertCommas(String orgName, String type, String callName, String uid) {
+        HashMap<String, String> commasConverted = new HashMap<>();
+        String[] values = new String[] {orgName, type, callName, uid};
+        for (int i = 0; i < values.length; i++) {
+            values[i] = values[i].replaceAll(",", "\u201A");
+        }
+
+        commasConverted.put("orgName", values[0]);
+        commasConverted.put("type", values[1]);
+        commasConverted.put("callName", values[2]);
+        commasConverted.put("uid", values[3]);
+
+        return commasConverted;
     }
 }
