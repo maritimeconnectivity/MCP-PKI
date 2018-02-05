@@ -11,7 +11,7 @@ The Maritime Connectivity Platform was formerly known as the Maritime Cloud and 
 ## Using the lib
 The primary function of this software is to make it easy/easier to use the MCP PKI for (Java) developers. 
 
-There is javadocs available here: <https://maritimecloud.github.io/MC-PKI/apidocs/>
+There is javadocs available here: <https://maritimeconnectivityplatform.github.io/MCP-PKI/apidocs/>
 
 Use PKIConfiguration for setting up configuration about Keystore and/or Truststore, use KeystoreHandler to load them and the you most like want to use CertificateHandler to, well, handle certificates...
 
@@ -33,12 +33,12 @@ A short example of use can be seen below:
 ## Commandline interface
 The secondary function of this software is to provide a (relatively) easy to use interface for the PKI manager. How to use is will be described below.
 
-If you have build using maven you should now have a `mc-pki-0.4.99-SNAPSHOT.jar` and a `mc-pki-0.4.99-SNAPSHOT-jar-with-dependencies.jar` (or similar). It is the latter we will be using since it can easily be runned from the commandline.
+If you have build using maven you should now have a `mc-pki-0.7.0-SNAPSHOT.jar` and a `mc-pki-0.7.0-SNAPSHOT-jar-with-dependencies.jar` (or similar). It is the latter we will be using since it can easily be runned from the commandline.
 
 ### Initializing the PKI
 To use the PKI we must first initialize it, which means create a root Certificate Authority (CA). This can be done with this command:
 ```sh
-java -jar mc-pki-0.4.99-SNAPSHOT-jar-with-dependencies.jar \
+java -jar mc-pki-0.7.0-SNAPSHOT-jar-with-dependencies.jar \
     --init \
     --truststore-path mc-truststore.jks \
     --truststore-password changeit \
@@ -78,7 +78,7 @@ Remember to keep the list of revoked sub ca. Each time a new sub CA is revoked y
 ### Create sub CA
 Create a sub CA like this:
 ```sh
-java -jar mc-pki-0.4.99-SNAPSHOT-jar-with-dependencies.jar \
+java -jar mc-pki-0.7.0-SNAPSHOT-jar-with-dependencies.jar \
     --create-subca \
     --root-keystore-path root-ca-keystore.jks \
     --root-keystore-password changeit \
@@ -117,12 +117,12 @@ Deploy (requires a gpg key registered at sonatype):
 mvn -Dskip.signing=false clean deploy -Psonatype
 ```
 
-Build the javadocs used for the documentation available at https://maritimecloud.github.io/MC-PKI/
+Build the javadocs used for the documentation available at https://maritimeconnectivityplatform.github.io/MCP-PKI/
 ```sh
 ./javadocs.sh docs
 ```
 
-Build the javadocs used for the documentation available at https://maritimecloud.github.io/MC-PKI/ and push to github:
+Build the javadocs used for the documentation available at https://maritimeconnectivityplatform.github.io/MCP-PKI/ and push to github:
 ```sh
 ./javadocs.sh site
 ```
