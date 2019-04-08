@@ -33,7 +33,7 @@ A short example of use can be seen below:
 ## Commandline interface
 The secondary function of this software is to provide a (relatively) easy to use interface for the PKI manager. How to use is will be described below.
 
-If you have build using maven you should now have a `mc-pki-0.7.0-SNAPSHOT.jar` and a `mc-pki-0.7.0-SNAPSHOT-jar-with-dependencies.jar` (or similar). It is the latter we will be using since it can easily be runned from the commandline.
+If you have build using maven you should now have a `mc-pki-0.9.0-SNAPSHOT.jar` and a `mc-pki-0.9.0-SNAPSHOT-jar-with-dependencies.jar` (or similar). It is the latter we will be using since it can easily be run from the commandline.
 
 ### Initializing the PKI
 To use the PKI we must first initialize it, which means create a root Certificate Authority (CA). This can be done with this command:
