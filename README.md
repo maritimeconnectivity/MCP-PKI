@@ -38,7 +38,7 @@ If you have build using maven you should now have a `mc-pki-0.7.0-SNAPSHOT.jar` 
 ### Initializing the PKI
 To use the PKI we must first initialize it, which means create a root Certificate Authority (CA). This can be done with this command:
 ```sh
-java -jar mc-pki-0.7.0-SNAPSHOT-jar-with-dependencies.jar \
+java -jar mc-pki-0.9.0-SNAPSHOT-jar-with-dependencies.jar \
     --init \
     --truststore-path mc-truststore.jks \
     --truststore-password changeit \
@@ -55,7 +55,7 @@ Change the passwords as you see fit.
 ### Create root Certificate Revocation List
 We must also create a root Certificate Revocation List to be able to tell if any sub CA has been revoked. This can be done with this command: 
 ```sh
-java -jar mc-pki-0.4.99-SNAPSHOT-jar-with-dependencies.jar \
+java -jar mc-pki-0.9.0-SNAPSHOT-jar-with-dependencies.jar \
     --generate-root-crl \
     --root-keystore-path root-ca-keystore.jks \
     --root-keystore-password changeit \
@@ -78,7 +78,7 @@ Remember to keep the list of revoked sub ca. Each time a new sub CA is revoked y
 ### Create sub CA
 Create a sub CA like this:
 ```sh
-java -jar mc-pki-0.7.0-SNAPSHOT-jar-with-dependencies.jar \
+java -jar mc-pki-0.9.0-SNAPSHOT-jar-with-dependencies.jar \
     --create-subca \
     --root-keystore-path root-ca-keystore.jks \
     --root-keystore-password changeit \
