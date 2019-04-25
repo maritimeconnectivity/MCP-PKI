@@ -89,8 +89,7 @@ java -jar mc-pki-0.9.0-SNAPSHOT-jar-with-dependencies.jar \
     --subca-keystore-password changeit \
     --subca-key-password changeit \
     --x500-name "UID=urn:mrn:mcl:ca:maritimecloud-idreg, C=DK, ST=Denmark, L=Copenhagen, O=MaritimeCloud Test, OU=MaritimeCloud Test, CN=MaritimeCloud Test Identity Registry, E=info@maritimecloud.net" \
-    --crl-endpoint "https://localhost/x509/api/certificates/crl/urn:mrn:mcl:ca:maritimecloud-idreg" \
-    --ocsp-endpoint "https://localhost/x509/api/certificates/ocsp/urn:mrn:mcl:ca:maritimecloud-idreg"
+    --crl-endpoint "https://localhost/x509/api/certificates/crl/urn:mrn:mcl:ca:maritimecloud-idreg"
 ```
 
 The UID will be used as alias when stored in the truststore and subca-keystore. The root-keystore and truststore is expected to exists, while the subca-keystore will be created if it does not exists.
