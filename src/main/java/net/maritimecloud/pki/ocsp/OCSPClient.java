@@ -207,9 +207,7 @@ public class OCSPClient {
             } else {
                 throw new OCSPValidationException("Serial number of certificate in response ocsp does not match certificate serial number");
             }
-        } catch (CertificateEncodingException | OperatorCreationException | OCSPException | IOException ex) {
-            throw new OCSPValidationException("Unable to perform validation through OCSP (" + certificate.getSubjectX500Principal().getName() + ")", ex);
-        } catch (CertException | CertificateException ex) {
+        } catch (OperatorCreationException | OCSPException | IOException | CertException | CertificateException ex) {
             throw new OCSPValidationException("Unable to perform validation through OCSP (" + certificate.getSubjectX500Principal().getName() + ")", ex);
         }
     }

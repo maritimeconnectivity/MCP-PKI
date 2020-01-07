@@ -17,6 +17,7 @@ package net.maritimecloud.pki;
 
 
 import lombok.extern.slf4j.Slf4j;
+import net.maritimecloud.pki.exception.PKIRuntimeException;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -179,7 +180,7 @@ public class CertificateHandler {
             pemFormat = perStrWriter.toString();
             pemWrite.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new PKIRuntimeException(e);
         }
         return pemFormat;
     }
@@ -205,7 +206,7 @@ public class CertificateHandler {
             bos.close();
             return bos.toByteArray();
         } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException e) {
-            throw new RuntimeException(e);
+            throw new PKIRuntimeException(e);
         }
     }
 
@@ -278,8 +279,8 @@ public class CertificateHandler {
         // Extract first and last name from full name
         String lastName = "";
         String firstName = "";
-        if (name.split("\\w +\\w").length > 1) {
-            lastName = name.substring(name.lastIndexOf(" ")+1);
+        if (name != null && name.split("\\w +\\w").length > 1) {
+            lastName = name.substring(name.lastIndexOf(' ')+1);
             firstName = name.substring(0, name.lastIndexOf(' '));
         } else {
             firstName = name;
@@ -318,10 +319,7 @@ public class CertificateHandler {
                         encoded = ((DERTaggedObject) encoded).getObject();
                         encoded = ((DERTaggedObject) encoded).getObject();
                         value = ((DERUTF8String) encoded).getString();
-                    } catch (UnsupportedEncodingException e) {
-                        log.error("Error decoding subjectAltName" + e.getLocalizedMessage(), e);
-                        continue;
-                    } catch (Exception e) {
+                    } catch (IOException e) {
                         log.error("Error decoding subjectAltName" + e.getLocalizedMessage(), e);
                         continue;
                     } finally {
@@ -329,7 +327,7 @@ public class CertificateHandler {
                             try {
                                 decoder.close();
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                log.error("Stream could not be closed", e);
                             }
                         }
                     }
@@ -359,6 +357,7 @@ public class CertificateHandler {
                             break;
                         case MC_OID_SHIP_MRN:
                             identity.setShipMrn(value);
+                            break;
                         case MC_OID_PERMISSIONS:
                             if (value != null && !value.trim().isEmpty()) {
                                 if (permissions.length() == 0) {

@@ -42,8 +42,6 @@ class OCSPVerifierTest {
         RevocationInfo info = null;
         try {
             info = OCSPVerifier.verifyCertificateOCSP(cert, kh.getTrustStore());
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (KeyStoreException e) {
             e.printStackTrace();
         } catch (OCSPValidationException e) {
@@ -62,8 +60,6 @@ class OCSPVerifierTest {
         RevocationInfo info = null;
         try {
             info = OCSPVerifier.verifyCertificateOCSP(cert, kh.getTrustStore());
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (KeyStoreException e) {
             e.printStackTrace();
         } catch (OCSPValidationException e) {

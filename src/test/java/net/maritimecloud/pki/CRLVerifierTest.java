@@ -111,7 +111,7 @@ class CRLVerifierTest {
         List<String> crlDistPoints = null;
         try {
             crlDistPoints = CRLVerifier.getCrlDistributionPoints(cert);
-        } catch (CertificateParsingException | IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             fail("Extracting the CRL distribution point failed!");
         }

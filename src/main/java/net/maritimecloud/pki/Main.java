@@ -160,9 +160,7 @@ public class Main {
 
     public X509Certificate getCertificate(String certPath) throws IOException {
         String pemCert = new String(Files.readAllBytes(Paths.get(certPath)));
-        X509Certificate cert = CertificateHandler.getCertFromPem(pemCert);
-
-        return cert;
+        return CertificateHandler.getCertFromPem(pemCert);
     }
 
     public static void main(String[] args) {
@@ -198,7 +196,6 @@ public class Main {
                 System.out.println(identity);
             } catch (IOException e) {
                 System.err.println("Parsing of certificate failed. Reason: " + e.getMessage());
-                return;
             }
 
             // Default to show the help message

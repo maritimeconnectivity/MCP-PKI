@@ -64,11 +64,11 @@ import java.net.URL;
 import java.security.cert.CRLException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateParsingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -140,7 +140,7 @@ public final class CRLVerifier {
      * ldap://ldap.infonotary.com/dc=identity-ca,dc=infonotary,dc=com
      */
     public static X509CRL downloadCRLFromLDAP(String ldapURL) throws NamingException, CertificateException, CRLException {
-        Map<String, String> env = new Hashtable<>();
+        Map<String, String> env = new HashMap<>();
         env.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
         env.put(Context.PROVIDER_URL, ldapURL);
 
@@ -184,7 +184,7 @@ public final class CRLVerifier {
      * "CRL Distribution Point" extension in a X.509 certificate. If CRL
      * distribution point extension is unavailable, returns an empty list.
      */
-    public static List<String> getCrlDistributionPoints(X509Certificate cert) throws CertificateParsingException, IOException {
+    public static List<String> getCrlDistributionPoints(X509Certificate cert) throws IOException {
         byte[] crldpExt = cert.getExtensionValue(Extension.cRLDistributionPoints.getId());
         if (crldpExt == null) {
             return new ArrayList<>();

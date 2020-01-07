@@ -17,6 +17,7 @@ package net.maritimecloud.pki;
 
 
 import lombok.extern.slf4j.Slf4j;
+import net.maritimecloud.pki.exception.PKIRuntimeException;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
@@ -33,6 +34,7 @@ import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
+import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
@@ -40,6 +42,7 @@ import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.X509KeyUsage;
 import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.util.BigIntegers;
 
@@ -54,6 +57,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Calendar;
@@ -98,7 +102,7 @@ public class CertificateBuilder {
      * @throws Exception Throws exception on certificate generation errors.
      */
     public X509Certificate buildAndSignCert(BigInteger serialNumber, PrivateKey signerPrivateKey, PublicKey signerPublicKey, PublicKey subjectPublicKey, X500Name issuer, X500Name subject,
-                                            Map<String, String> customAttrs, String type, String ocspUrl, String crlUrl) throws Exception {
+                                            Map<String, String> customAttrs, String type, String ocspUrl, String crlUrl) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException {
         // Dates are converted to GMT/UTC inside the cert builder
         Calendar cal = Calendar.getInstance();
         Date now = cal.getTime();
@@ -182,7 +186,9 @@ public class CertificateBuilder {
      * @param baseCrlOcspURI The base URI used for the CRL and OCSP endpoint. This will be prepended: (ocsp|crl)/urn:mrn:mcl:ca:...
      * @return Returns a signed X509Certificate
      */
-    public X509Certificate generateCertForEntity(BigInteger serialNumber, String country, String orgName, String type, String callName, String email, String uid, PublicKey publickey, Map<String, String> customAttr, String signingAlias, String baseCrlOcspURI) throws Exception {
+    public X509Certificate generateCertForEntity(BigInteger serialNumber, String country, String orgName, String type,
+                                                 String callName, String email, String uid, PublicKey publickey,
+                                                 Map<String, String> customAttr, String signingAlias, String baseCrlOcspURI) throws CertificateException, OperatorCreationException, CertIOException, NoSuchAlgorithmException {
         KeyStore.PrivateKeyEntry signingCertEntry = keystoreHandler.getSigningCertEntry(signingAlias);
         Certificate signingCert = signingCertEntry.getCertificate();
         X509Certificate signingX509Cert = (X509Certificate) signingCert;
@@ -197,7 +203,7 @@ public class CertificateBuilder {
             }
         }
 
-        HashMap<String, String> commasConverted = convertCommas(orgName, type, callName, uid);
+        Map<String, String> commasConverted = convertCommas(orgName, type, callName, uid);
 
         String orgSubjectDn = "C=" + orgCountryCode + ", " +
                 "O=" + commasConverted.get("orgName") + ", " +
@@ -227,12 +233,12 @@ public class CertificateBuilder {
         try {
             g = KeyPairGenerator.getInstance("ECDSA", BC_PROVIDER_NAME);
         } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new PKIRuntimeException(e.getMessage(), e);
         }
         try {
             g.initialize(ecGenSpec, new SecureRandom());
         } catch (InvalidAlgorithmParameterException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new PKIRuntimeException(e.getMessage(), e);
         }
         return g.generateKeyPair();
     }
@@ -257,7 +263,7 @@ public class CertificateBuilder {
      *
      * @return a HashMap of the converted strings
      */
-    public HashMap<String, String> convertCommas(String orgName, String type, String callName, String uid) {
+    public Map<String, String> convertCommas(String orgName, String type, String callName, String uid) {
         HashMap<String, String> commasConverted = new HashMap<>();
         String[] values = new String[] {orgName, type, callName, uid};
         for (int i = 0; i < values.length; i++) {
