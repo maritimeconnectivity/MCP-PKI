@@ -51,7 +51,6 @@ import java.util.Date;
 import java.util.List;
 
 import static net.maritimecloud.pki.PKIConstants.KEYSTORE_TYPE;
-import static net.maritimecloud.pki.PKIConstants.ROOT_CERT_ALIAS;
 
 @Slf4j
 @AllArgsConstructor
@@ -68,7 +67,7 @@ public class CAHandler {
      *
      * @param subCaCertDN The DN of the new sub CA certificate.
      */
-    public void createSubCa(String subCaCertDN) {
+    public void createSubCa(String subCaCertDN, String rootCAAlias) {
 
         // Open the various keystores
         KeyStore rootKeystore;
@@ -111,7 +110,7 @@ public class CAHandler {
         X500Name rootCertX500Name;
         String crlUrl;
         try {
-            rootCertEntry = (KeyStore.PrivateKeyEntry) rootKeystore.getEntry(ROOT_CERT_ALIAS, protParam);
+            rootCertEntry = (KeyStore.PrivateKeyEntry) rootKeystore.getEntry(rootCAAlias, protParam);
             rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject();
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
             throw new RuntimeException(e);
@@ -170,7 +169,7 @@ public class CAHandler {
      * @param rootCertX500Name The DN of the new root CA Certificate
      * @param crlUrl CRL endpoint
      */
-    public void initRootCA(String rootCertX500Name, String crlUrl) {
+    public void initRootCA(String rootCertX500Name, String crlUrl, String rootCAAlias) {
         KeyPair cakp = CertificateBuilder.generateKeyPair();
         KeyStore rootks;
         KeyStore ts;
@@ -191,7 +190,7 @@ public class CAHandler {
 
             Certificate[] certChain = new Certificate[1];
             certChain[0] = cacert;
-            rootks.setKeyEntry(ROOT_CERT_ALIAS, cakp.getPrivate(), pkiConfiguration.getRootCaKeyPassword().toCharArray(), certChain);
+            rootks.setKeyEntry(rootCAAlias, cakp.getPrivate(), pkiConfiguration.getRootCaKeyPassword().toCharArray(), certChain);
             rootks.store(rootfos, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
             rootks = KeyStore.getInstance(KeyStore.getDefaultType());
             rootks.load(null, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
@@ -200,7 +199,7 @@ public class CAHandler {
             ts = KeyStore.getInstance(KeyStore.getDefaultType());
             ts.load(null, pkiConfiguration.getTruststorePassword().toCharArray());
             tsfos = new FileOutputStream(pkiConfiguration.getTruststorePath());
-            ts.setCertificateEntry(ROOT_CERT_ALIAS, cacert);
+            ts.setCertificateEntry(rootCAAlias, cacert);
             ts.store(tsfos, pkiConfiguration.getTruststorePassword().toCharArray());
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -282,7 +281,7 @@ public class CAHandler {
      * @param outputCaCrlPath Output path where to place the CRL.
      * @param revocationFile Path to the CSV file which contains revocation info.
      */
-    public void generateRootCRL(String outputCaCrlPath, String revocationFile) {
+    public void generateRootCRL(String outputCaCrlPath, String revocationFile, String rootCAAlias) {
         List<RevocationInfo> revocationInfos = loadRevocationFile(revocationFile);
 
         try {
@@ -291,7 +290,7 @@ public class CAHandler {
             rootks.load(readStream, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
             KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(pkiConfiguration.getRootCaKeystorePassword().toCharArray());
             KeyStore.PrivateKeyEntry rootCertEntry;
-            rootCertEntry = (KeyStore.PrivateKeyEntry) rootks.getEntry(ROOT_CERT_ALIAS, protParam);
+            rootCertEntry = (KeyStore.PrivateKeyEntry) rootks.getEntry(rootCAAlias, protParam);
             String rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject().toString();
             Revocation.generateRootCACRL(rootCertX500Name, revocationInfos, rootCertEntry, outputCaCrlPath);
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {

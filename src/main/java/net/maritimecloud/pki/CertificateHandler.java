@@ -73,6 +73,8 @@ import static net.maritimecloud.pki.PKIConstants.MC_OID_MRN;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_PERMISSIONS;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_PORT_OF_REGISTER;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_SHIP_MRN;
+import static net.maritimecloud.pki.PKIConstants.MC_OID_MRN_SUBSIDIARY;
+import static net.maritimecloud.pki.PKIConstants.MC_OID_HOME_MMS_URL;
 import static org.bouncycastle.asn1.x500.style.IETFUtils.valueToString;
 
 
@@ -275,6 +277,9 @@ public class CertificateHandler {
         identity.setOu(getElement(x500name, BCStyle.OU));
         identity.setCountry(getElement(x500name, BCStyle.C));
         identity.setEmail(getElement(x500name, BCStyle.EmailAddress));
+        // could be changed with better fit to the BCStyle context
+        identity.setMrnSubsidiary(getElement(x500name, BCStyle.NAME_AT_BIRTH));
+        identity.setHomeMmsUrl(getElement(x500name, BCStyle.UnstructuredAddress));
         // Extract first and last name from full name
         String lastName = "";
         String firstName = "";
@@ -353,12 +358,18 @@ public class CertificateHandler {
                         case MC_OID_PORT_OF_REGISTER:
                             identity.setPortOfRegister(value);
                             break;
-                        case MC_OID_MRN:
-                            // We only support 1 mrn
+                        case MC_OID_MRN: // primary MRN
                             identity.setMrn(value);
+                            break;
+                        case MC_OID_MRN_SUBSIDIARY:
+                            identity.setMrnSubsidiary(value);
+                            break;
+                        case MC_OID_HOME_MMS_URL:
+                            identity.setHomeMmsUrl(value);
                             break;
                         case MC_OID_SHIP_MRN:
                             identity.setShipMrn(value);
+                            break;
                         case MC_OID_PERMISSIONS:
                             if (value != null && !value.trim().isEmpty()) {
                                 if (permissions.length() == 0) {

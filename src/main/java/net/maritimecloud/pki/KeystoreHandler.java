@@ -32,7 +32,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
 import static net.maritimecloud.pki.PKIConstants.KEYSTORE_TYPE;
-import static net.maritimecloud.pki.PKIConstants.ROOT_CERT_ALIAS;
 
 @Slf4j
 public class KeystoreHandler {
@@ -76,7 +75,7 @@ public class KeystoreHandler {
      * @param alias Either ROOT_CERT_ALIAS or INTERMEDIATE_CERT_ALIAS
      * @return a certificate
      */
-    public Certificate getMCCertificate(String alias) {
+    public Certificate getMCPCertificate(String alias) {
         log.debug(pkiConfiguration.getTruststorePath());
         FileInputStream is;
         try {
@@ -123,23 +122,13 @@ public class KeystoreHandler {
     }
 
     /**
-     * Returns the public key of the root certificate
-     *
-     * @return public key
-     */
-    public PublicKey getRootPubKey() {
-        Certificate rootCert = getMCCertificate(ROOT_CERT_ALIAS);
-        return rootCert.getPublicKey();
-    }
-
-    /**
      * Returns the public key of the sub CA certificate with the given alias
      *
      * @param alias Alias of a sub CA
      * @return
      */
     public PublicKey getPubKey(String alias) {
-        Certificate cert = getMCCertificate(alias);
+        Certificate cert = getMCPCertificate(alias);
         return cert.getPublicKey();
     }
 

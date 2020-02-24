@@ -43,5 +43,6 @@ public class PKIIdentity {
     private String portOfRegister;
     // This value is only relevant to services that are linked to a vessel
     private String shipMrn;
-
+    private String mrnSubsidiary;
+    private String homeMmsUrl;
 }

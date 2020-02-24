@@ -53,7 +53,7 @@ class RevocationTest {
         List<RevocationInfo> infos = Arrays.asList(info);
 
         // Load a subCA key used for siging
-        PKIConfiguration pkiConf = new PKIConfiguration();
+        PKIConfiguration pkiConf = new PKIConfiguration(TestUtils.getRootCAAlias());
         pkiConf.setSubCaKeystorePath("src/test/resources/ca/subca-keystore.jks");
         pkiConf.setSubCaKeystorePassword("changeit");
         pkiConf.setSubCaKeyPassword("changeit");

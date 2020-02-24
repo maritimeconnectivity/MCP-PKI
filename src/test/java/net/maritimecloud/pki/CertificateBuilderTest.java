@@ -1,5 +1,7 @@
 package net.maritimecloud.pki;
 
+import net.maritimecloud.pki.PKIConfiguration;
+import net.maritimecloud.pki.PKIConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +26,7 @@ class CertificateBuilderTest {
 
     @BeforeEach
     void setUp() {
-        pkiConf = new PKIConfiguration();
+        pkiConf = new PKIConfiguration(TestUtils.getRootCAAlias());
         pkiConf.setTruststorePassword("changeit");
         pkiConf.setTruststorePath("src/test/resources/ca/mc-truststore.jks");
         pkiConf.setSubCaKeystorePath("src/test/resources/ca/subca-keystore.jks");
@@ -44,6 +46,8 @@ class CertificateBuilderTest {
         Map<String, String> attrs= new HashMap<String, String>();
         attrs.put(PKIConstants.MC_OID_MRN, userMrn);
         attrs.put(PKIConstants.MC_OID_PERMISSIONS, permissions);
+        attrs.put(PKIConstants.MC_OID_MRN_SUBSIDIARY, "urn:mrn:stm:user:dmc:thc");
+        attrs.put(PKIConstants.MC_OID_HOME_MMS_URL, "http://smartnav.org/");
         X509Certificate userCert;
         try {
             userCert = cb.generateCertForEntity(BigInteger.ONE, "DK", "urn:mrn:mcl:org:dma", "user", "Thomas Christensen", "thc@dma.dk", userMrn, certKeyPair.getPublic(), attrs, signingAlias, baseCrlOcspPath);

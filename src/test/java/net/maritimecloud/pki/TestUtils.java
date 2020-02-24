@@ -27,6 +27,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestUtils {
 
+    public static String getRootCAAlias() {
+        return "urn:mrn:mcl:ca:maritimecloud";
+    }
+
     public static String getMyBoatCertPem() {
         String certFile = "src/test/resources/Certificate_Myboat.pem";
         String contents = loadTxtFile(certFile);
