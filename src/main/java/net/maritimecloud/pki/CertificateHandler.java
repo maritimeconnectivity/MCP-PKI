@@ -74,6 +74,8 @@ import static net.maritimecloud.pki.PKIConstants.MC_OID_MRN;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_PERMISSIONS;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_PORT_OF_REGISTER;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_SHIP_MRN;
+import static net.maritimecloud.pki.PKIConstants.MC_OID_MRN_SUBSIDIARY;
+import static net.maritimecloud.pki.PKIConstants.MC_OID_HOME_MMS_URL;
 import static org.bouncycastle.asn1.x500.style.IETFUtils.valueToString;
 
 
@@ -351,9 +353,14 @@ public class CertificateHandler {
                         case MC_OID_PORT_OF_REGISTER:
                             identity.setPortOfRegister(value);
                             break;
-                        case MC_OID_MRN:
-                            // We only support 1 mrn
+                        case MC_OID_MRN: // primary MRN
                             identity.setMrn(value);
+                            break;
+                        case MC_OID_MRN_SUBSIDIARY:
+                            identity.setMrnSubsidiary(value);
+                            break;
+                        case MC_OID_HOME_MMS_URL:
+                            identity.setHomeMmsUrl(value);
                             break;
                         case MC_OID_SHIP_MRN:
                             identity.setShipMrn(value);

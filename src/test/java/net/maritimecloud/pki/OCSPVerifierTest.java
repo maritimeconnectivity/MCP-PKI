@@ -25,8 +25,6 @@ import java.net.URL;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 
-import static net.maritimecloud.pki.TestUtils.getEcdisCert;
-import static net.maritimecloud.pki.TestUtils.getMyBoatCert;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -34,8 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class OCSPVerifierTest {
     //@Test
     void verifyCertificateOCSP1() {
-        X509Certificate cert = getMyBoatCert();
-        PKIConfiguration pkiConf = new PKIConfiguration();
+        X509Certificate cert = TestUtils.getMyBoatCert();
+        PKIConfiguration pkiConf = new PKIConfiguration(TestUtils.getRootCAAlias());
         pkiConf.setTruststorePassword("changeit");
         pkiConf.setTruststorePath("src/test/resources/mc-truststore-password-is-changeit.jks");
         KeystoreHandler kh = new KeystoreHandler(pkiConf);
@@ -51,9 +49,9 @@ class OCSPVerifierTest {
     }
 
     //@Test
-    void verifyCertificateOCSP2() {
-        X509Certificate cert = getEcdisCert();
-        PKIConfiguration pkiConf = new PKIConfiguration();
+    void verifyCertificateOCSP2(String rootCAAlias) {
+        X509Certificate cert = TestUtils.getEcdisCert();
+        PKIConfiguration pkiConf = new PKIConfiguration(rootCAAlias);
         pkiConf.setTruststorePassword("changeit");
         pkiConf.setTruststorePath("src/test/resources/mc-truststore-password-is-changeit.jks");
         KeystoreHandler kh = new KeystoreHandler(pkiConf);
@@ -70,7 +68,7 @@ class OCSPVerifierTest {
 
     @Test
     void getOcspUrl1() {
-        X509Certificate cert = getMyBoatCert();
+        X509Certificate cert = TestUtils.getMyBoatCert();
         URL ocspUrl = OCSPClient.getOcspUrlFromCertificate(cert);
         assertNotNull(ocspUrl);
         assertEquals("https://api.maritimecloud.net/x509/api/certificates/ocsp", ocspUrl.toString());
@@ -78,7 +76,7 @@ class OCSPVerifierTest {
 
     @Test
     void getOcspUrl2() {
-        X509Certificate cert = getEcdisCert();
+        X509Certificate cert = TestUtils.getEcdisCert();
         URL ocspUrl = OCSPClient.getOcspUrlFromCertificate(cert);
         assertNotNull(ocspUrl);
         assertEquals("https://api.maritimecloud.net/x509/api/certificates/ocsp", ocspUrl.toString());
