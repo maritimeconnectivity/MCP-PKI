@@ -277,9 +277,6 @@ public class CertificateHandler {
         identity.setOu(getElement(x500name, BCStyle.OU));
         identity.setCountry(getElement(x500name, BCStyle.C));
         identity.setEmail(getElement(x500name, BCStyle.EmailAddress));
-        // could be changed with better fit to the BCStyle context
-        identity.setMrnSubsidiary(getElement(x500name, BCStyle.NAME_AT_BIRTH));
-        identity.setHomeMmsUrl(getElement(x500name, BCStyle.UnstructuredAddress));
         // Extract first and last name from full name
         String lastName = "";
         String firstName = "";
