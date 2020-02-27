@@ -18,7 +18,7 @@ Use PKIConfiguration for setting up configuration about Keystore and/or Truststo
 A short example of use can be seen below:
 ```java
     // Setup MC PKI
-    PKIConfiguration pkiConf = new PKIConfiguration();
+    PKIConfiguration pkiConf = new PKIConfiguration("urn:mrn:mcl:ca:maritimecloud");
     pkiConf.setTruststorePath("/path/to/mc-truststore.jks");
     pkiConf.setTruststorePassword("changeit");
     KeystoreHandler kh = new KeystoreHandler(pkiConf);
@@ -45,10 +45,11 @@ java -jar mc-pki-0.9.0-SNAPSHOT-jar-with-dependencies.jar \
     --root-keystore-path root-ca-keystore.jks \
     --root-keystore-password changeit \
     --root-key-password changeit \
+    --root-ca-alias "urn:mrn:mcl:ca:maritimecloud" \
     --x500-name "C=DK, ST=Denmark, L=Copenhagen, O=MCP Test, OU=MCP Test, CN=MCP Test Root Certificate, E=info@maritimecloud.net" \
     --crl-endpoint "https://localhost/x509/api/certificates/crl/urn:mrn:mcl:ca:maritimecloud"
 ```
-Note that the truststore and root-keystore will be overwritten! Also note that crl-endpoint should end with `urn:mrn:mcl:ca:maritimecloud`, as this is the expected by the Maritime Cloud Identity Registry!
+Note that the truststore and root-keystore will be overwritten! Also note that crl-endpoint should end with `urn:mrn:mcl:ca:maritimecloud` which is the value of *root-ca-alias*.
 
 Change the passwords as you see fit.
 
@@ -61,6 +62,7 @@ java -jar mc-pki-0.9.0-SNAPSHOT-jar-with-dependencies.jar \
     --root-keystore-password changeit \
     --root-key-password changeit \
     --revoked-subca-file revoked-subca.csv \
+    --root-ca-alias "urn:mrn:mcl:ca:maritimecloud" \
     --root-crl-path root-ca.crl
 ```
 The revoked-subca-file CSV file must either be empty or have a format like this:
@@ -88,6 +90,7 @@ java -jar mc-pki-0.9.0-SNAPSHOT-jar-with-dependencies.jar \
     --subca-keystore subca-keystore.jks \
     --subca-keystore-password changeit \
     --subca-key-password changeit \
+    --root-ca-alias "urn:mrn:mcl:ca:maritimecloud" \
     --x500-name "UID=urn:mrn:mcl:ca:maritimecloud-idreg, C=DK, ST=Denmark, L=Copenhagen, O=MaritimeCloud Test, OU=MaritimeCloud Test, CN=MaritimeCloud Test Identity Registry, E=info@maritimecloud.net" \
     --crl-endpoint "https://localhost/x509/api/certificates/crl/urn:mrn:mcl:ca:maritimecloud-idreg"
 ```
