@@ -43,6 +43,7 @@ import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.cert.CertException;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
 import org.bouncycastle.cert.ocsp.CertificateID;
 import org.bouncycastle.cert.ocsp.CertificateStatus;
@@ -56,7 +57,6 @@ import org.bouncycastle.cert.ocsp.jcajce.JcaCertificateID;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -108,7 +108,7 @@ public class OCSPClient {
         URL url = null;
         if (null != octetBytes) {
             try {
-                byte[] encoded = X509ExtensionUtil.fromExtensionValue(octetBytes).getEncoded();
+                byte[] encoded = JcaX509ExtensionUtils.parseExtensionValue(octetBytes).getEncoded();
                 ASN1Sequence seq = ASN1Sequence.getInstance(ASN1Primitive.fromByteArray(encoded));
                 AuthorityInformationAccess access = AuthorityInformationAccess.getInstance(seq);
                 for (AccessDescription accessDescription : access.getAccessDescriptions()){

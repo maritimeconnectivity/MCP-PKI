@@ -21,7 +21,7 @@ import net.maritimecloud.pki.exception.PKIRuntimeException;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.DLSequence;
 import org.bouncycastle.asn1.x500.RDN;
@@ -68,14 +68,14 @@ import static net.maritimecloud.pki.PKIConstants.BC_PROVIDER_NAME;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_AIS_SHIPTYPE;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_CALLSIGN;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_FLAGSTATE;
+import static net.maritimecloud.pki.PKIConstants.MC_OID_HOME_MMS_URL;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_IMO_NUMBER;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_MMSI_NUMBER;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_MRN;
+import static net.maritimecloud.pki.PKIConstants.MC_OID_MRN_SUBSIDIARY;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_PERMISSIONS;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_PORT_OF_REGISTER;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_SHIP_MRN;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_MRN_SUBSIDIARY;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_HOME_MMS_URL;
 import static org.bouncycastle.asn1.x500.style.IETFUtils.valueToString;
 
 
@@ -318,8 +318,8 @@ public class CertificateHandler {
                         oid = asnOID.getId();
                         // For some weird reason we need to do this 2 times - otherwise we get a
                         // ClassCastException when extracting the value.
-                        encoded = ((DERTaggedObject) encoded).getObject();
-                        encoded = ((DERTaggedObject) encoded).getObject();
+                        encoded = ((ASN1TaggedObject) encoded).getObject();
+                        encoded = ((ASN1TaggedObject) encoded).getObject();
                         value = ((DERUTF8String) encoded).getString();
                     } catch (IOException e) {
                         log.error("Error decoding subjectAltName" + e.getLocalizedMessage(), e);
