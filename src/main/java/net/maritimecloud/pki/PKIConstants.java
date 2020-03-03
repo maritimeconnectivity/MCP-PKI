@@ -39,6 +39,7 @@ public class PKIConstants {
     public static final String MC_OID_PORT_OF_REGISTER = "2.25.285632790821948647314354670918887798603";
     public static final String MC_OID_MRN_SUBSIDIARY   = "2.25.133833610339604538603087183843785923701";
     public static final String MC_OID_HOME_MMS_URL     = "2.25.171344478791913547554566856023141401757";
+    public static final String MC_OID_URL              = "2.25.245076023612240385163414144226581328607";
 
 
     // Used to identify the DNSName attribute in the X509 Extension: Subject Alternative Name.

@@ -76,6 +76,7 @@ import static net.maritimecloud.pki.PKIConstants.MC_OID_MRN_SUBSIDIARY;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_PERMISSIONS;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_PORT_OF_REGISTER;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_SHIP_MRN;
+import static net.maritimecloud.pki.PKIConstants.MC_OID_URL;
 import static org.bouncycastle.asn1.x500.style.IETFUtils.valueToString;
 
 
@@ -364,6 +365,9 @@ public class CertificateHandler {
                             break;
                         case MC_OID_SHIP_MRN:
                             identity.setShipMrn(value);
+                            break;
+                        case MC_OID_URL:
+                            identity.setUrl(value);
                             break;
                         case MC_OID_PERMISSIONS:
                             if (value != null && !value.trim().isEmpty()) {

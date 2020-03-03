@@ -45,4 +45,5 @@ public class PKIIdentity {
     private String shipMrn;
     private String mrnSubsidiary;
     private String homeMmsUrl;
+    private String url;
 }
