@@ -104,7 +104,7 @@ This project includes code from the Apache Xcf project (Apache License, Version 
 
 
 ## Building
-Build the jar using maven like this:
+Build the jar using Maven (>=v3.3.9) like this:
 ```sh
 mvn clean test install
 ```
