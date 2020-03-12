@@ -8,7 +8,7 @@ Building using maven should be as simple as running `mvn install`.
 
 The Maritime Connectivity Platform was formerly known as the Maritime Cloud and therefore there might still be references to that in this project.  
 
-MCP-PKI implements the `certificate attributes` described in [the developer's page of identity registry](https://developers.maritimeconnectivity.net/identity/index.html#certificate-attributes) and used in [Maritime Identity Registry](https://github.com/MaritimeConnectivityPlatform/IdentityRegistry). 
+MCP-PKI implements the *certificate attributes* described in [the developer's page of identity registry](https://developers.maritimeconnectivity.net/identity/index.html#certificate-attributes) and used in [Maritime Identity Registry](https://github.com/MaritimeConnectivityPlatform/IdentityRegistry). 
 
 ## Using the lib
 The primary function of this software is to make it easy/easier to use the MCP PKI for (Java) developers. 
@@ -31,7 +31,7 @@ A short example of use can be seen below:
     // Extract Identity information from the certificate
     PKIIdentity user = CertificateHandler.getIdentityFromCert(cert);
 ```
-Here `urn:mrn:mcl:ca:maritimecloud` states the *root-ca-alias* which will be defined differently to each identity provider.
+Here the parameter "urn:mrn:mcl:ca:maritimecloud" states the *root-ca-alias* which will be defined differently to each identity provider.
 
 ## Commandline interface
 The secondary function of this software is to provide a (relatively) easy to use interface for the PKI manager. How to use is will be described below.
