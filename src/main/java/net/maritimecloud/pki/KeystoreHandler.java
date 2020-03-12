@@ -17,6 +17,7 @@ package net.maritimecloud.pki;
 
 
 import lombok.extern.slf4j.Slf4j;
+import net.maritimecloud.pki.exception.PKIRuntimeException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.FileInputStream;
@@ -32,7 +33,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
 import static net.maritimecloud.pki.PKIConstants.KEYSTORE_TYPE;
-import static net.maritimecloud.pki.PKIConstants.ROOT_CERT_ALIAS;
 
 @Slf4j
 public class KeystoreHandler {
@@ -52,21 +52,17 @@ public class KeystoreHandler {
      * @return a PrivateKeyEntry of the signing certificate
      */
     public KeyStore.PrivateKeyEntry getSigningCertEntry(String alias) {
-        FileInputStream is;
-        try {
-            is = new FileInputStream(pkiConfiguration.getSubCaKeystorePath());
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-        KeyStore keystore;
-        try {
-            keystore = KeyStore.getInstance(KEYSTORE_TYPE);
-            keystore.load(is, pkiConfiguration.getSubCaKeystorePassword().toCharArray());
+        try (FileInputStream is = new FileInputStream(pkiConfiguration.getSubCaKeystorePath())) {
+            KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
+            keyStore.load(is, pkiConfiguration.getSubCaKeystorePassword().toCharArray());
             KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(pkiConfiguration.getSubCaKeyPassword().toCharArray());
-            return (KeyStore.PrivateKeyEntry) keystore.getEntry(alias, protParam);
-
-        } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException | UnrecoverableEntryException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            return (KeyStore.PrivateKeyEntry) keyStore.getEntry(alias, protParam);
+        } catch (FileNotFoundException e) {
+            log.error("Could not open CA keystore", e);
+            throw new PKIRuntimeException(e.getMessage(), e);
+        } catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException | UnrecoverableEntryException e) {
+            log.error("Could not get CA entry", e);
+            throw new PKIRuntimeException(e.getMessage(), e);
         }
     }
 
@@ -76,24 +72,18 @@ public class KeystoreHandler {
      * @param alias Either ROOT_CERT_ALIAS or INTERMEDIATE_CERT_ALIAS
      * @return a certificate
      */
-    public Certificate getMCCertificate(String alias) {
+    public Certificate getMCPCertificate(String alias) {
         log.debug(pkiConfiguration.getTruststorePath());
-        FileInputStream is;
-        try {
-            is = new FileInputStream(pkiConfiguration.getTruststorePath());
+        try (FileInputStream is = new FileInputStream(pkiConfiguration.getTruststorePath())) {
+            KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
+            keyStore.load(is, pkiConfiguration.getTruststorePassword().toCharArray());
+            return keyStore.getCertificate(alias);
         } catch (FileNotFoundException e) {
             log.error("Could not open truststore", e);
-            throw new RuntimeException(e.getMessage(), e);
-        }
-        KeyStore keystore;
-        try {
-            keystore = KeyStore.getInstance(KEYSTORE_TYPE);
-            keystore.load(is, pkiConfiguration.getTruststorePassword().toCharArray());
-            return keystore.getCertificate(alias);
-
-        } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
-            log.error("Could not load root certificate", e);
-            throw new RuntimeException(e.getMessage(), e);
+            throw new PKIRuntimeException(e.getMessage(), e);
+        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
+            log.error("Could not load CA certificate", e);
+            throw new PKIRuntimeException(e.getMessage(), e);
         }
     }
 
@@ -103,33 +93,17 @@ public class KeystoreHandler {
      * @return a truststore
      */
     public KeyStore getTrustStore() {
-        FileInputStream is;
-        try {
-            is = new FileInputStream(pkiConfiguration.getTruststorePath());
+        try (FileInputStream is = new FileInputStream(pkiConfiguration.getTruststorePath())) {
+            KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
+            keyStore.load(is, pkiConfiguration.getTruststorePassword().toCharArray());
+            return keyStore;
         } catch (FileNotFoundException e) {
             log.error("Could not open truststore", e);
-            throw new RuntimeException(e.getMessage(), e);
+            throw new PKIRuntimeException(e.getMessage(), e);
+        } catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException e) {
+            log.error("Could not load truststore", e);
+            throw new PKIRuntimeException(e.getMessage(), e);
         }
-        KeyStore keystore;
-        try {
-            keystore = KeyStore.getInstance(KEYSTORE_TYPE);
-            keystore.load(is, pkiConfiguration.getTruststorePassword().toCharArray());
-            return keystore;
-
-        } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
-            log.error("Could not load truststore!", e);
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Returns the public key of the root certificate
-     *
-     * @return public key
-     */
-    public PublicKey getRootPubKey() {
-        Certificate rootCert = getMCCertificate(ROOT_CERT_ALIAS);
-        return rootCert.getPublicKey();
     }
 
     /**
@@ -139,7 +113,7 @@ public class KeystoreHandler {
      * @return
      */
     public PublicKey getPubKey(String alias) {
-        Certificate cert = getMCCertificate(alias);
+        Certificate cert = getMCPCertificate(alias);
         return cert.getPublicKey();
     }
 

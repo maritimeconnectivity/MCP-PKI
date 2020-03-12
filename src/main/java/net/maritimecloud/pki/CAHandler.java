@@ -18,6 +18,7 @@ package net.maritimecloud.pki;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.maritimecloud.pki.exception.PKIRuntimeException;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
@@ -41,7 +42,6 @@ import java.security.cert.CRLReason;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -51,7 +51,6 @@ import java.util.Date;
 import java.util.List;
 
 import static net.maritimecloud.pki.PKIConstants.KEYSTORE_TYPE;
-import static net.maritimecloud.pki.PKIConstants.ROOT_CERT_ALIAS;
 
 @Slf4j
 @AllArgsConstructor
@@ -68,7 +67,7 @@ public class CAHandler {
      *
      * @param subCaCertDN The DN of the new sub CA certificate.
      */
-    public void createSubCa(String subCaCertDN) {
+    public void createSubCa(String subCaCertDN, String rootCAAlias) {
 
         // Open the various keystores
         KeyStore rootKeystore;
@@ -98,7 +97,7 @@ public class CAHandler {
             truststore.load(trustFis, pkiConfiguration.getTruststorePassword().toCharArray());
 
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            throw new RuntimeException(e);
+            throw new PKIRuntimeException(e);
         } finally {
             safeClose(rootKeystoreIS);
             safeClose(trustFis);
@@ -111,16 +110,16 @@ public class CAHandler {
         X500Name rootCertX500Name;
         String crlUrl;
         try {
-            rootCertEntry = (KeyStore.PrivateKeyEntry) rootKeystore.getEntry(ROOT_CERT_ALIAS, protParam);
+            rootCertEntry = (KeyStore.PrivateKeyEntry) rootKeystore.getEntry(rootCAAlias, protParam);
             rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject();
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
-            throw new RuntimeException(e);
+            throw new PKIRuntimeException(e);
         }
         try {
             List<String> crlPoints = CRLVerifier.getCrlDistributionPoints((X509Certificate) rootCertEntry.getCertificate());
             crlUrl = crlPoints.get(0);
-        } catch (CertificateParsingException | IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new PKIRuntimeException(e);
         }
 
         // Create the sub CA certificate
@@ -129,13 +128,13 @@ public class CAHandler {
         X500Name subCaCertX500Name = new X500Name(subCaCertDN);
         String alias = CertificateHandler.getElement(subCaCertX500Name, BCStyle.UID);
         if (alias == null || alias.trim().isEmpty()) {
-            throw new RuntimeException("UID must be defined for sub CA! It will be used as the sub CA alias.");
+            throw new PKIRuntimeException("UID must be defined for sub CA! It will be used as the sub CA alias.");
         }
         try {
             subCaCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(), rootCertEntry.getPrivateKey(), rootCertEntry.getCertificate().getPublicKey(),
                     subCaKeyPair.getPublic(), rootCertX500Name, subCaCertX500Name, null, "INTERMEDIATE", null, crlUrl);
         } catch (Exception e) {
-            throw new RuntimeException("Could not create sub CA certificate!", e);
+            throw new PKIRuntimeException("Could not create sub CA certificate!", e);
         }
 
         // Store the sub CA certificate in the Sub CA keystore and the MC truststore
@@ -154,7 +153,7 @@ public class CAHandler {
             truststore.store(trustFos, pkiConfiguration.getTruststorePassword().toCharArray());
 
         } catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException e) {
-            throw new RuntimeException(e);
+            throw new PKIRuntimeException(e);
         } finally {
             safeClose(trustFos);
             safeClose(subCaFos);
@@ -170,7 +169,7 @@ public class CAHandler {
      * @param rootCertX500Name The DN of the new root CA Certificate
      * @param crlUrl CRL endpoint
      */
-    public void initRootCA(String rootCertX500Name, String crlUrl) {
+    public void initRootCA(String rootCertX500Name, String crlUrl, String rootCAAlias) {
         KeyPair cakp = CertificateBuilder.generateKeyPair();
         KeyStore rootks;
         KeyStore ts;
@@ -186,12 +185,12 @@ public class CAHandler {
                 cacert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(), cakp.getPrivate(), cakp.getPublic(), cakp.getPublic(),
                         new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl);
             } catch (Exception e) {
-                throw new RuntimeException(e.getMessage(), e);
+                throw new PKIRuntimeException(e.getMessage(), e);
             }
 
             Certificate[] certChain = new Certificate[1];
             certChain[0] = cacert;
-            rootks.setKeyEntry(ROOT_CERT_ALIAS, cakp.getPrivate(), pkiConfiguration.getRootCaKeyPassword().toCharArray(), certChain);
+            rootks.setKeyEntry(rootCAAlias, cakp.getPrivate(), pkiConfiguration.getRootCaKeyPassword().toCharArray(), certChain);
             rootks.store(rootfos, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
             rootks = KeyStore.getInstance(KeyStore.getDefaultType());
             rootks.load(null, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
@@ -200,10 +199,10 @@ public class CAHandler {
             ts = KeyStore.getInstance(KeyStore.getDefaultType());
             ts.load(null, pkiConfiguration.getTruststorePassword().toCharArray());
             tsfos = new FileOutputStream(pkiConfiguration.getTruststorePath());
-            ts.setCertificateEntry(ROOT_CERT_ALIAS, cacert);
+            ts.setCertificateEntry(rootCAAlias, cacert);
             ts.store(tsfos, pkiConfiguration.getTruststorePassword().toCharArray());
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new PKIRuntimeException(e.getMessage(), e);
         } finally {
             safeClose(rootfos);
             safeClose(tsfos);
@@ -215,7 +214,7 @@ public class CAHandler {
             try {
                 stream.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Stream could not be closed", e);
             }
         }
     }
@@ -225,7 +224,7 @@ public class CAHandler {
             try {
                 stream.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Stream could not be closed", e);
             }
         }
     }
@@ -252,24 +251,24 @@ public class CAHandler {
                 }
                 String[] revocationInfoSplit = csvLine.split(cvsSplitBy);
                 if (revocationInfoSplit.length != 3) {
-                    throw new RuntimeException("Missing info from line: " + csvLine);
+                    throw new PKIRuntimeException("Missing info from line: " + csvLine);
                 }
                 RevocationInfo info = new RevocationInfo();
                 info.setSerialNumber(new BigInteger(revocationInfoSplit[0].trim()));
                 info.setRevokeReason(CRLReason.values()[Revocation.getCRLReasonFromString(revocationInfoSplit[1].trim().toLowerCase())]);
                 Date revokedAt = format.parse(revocationInfoSplit[2].trim());
                 if (revokedAt == null) {
-                    throw new RuntimeException("Invalid date format!");
+                    throw new PKIRuntimeException("Invalid date format!");
                 }
                 info.setRevokedAt(revokedAt);
                 revocationInfos.add(info);
             }
         } catch (FileNotFoundException e) {
-            throw new RuntimeException("Could not find the revocation info file!", e);
+            throw new PKIRuntimeException("Could not find the revocation info file!", e);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new PKIRuntimeException(e);
         } catch (ParseException e) {
-            throw new RuntimeException("Invalid date format!", e);
+            throw new PKIRuntimeException("Invalid date format!", e);
         }
 
         return revocationInfos;
@@ -282,7 +281,7 @@ public class CAHandler {
      * @param outputCaCrlPath Output path where to place the CRL.
      * @param revocationFile Path to the CSV file which contains revocation info.
      */
-    public void generateRootCRL(String outputCaCrlPath, String revocationFile) {
+    public void generateRootCRL(String outputCaCrlPath, String revocationFile, String rootCAAlias) {
         List<RevocationInfo> revocationInfos = loadRevocationFile(revocationFile);
 
         try {
@@ -291,17 +290,17 @@ public class CAHandler {
             rootks.load(readStream, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
             KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(pkiConfiguration.getRootCaKeystorePassword().toCharArray());
             KeyStore.PrivateKeyEntry rootCertEntry;
-            rootCertEntry = (KeyStore.PrivateKeyEntry) rootks.getEntry(ROOT_CERT_ALIAS, protParam);
+            rootCertEntry = (KeyStore.PrivateKeyEntry) rootks.getEntry(rootCAAlias, protParam);
             String rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject().toString();
             Revocation.generateRootCACRL(rootCertX500Name, revocationInfos, rootCertEntry, outputCaCrlPath);
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
-            throw new RuntimeException("Unable to generate RootCACRL", e);
+            throw new PKIRuntimeException("Unable to generate RootCACRL", e);
         } catch (CertificateException e) {
-            throw new RuntimeException("Could not load root certificate!", e);
+            throw new PKIRuntimeException("Could not load root certificate!", e);
         } catch (FileNotFoundException e) {
-            throw new RuntimeException("Could not find root keystore!", e);
+            throw new PKIRuntimeException("Could not find root keystore!", e);
         } catch (IOException e) {
-            throw new RuntimeException("Could not load root keystore!", e);
+            throw new PKIRuntimeException("Could not load root keystore!", e);
         }
     }
 }

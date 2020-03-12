@@ -16,6 +16,7 @@
 package net.maritimecloud.pki;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -48,4 +49,12 @@ public class PKIConfiguration {
 
     //@Value("${net.maritimecloud.pki.truststore-password}")
     private String truststorePassword;
+
+    //@Value("${net.maritimecloud.pki.root-ca-alias}")
+    @NonNull
+    private String rootCAAlias;
+
+    public PKIConfiguration(String rootCAAlias){
+        this.rootCAAlias = rootCAAlias;
+    }
 }

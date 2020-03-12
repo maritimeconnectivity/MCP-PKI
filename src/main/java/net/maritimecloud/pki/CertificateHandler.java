@@ -17,10 +17,11 @@ package net.maritimecloud.pki;
 
 
 import lombok.extern.slf4j.Slf4j;
+import net.maritimecloud.pki.exception.PKIRuntimeException;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.DLSequence;
 import org.bouncycastle.asn1.x500.RDN;
@@ -67,12 +68,15 @@ import static net.maritimecloud.pki.PKIConstants.BC_PROVIDER_NAME;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_AIS_SHIPTYPE;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_CALLSIGN;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_FLAGSTATE;
+import static net.maritimecloud.pki.PKIConstants.MC_OID_HOME_MMS_URL;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_IMO_NUMBER;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_MMSI_NUMBER;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_MRN;
+import static net.maritimecloud.pki.PKIConstants.MC_OID_MRN_SUBSIDIARY;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_PERMISSIONS;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_PORT_OF_REGISTER;
 import static net.maritimecloud.pki.PKIConstants.MC_OID_SHIP_MRN;
+import static net.maritimecloud.pki.PKIConstants.MC_OID_URL;
 import static org.bouncycastle.asn1.x500.style.IETFUtils.valueToString;
 
 
@@ -179,7 +183,7 @@ public class CertificateHandler {
             pemFormat = perStrWriter.toString();
             pemWrite.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new PKIRuntimeException(e);
         }
         return pemFormat;
     }
@@ -205,7 +209,7 @@ public class CertificateHandler {
             bos.close();
             return bos.toByteArray();
         } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException e) {
-            throw new RuntimeException(e);
+            throw new PKIRuntimeException(e);
         }
     }
 
@@ -278,8 +282,8 @@ public class CertificateHandler {
         // Extract first and last name from full name
         String lastName = "";
         String firstName = "";
-        if (name.split("\\w +\\w").length > 1) {
-            lastName = name.substring(name.lastIndexOf(" ")+1);
+        if (name != null && name.split("\\w +\\w").length > 1) {
+            lastName = name.substring(name.lastIndexOf(' ')+1);
             firstName = name.substring(0, name.lastIndexOf(' '));
         } else {
             firstName = name;
@@ -315,13 +319,10 @@ public class CertificateHandler {
                         oid = asnOID.getId();
                         // For some weird reason we need to do this 2 times - otherwise we get a
                         // ClassCastException when extracting the value.
-                        encoded = ((DERTaggedObject) encoded).getObject();
-                        encoded = ((DERTaggedObject) encoded).getObject();
+                        encoded = ((ASN1TaggedObject) encoded).getObject();
+                        encoded = ((ASN1TaggedObject) encoded).getObject();
                         value = ((DERUTF8String) encoded).getString();
-                    } catch (UnsupportedEncodingException e) {
-                        log.error("Error decoding subjectAltName" + e.getLocalizedMessage(), e);
-                        continue;
-                    } catch (Exception e) {
+                    } catch (IOException e) {
                         log.error("Error decoding subjectAltName" + e.getLocalizedMessage(), e);
                         continue;
                     } finally {
@@ -329,7 +330,7 @@ public class CertificateHandler {
                             try {
                                 decoder.close();
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                log.error("Stream could not be closed", e);
                             }
                         }
                     }
@@ -353,12 +354,21 @@ public class CertificateHandler {
                         case MC_OID_PORT_OF_REGISTER:
                             identity.setPortOfRegister(value);
                             break;
-                        case MC_OID_MRN:
-                            // We only support 1 mrn
+                        case MC_OID_MRN: // primary MRN
                             identity.setMrn(value);
+                            break;
+                        case MC_OID_MRN_SUBSIDIARY:
+                            identity.setMrnSubsidiary(value);
+                            break;
+                        case MC_OID_HOME_MMS_URL:
+                            identity.setHomeMmsUrl(value);
                             break;
                         case MC_OID_SHIP_MRN:
                             identity.setShipMrn(value);
+                            break;
+                        case MC_OID_URL:
+                            identity.setUrl(value);
+                            break;
                         case MC_OID_PERMISSIONS:
                             if (value != null && !value.trim().isEmpty()) {
                                 if (permissions.length() == 0) {

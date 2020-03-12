@@ -33,10 +33,6 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import static net.maritimecloud.pki.TestUtils.getEcdisCert;
-import static net.maritimecloud.pki.TestUtils.getEcdisCertPem;
-import static net.maritimecloud.pki.TestUtils.getMyBoatCert;
-import static net.maritimecloud.pki.TestUtils.getMyBoatCertPem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -48,8 +44,8 @@ public class CertificateHandlerTest {
 
     //@Test
     void verifyCertificateChain1() {
-        X509Certificate cert = getMyBoatCert();
-        PKIConfiguration pkiConf = new PKIConfiguration();
+        X509Certificate cert = TestUtils.getMyBoatCert();
+        PKIConfiguration pkiConf = new PKIConfiguration(TestUtils.getRootCAAlias());
         pkiConf.setTruststorePassword("changeit");
         pkiConf.setTruststorePath("src/test/resources/mc-truststore-password-is-changeit.jks");
         KeystoreHandler kh = new KeystoreHandler(pkiConf);
@@ -73,8 +69,8 @@ public class CertificateHandlerTest {
 
     @Test
     void verifyCertificateChain2() {
-        X509Certificate cert = getEcdisCert();
-        PKIConfiguration pkiConf = new PKIConfiguration();
+        X509Certificate cert = TestUtils.getEcdisCert();
+        PKIConfiguration pkiConf = new PKIConfiguration(TestUtils.getRootCAAlias());
         pkiConf.setTruststorePassword("changeit");
         pkiConf.setTruststorePath("src/test/resources/mc-truststore-password-is-changeit.jks");
         KeystoreHandler kh = new KeystoreHandler(pkiConf);
@@ -104,8 +100,8 @@ public class CertificateHandlerTest {
 
     @Test
     void verifyCertificate() {
-        X509Certificate cert = getMyBoatCert();
-        PKIConfiguration pkiConf = new PKIConfiguration();
+        X509Certificate cert = TestUtils.getMyBoatCert();
+        PKIConfiguration pkiConf = new PKIConfiguration(TestUtils.getRootCAAlias());
         pkiConf.setTruststorePassword("changeit");
         pkiConf.setTruststorePath("src/test/resources/mc-truststore-password-is-changeit.jks");
         KeystoreHandler kh = new KeystoreHandler(pkiConf);
@@ -116,7 +112,7 @@ public class CertificateHandlerTest {
 
     @Test
     void getPemFromEncoded() {
-        X509Certificate cert = getMyBoatCert();
+        X509Certificate cert = TestUtils.getMyBoatCert();
         try {
             String pemCertificate = CertificateHandler.getPemFromEncoded("CERTIFICATE", cert.getEncoded());
             assertEquals(pemCertificate, "-----BEGIN CERTIFICATE-----\n" +
@@ -234,7 +230,7 @@ public class CertificateHandlerTest {
 
     @Test
     void getCertFromPem1() {
-        String certPem = getMyBoatCertPem();
+        String certPem = TestUtils.getMyBoatCertPem();
         X509Certificate cert = CertificateHandler.getCertFromPem(certPem);
         assertNotNull(cert);
         assertEquals(BigInteger.valueOf(193), cert.getSerialNumber());
@@ -242,7 +238,7 @@ public class CertificateHandlerTest {
 
     @Test
     void getCertFromPem2() {
-        String certPem = getEcdisCertPem();
+        String certPem = TestUtils.getEcdisCertPem();
         X509Certificate cert = CertificateHandler.getCertFromPem(certPem);
         assertNotNull(cert);
         assertEquals(BigInteger.valueOf(35), cert.getSerialNumber());
@@ -250,7 +246,7 @@ public class CertificateHandlerTest {
 
     @Test
     void getIdentityFromCert() {
-        X509Certificate cert = getMyBoatCert();
+        X509Certificate cert = TestUtils.getMyBoatCert();
 
         PKIIdentity identity = CertificateHandler.getIdentityFromCert(cert);
         assertNotNull(identity);
