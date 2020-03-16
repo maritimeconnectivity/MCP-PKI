@@ -114,30 +114,31 @@ public class CertificateHandlerTest {
     void getPemFromEncoded() {
         X509Certificate cert = TestUtils.getMyBoatCert();
         try {
+            String newlineChar = System.lineSeparator();
             String pemCertificate = CertificateHandler.getPemFromEncoded("CERTIFICATE", cert.getEncoded());
-            assertEquals(pemCertificate, "-----BEGIN CERTIFICATE-----\n" +
-                    "MIID6DCCA2+gAwIBAgICAMEwCgYIKoZIzj0EAwIwgdMxCzAJBgNVBAYTAkRLMRAw\n" +
-                    "DgYDVQQIDAdEZW5tYXJrMRMwEQYDVQQHDApDb3BlbmhhZ2VuMRYwFAYDVQQKDA1N\n" +
-                    "YXJpdGltZUNsb3VkMSgwJgYDVQQLDB9NYXJpdGltZUNsb3VkIElkZW50aXR5IFJl\n" +
-                    "Z2lzdHJ5MTQwMgYDVQQDDCtNYXJpdGltZUNsb3VkIElkZW50aXR5IFJlZ2lzdHJ5\n" +
-                    "IENlcnRpZmljYXRlMSUwIwYJKoZIhvcNAQkBFhZpbmZvQG1hcml0aW1lY2xvdWQu\n" +
-                    "bmV0MB4XDTE3MDExMzEwNTIyNVoXDTI1MDEwMTAwMDAwMFowfTELMAkGA1UEBhMC\n" +
-                    "REsxHDAaBgNVBAoME3Vybjptcm46bWNsOm9yZzpkbWExDzANBgNVBAsMBnZlc3Nl\n" +
-                    "bDEQMA4GA1UEAwwHTXkgQm9hdDEtMCsGCgmSJomT8ixkAQEMHXVybjptcm46bWNs\n" +
-                    "OnZlc3NlbDpkbWE6bXlib2F0MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEx8Dz55UD\n" +
-                    "4GzAHVOM7DB76/Abig+rQl8mLgEqFNCk8ZzbG8VryMmIWIq2j4dJqsGqwwAqFcJl\n" +
-                    "vchJdx5Hz1brSbffCBwGJ4QqhxJm85NQx4vU6iWiP3o0nDC11enk1lppo4IBaTCC\n" +
-                    "AWUwHwYDVR0jBBgwFoAUWDdhX43k8x4PdkyZx3OiZdl1FjIwHQYDVR0OBBYEFGYx\n" +
-                    "dChhVfJWPcQa6rx+Tj1vXRraMIGCBgNVHREEezB5oCIGFGmDtqOX2Juv+MfLmeyA\n" +
-                    "gKqu14oboAoMCDEyMzQ1Njc4oBoGFGmChru7yJuwqMfLntmAgKqu14oboAIMAKA3\n" +
-                    "BhRpg5i818Ce8PDHy6qdgICqrteKG6AfDB11cm46bXJuOm1jbDp2ZXNzZWw6ZG1h\n" +
-                    "Om15Ym9hdDBIBgNVHR8EQTA/MD2gO6A5hjdodHRwczovL2FwaS5tYXJpdGltZWNs\n" +
-                    "b3VkLm5ldC94NTA5L2FwaS9jZXJ0aWZpY2F0ZXMvY3JsMFQGCCsGAQUFBwEBBEgw\n" +
-                    "RjBEBggrBgEFBQcwAYY4aHR0cHM6Ly9hcGkubWFyaXRpbWVjbG91ZC5uZXQveDUw\n" +
-                    "OS9hcGkvY2VydGlmaWNhdGVzL29jc3AwCgYIKoZIzj0EAwIDZwAwZAIwIyCgTm1W\n" +
-                    "dc8VlwF5RNYVziG5KWJw+YVO5MirhcISDnPNkUAabZzDwNPUoIZImRaCAjB8MIF6\n" +
-                    "laWn9dLCvirTEuYJDSS3x9DJzIiQa/aJRSLSuFDu/g6Dw5TmQGbl5kg5Crs=\n" +
-                    "-----END CERTIFICATE-----\n");
+            assertEquals(pemCertificate, String.format("-----BEGIN CERTIFICATE-----%1$s" +
+                    "MIID6DCCA2+gAwIBAgICAMEwCgYIKoZIzj0EAwIwgdMxCzAJBgNVBAYTAkRLMRAw%1$s" +
+                    "DgYDVQQIDAdEZW5tYXJrMRMwEQYDVQQHDApDb3BlbmhhZ2VuMRYwFAYDVQQKDA1N%1$s" +
+                    "YXJpdGltZUNsb3VkMSgwJgYDVQQLDB9NYXJpdGltZUNsb3VkIElkZW50aXR5IFJl%1$s" +
+                    "Z2lzdHJ5MTQwMgYDVQQDDCtNYXJpdGltZUNsb3VkIElkZW50aXR5IFJlZ2lzdHJ5%1$s" +
+                    "IENlcnRpZmljYXRlMSUwIwYJKoZIhvcNAQkBFhZpbmZvQG1hcml0aW1lY2xvdWQu%1$s" +
+                    "bmV0MB4XDTE3MDExMzEwNTIyNVoXDTI1MDEwMTAwMDAwMFowfTELMAkGA1UEBhMC%1$s" +
+                    "REsxHDAaBgNVBAoME3Vybjptcm46bWNsOm9yZzpkbWExDzANBgNVBAsMBnZlc3Nl%1$s" +
+                    "bDEQMA4GA1UEAwwHTXkgQm9hdDEtMCsGCgmSJomT8ixkAQEMHXVybjptcm46bWNs%1$s" +
+                    "OnZlc3NlbDpkbWE6bXlib2F0MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEx8Dz55UD%1$s" +
+                    "4GzAHVOM7DB76/Abig+rQl8mLgEqFNCk8ZzbG8VryMmIWIq2j4dJqsGqwwAqFcJl%1$s" +
+                    "vchJdx5Hz1brSbffCBwGJ4QqhxJm85NQx4vU6iWiP3o0nDC11enk1lppo4IBaTCC%1$s" +
+                    "AWUwHwYDVR0jBBgwFoAUWDdhX43k8x4PdkyZx3OiZdl1FjIwHQYDVR0OBBYEFGYx%1$s" +
+                    "dChhVfJWPcQa6rx+Tj1vXRraMIGCBgNVHREEezB5oCIGFGmDtqOX2Juv+MfLmeyA%1$s" +
+                    "gKqu14oboAoMCDEyMzQ1Njc4oBoGFGmChru7yJuwqMfLntmAgKqu14oboAIMAKA3%1$s" +
+                    "BhRpg5i818Ce8PDHy6qdgICqrteKG6AfDB11cm46bXJuOm1jbDp2ZXNzZWw6ZG1h%1$s" +
+                    "Om15Ym9hdDBIBgNVHR8EQTA/MD2gO6A5hjdodHRwczovL2FwaS5tYXJpdGltZWNs%1$s" +
+                    "b3VkLm5ldC94NTA5L2FwaS9jZXJ0aWZpY2F0ZXMvY3JsMFQGCCsGAQUFBwEBBEgw%1$s" +
+                    "RjBEBggrBgEFBQcwAYY4aHR0cHM6Ly9hcGkubWFyaXRpbWVjbG91ZC5uZXQveDUw%1$s" +
+                    "OS9hcGkvY2VydGlmaWNhdGVzL29jc3AwCgYIKoZIzj0EAwIDZwAwZAIwIyCgTm1W%1$s" +
+                    "dc8VlwF5RNYVziG5KWJw+YVO5MirhcISDnPNkUAabZzDwNPUoIZImRaCAjB8MIF6%1$s" +
+                    "laWn9dLCvirTEuYJDSS3x9DJzIiQa/aJRSLSuFDu/g6Dw5TmQGbl5kg5Crs=%1$s" +
+                    "-----END CERTIFICATE-----%1$s", newlineChar));
         } catch (CertificateEncodingException e) {
             e.printStackTrace();
             fail("Unexpected Exception");
@@ -256,11 +257,6 @@ public class CertificateHandlerTest {
         assertEquals("12345678", identity.getImoNumber());
         assertEquals("urn:mrn:mcl:vessel:dma:myboat", identity.getMrn());
         assertEquals(null, identity.getPermissions());
-    }
-
-    @Test
-    void getElement() {
-
     }
 
 }
