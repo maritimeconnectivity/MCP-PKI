@@ -16,7 +16,6 @@
 package net.maritimecloud.pki;
 
 
-import lombok.extern.slf4j.Slf4j;
 import net.maritimecloud.pki.exception.PKIRuntimeException;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -73,7 +72,6 @@ import static net.maritimecloud.pki.PKIConstants.CERT_EXPIRE_YEAR;
 import static net.maritimecloud.pki.PKIConstants.ELLIPTIC_CURVE;
 import static net.maritimecloud.pki.PKIConstants.SIGNER_ALGORITHM;
 
-@Slf4j
 public class CertificateBuilder {
 
     private KeystoreHandler keystoreHandler;
