@@ -19,6 +19,10 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import sun.security.pkcs11.SunPKCS11;
+
+import java.security.Provider;
+import java.security.Security;
 
 @Getter
 @Setter
@@ -54,7 +58,19 @@ public class PKIConfiguration {
     @NonNull
     private String rootCAAlias;
 
+    private boolean isUsingPkcs11;
+
+    private String pkcs11ProviderName;
+
     public PKIConfiguration(String rootCAAlias){
         this.rootCAAlias = rootCAAlias;
+    }
+
+    public PKIConfiguration(String rootCAAlias, String pkcs11ConfigPath) {
+        this(rootCAAlias);
+        Provider provider = new SunPKCS11(pkcs11ConfigPath);
+        Security.addProvider(provider);
+        this.isUsingPkcs11 = true;
+        this.pkcs11ProviderName = provider.getName();
     }
 }
