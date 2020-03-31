@@ -21,6 +21,7 @@ import lombok.Setter;
 import lombok.ToString;
 import sun.security.pkcs11.SunPKCS11;
 
+import java.io.Console;
 import java.security.Provider;
 import java.security.Security;
 
@@ -62,15 +63,25 @@ public class PKIConfiguration {
 
     private String pkcs11ProviderName;
 
+    private char[] pkcs11Pin;
+
     public PKIConfiguration(String rootCAAlias){
         this.rootCAAlias = rootCAAlias;
     }
 
-    public PKIConfiguration(String rootCAAlias, String pkcs11ConfigPath) {
+    public PKIConfiguration(String rootCAAlias, String pkcs11ConfigPath, String pkcs11Pin) {
         this(rootCAAlias);
         Provider provider = new SunPKCS11(pkcs11ConfigPath);
         Security.addProvider(provider);
         this.isUsingPkcs11 = true;
         this.pkcs11ProviderName = provider.getName();
+        // If pkcs11Pin is null the user will be prompted to input it in the console
+        if (pkcs11Pin == null) {
+            Console console = System.console();
+            System.out.println("Please input HSM slot pin: ");
+            this.pkcs11Pin = console.readPassword();
+        } else {
+            this.pkcs11Pin = pkcs11Pin.toCharArray();
+        }
     }
 }

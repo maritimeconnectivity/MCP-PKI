@@ -52,6 +52,22 @@ public class KeystoreHandler {
      * @return a PrivateKeyEntry of the signing certificate
      */
     public KeyStore.PrivateKeyEntry getSigningCertEntry(String alias) {
+        if (pkiConfiguration.isUsingPkcs11()) {
+            try {
+                KeyStore keyStore = KeyStore.getInstance("PKCS11");
+                keyStore.load(null, pkiConfiguration.getTruststorePassword().toCharArray());
+                return (KeyStore.PrivateKeyEntry) keyStore.getEntry(alias, null);
+            } catch (KeyStoreException e) {
+                log.error("Could not create PKCS#11 keystore");
+                throw new PKIRuntimeException(e.getMessage(), e);
+            } catch (CertificateException | IOException | NoSuchAlgorithmException e) {
+                log.error("Could not open PKCS#11 keystore");
+                throw new PKIRuntimeException(e.getMessage(), e);
+            } catch (UnrecoverableEntryException e) {
+                log.error("Could not get CA entry from PKCS#11 keystore");
+                throw new PKIRuntimeException(e.getMessage(), e);
+            }
+        }
         try (FileInputStream is = new FileInputStream(pkiConfiguration.getSubCaKeystorePath())) {
             KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
             keyStore.load(is, pkiConfiguration.getSubCaKeystorePassword().toCharArray());

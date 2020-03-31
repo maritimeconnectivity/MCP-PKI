@@ -44,6 +44,8 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.util.BigIntegers;
+import sun.security.pkcs11.SunPKCS11;
+import sun.security.pkcs11.wrapper.PKCS11;
 
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
@@ -55,6 +57,7 @@ import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -242,18 +245,41 @@ public class CertificateBuilder {
     }
 
     /**
+     * Generates a keypair (public and private) based on Elliptic curves on a HSM using PKCS#11
+     * @param pkcs11ProviderName the name of the PKCS#11 provider
+     * @return The generated keypair
+     */
+    public static KeyPair generateKeyPairPKCS11(String pkcs11ProviderName) {
+        ECGenParameterSpec ecGenSpec = new ECGenParameterSpec(ELLIPTIC_CURVE);
+        KeyPairGenerator g;
+        try {
+            g = KeyPairGenerator.getInstance("EC", pkcs11ProviderName);
+            g.initialize(ecGenSpec, SecureRandom.getInstance("PKCS11", pkcs11ProviderName));
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
+            throw new PKIRuntimeException(e.getMessage(), e);
+        }
+        return g.generateKeyPair();
+    }
+
+    /**
      * Generate a unique serial number to uniquely identify certificates.
      *
      * @return a unique serialnumber
      */
-    public BigInteger generateSerialNumber() {
+    public BigInteger generateSerialNumber(String pkcs11ProviderName) {
         // BigInteger => NUMERICAL(50) MySQL
         // Max number supported in X509 serial number 2^159-1 = 730750818665451459101842416358141509827966271487
         BigInteger maxValue = new BigInteger("730750818665451459101842416358141509827966271487");
         // Min number 2^32-1 = 4294967296 - we set a minimum value to avoid collisions with old certificates that has used seq numbers
-        BigInteger minValue = new BigInteger("4294967296");
+        BigInteger minValue = BigInteger.ZERO;
+        if (pkcs11ProviderName != null) {
+            try {
+                BigIntegers.createRandomInRange(minValue, maxValue, SecureRandom.getInstance("PKCS11", pkcs11ProviderName));
+            } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+                throw new PKIRuntimeException(e.getMessage(), e);
+            }
+        }
         return BigIntegers.createRandomInRange(minValue, maxValue, random);
-        //return new BigInteger(159, random).abs();
     }
 
     /**

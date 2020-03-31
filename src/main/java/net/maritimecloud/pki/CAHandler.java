@@ -22,6 +22,7 @@ import net.maritimecloud.pki.exception.PKIRuntimeException;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.operator.OperatorCreationException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -131,7 +132,7 @@ public class CAHandler {
             throw new PKIRuntimeException("UID must be defined for sub CA! It will be used as the sub CA alias.");
         }
         try {
-            subCaCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(), rootCertEntry.getPrivateKey(), rootCertEntry.getCertificate().getPublicKey(),
+            subCaCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(null), rootCertEntry.getPrivateKey(), rootCertEntry.getCertificate().getPublicKey(),
                     subCaKeyPair.getPublic(), rootCertX500Name, subCaCertX500Name, null, "INTERMEDIATE", null, crlUrl);
         } catch (Exception e) {
             throw new PKIRuntimeException("Could not create sub CA certificate!", e);
@@ -182,7 +183,7 @@ public class CAHandler {
             rootfos = new FileOutputStream(pkiConfiguration.getRootCaKeystorePath());
             X509Certificate cacert;
             try {
-                cacert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(), cakp.getPrivate(), cakp.getPublic(), cakp.getPublic(),
+                cacert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(null), cakp.getPrivate(), cakp.getPublic(), cakp.getPublic(),
                         new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl);
             } catch (Exception e) {
                 throw new PKIRuntimeException(e.getMessage(), e);
@@ -206,6 +207,29 @@ public class CAHandler {
         } finally {
             safeClose(rootfos);
             safeClose(tsfos);
+        }
+    }
+
+    public void initRootCAPKCS11(String rootCertX500Name, String crlUrl, String rootCAAlias) {
+        String pkcs11ProviderName = pkiConfiguration.getPkcs11ProviderName();
+        KeyPair caKeyPair = CertificateBuilder.generateKeyPairPKCS11(pkcs11ProviderName);
+        KeyStore rootKeyStore;
+        KeyStore trustStore;
+        try (FileOutputStream tsFos = new FileOutputStream(pkiConfiguration.getTruststorePath())) {
+            rootKeyStore = KeyStore.getInstance("PKCS11");
+            rootKeyStore.load(null, pkiConfiguration.getPkcs11Pin());
+            X509Certificate caCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(pkcs11ProviderName), caKeyPair.getPrivate(), caKeyPair.getPublic(), caKeyPair.getPublic(),
+                    new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl);
+            Certificate[] certChain = new Certificate[1];
+            certChain[0] = caCert;
+            rootKeyStore.setKeyEntry(rootCAAlias, caKeyPair.getPrivate(), null, certChain);
+
+            // Store away the truststore
+            trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(null, pkiConfiguration.getTruststorePassword().toCharArray());
+            trustStore.store(tsFos, pkiConfiguration.getTruststorePassword().toCharArray());
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | OperatorCreationException e) {
+            throw new PKIRuntimeException(e.getMessage(), e);
         }
     }
 

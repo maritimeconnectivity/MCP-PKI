@@ -167,6 +167,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        PKIConfiguration pkiConfiguration = new PKIConfiguration(ROOT_CA_ALIAS, "pkcs11.cfg", "2468");
         Main main = new Main();
 
         CommandLineParser parser = new DefaultParser();

@@ -70,7 +70,7 @@ class CertificateBuilderTest {
 
     @Test
     void generateSerialNumber() {
-        BigInteger sn = cb.generateSerialNumber();
+        BigInteger sn = cb.generateSerialNumber(null);
         assertNotNull(sn);
     }
 
