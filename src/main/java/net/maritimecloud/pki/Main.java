@@ -34,6 +34,8 @@ public class Main {
     private static final String PRINT_OUT_CERTIFICATE = "print-certificate";
     private static final String ROOT_CA_ALIAS = "root-ca-alias";
     private static final String NO_ROOT_CA_ALIAS_REQUIRED = "";
+    private static final String PKCS11 = "pkcs11";
+    private static final String PKCS11_CONFIG = "pkcs11-conf";
 
     private Options setupOptions() {
         // Create Options object
@@ -68,6 +70,10 @@ public class Main {
 
         // Print out a certificate
         options.addOption("pc", PRINT_OUT_CERTIFICATE, true, "Print out a certificate in human readable text");
+
+        // Use HSM using PKCS#11
+        options.addOption("p11", PKCS11, false, "Use PKCS#11 to interact with an HSM");
+        options.addOption("p11c", PKCS11_CONFIG, true, "Path to a PKCS#11 config file");
         return options;
     }
 
@@ -87,6 +93,14 @@ public class Main {
         CertificateBuilder certificateBuilder = new CertificateBuilder(keystoreHandler);
         CAHandler caHandler = new CAHandler(certificateBuilder, pkiConfiguration);
         caHandler.initRootCA(cmd.getOptionValue(X500_NAME), cmd.getOptionValue(CRL_ENDPOINT), cmd.getOptionValue(ROOT_CA_ALIAS));
+    }
+
+    private void initCAPKCS11(CommandLine cmd) {
+        if (!cmd.hasOption(TRUSTSTORE) || !cmd.hasOption(TRUSTSTORE_PASSWORD) || !cmd.hasOption(CRL_ENDPOINT) || !cmd.hasOption(X500_NAME) || !cmd.hasOption(ROOT_CA_ALIAS) || !cmd.hasOption(PKCS11_CONFIG)) {
+            System.err.println("The init with PKCS#11 requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD, X500_NAME, CRL_ENDPOINT, ROOT_CA_ALIAS, PKCS11_CONFIG));
+            return;
+        }
+        PKIConfiguration pkiConfiguration = new PKIConfiguration()
     }
 
     private void genRootCRL(CommandLine cmd) {
@@ -129,7 +143,7 @@ public class Main {
 
     public void verifyCertificate(CommandLine cmd) {
         if (!cmd.hasOption(TRUSTSTORE) || !cmd.hasOption(TRUSTSTORE_PASSWORD)) {
-            System.err.println("The init requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD));
+            System.err.println("Verifying a certificate requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD));
             return;
         }
         PKIConfiguration pkiConfiguration = new PKIConfiguration(NO_ROOT_CA_ALIAS_REQUIRED);
@@ -167,7 +181,6 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        PKIConfiguration pkiConfiguration = new PKIConfiguration(ROOT_CA_ALIAS, "pkcs11.cfg", "2468");
         Main main = new Main();
 
         CommandLineParser parser = new DefaultParser();
@@ -180,7 +193,11 @@ public class Main {
             return;
         }
         if (cmd.hasOption(INIT)) {
-            main.initCA(cmd);
+            if (cmd.hasOption(PKCS11)) {
+                main.initCAPKCS11(cmd);
+            } else {
+                main.initCA(cmd);
+            }
 
         // Generate root CRL
         } else if (cmd.hasOption(GENERATE_ROOT_CRL)) {
