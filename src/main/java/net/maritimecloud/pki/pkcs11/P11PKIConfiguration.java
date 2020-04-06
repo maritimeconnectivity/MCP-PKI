@@ -43,10 +43,10 @@ public class P11PKIConfiguration extends PKIConfiguration {
 
     public P11PKIConfiguration(String rootCAAlias, String pkcs11ConfigPath, String pkcs11Pin) {
         super(rootCAAlias);
-        AuthProvider provider = new SunPKCS11(pkcs11ConfigPath);
-        Security.addProvider(provider);
-        this.provider = provider;
-        this.pkcs11ProviderName = provider.getName();
+        AuthProvider authProvider = new SunPKCS11(pkcs11ConfigPath);
+        Security.addProvider(authProvider);
+        this.provider = authProvider;
+        this.pkcs11ProviderName = authProvider.getName();
         // If pkcs11Pin is null the user will be prompted to input it in the console
         if (pkcs11Pin == null) {
             Console console = System.console();

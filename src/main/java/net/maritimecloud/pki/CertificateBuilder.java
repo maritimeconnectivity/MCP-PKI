@@ -17,7 +17,6 @@ package net.maritimecloud.pki;
 
 
 import net.maritimecloud.pki.exception.PKIRuntimeException;
-import net.maritimecloud.pki.pkcs11.PasswordHandler;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
@@ -45,10 +44,7 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.util.BigIntegers;
-import sun.security.pkcs11.SunPKCS11;
-import sun.security.pkcs11.wrapper.PKCS11;
 
-import javax.security.auth.login.LoginException;
 import java.math.BigInteger;
 import java.security.AuthProvider;
 import java.security.InvalidAlgorithmParameterException;
@@ -58,10 +54,8 @@ import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
-import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -266,8 +260,7 @@ public class CertificateBuilder {
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
         }
-        KeyPair keyPair = g.generateKeyPair();
-        return keyPair;
+        return g.generateKeyPair();
     }
 
     /**

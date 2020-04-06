@@ -26,8 +26,13 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.CRLReason;
 import java.security.cert.X509Certificate;
+import java.util.Optional;
 
 public class OCSPVerifier {
+
+    private OCSPVerifier() {
+        // empty on purpose
+    }
 
     /**
      * Verifies a certificate against a its issuer using OCSP. In most cases you should probably use
@@ -66,8 +71,9 @@ public class OCSPVerifier {
             info.setStatus(ocspClient.getCertificateStatus());
         } else {
             info.setStatus(ocspClient.getCertificateStatus());
-            if (ocspClient.getRevokedStatus().isPresent()) {
-                RevokedStatus rs = ocspClient.getRevokedStatus().get();
+            Optional<RevokedStatus> revokedStatus = ocspClient.getRevokedStatus();
+            if (revokedStatus.isPresent()) {
+                RevokedStatus rs = revokedStatus.get();
                 info.setRevokeReason(CRLReason.values()[rs.getRevocationReason()]);
                 info.setRevokedAt(rs.getRevocationTime());
             }

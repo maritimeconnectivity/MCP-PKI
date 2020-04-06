@@ -191,10 +191,8 @@ public class Revocation {
             //log.warn("unable to generate RootCACRL", e);
             return;
         }
-        try {
-            BufferedWriter writer = new BufferedWriter( new FileWriter(outputCaCrlPath));
+        try (BufferedWriter writer = new BufferedWriter( new FileWriter(outputCaCrlPath))) {
             writer.write(pemCrl);
-            writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
