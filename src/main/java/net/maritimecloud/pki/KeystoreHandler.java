@@ -18,6 +18,7 @@ package net.maritimecloud.pki;
 
 import lombok.extern.slf4j.Slf4j;
 import net.maritimecloud.pki.exception.PKIRuntimeException;
+import net.maritimecloud.pki.pkcs11.P11PKIConfiguration;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.FileInputStream;
@@ -52,15 +53,16 @@ public class KeystoreHandler {
      * @return a PrivateKeyEntry of the signing certificate
      */
     public KeyStore.PrivateKeyEntry getSigningCertEntry(String alias) {
-        if (pkiConfiguration.isUsingPkcs11()) {
+        if (pkiConfiguration instanceof P11PKIConfiguration) {
+            P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
             try {
-                KeyStore keyStore = KeyStore.getInstance("PKCS11");
-                keyStore.load(null, pkiConfiguration.getTruststorePassword().toCharArray());
+                KeyStore keyStore = KeyStore.getInstance("PKCS11", p11PKIConfiguration.getProvider());
+                keyStore.load(null, p11PKIConfiguration.getPkcs11Pin());
                 return (KeyStore.PrivateKeyEntry) keyStore.getEntry(alias, null);
             } catch (KeyStoreException e) {
                 log.error("Could not create PKCS#11 keystore");
                 throw new PKIRuntimeException(e.getMessage(), e);
-            } catch (CertificateException | IOException | NoSuchAlgorithmException e) {
+            } catch (NoSuchAlgorithmException | CertificateException | IOException e) {
                 log.error("Could not open PKCS#11 keystore");
                 throw new PKIRuntimeException(e.getMessage(), e);
             } catch (UnrecoverableEntryException e) {

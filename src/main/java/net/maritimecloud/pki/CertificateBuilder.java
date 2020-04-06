@@ -107,7 +107,7 @@ public class CertificateBuilder {
      * @throws Exception Throws exception on certificate generation errors.
      */
     public X509Certificate buildAndSignCert(BigInteger serialNumber, PrivateKey signerPrivateKey, PublicKey signerPublicKey, PublicKey subjectPublicKey, X500Name issuer, X500Name subject,
-                                            Map<String, String> customAttrs, String type, String ocspUrl, String crlUrl) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException {
+                                            Map<String, String> customAttrs, String type, String ocspUrl, String crlUrl, AuthProvider p11AuthProvider) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException {
         // Dates are converted to GMT/UTC inside the cert builder
         Calendar cal = Calendar.getInstance();
         Date now = cal.getTime();
@@ -174,7 +174,11 @@ public class CertificateBuilder {
         }
         // Create the key signer
         JcaContentSignerBuilder builder = new JcaContentSignerBuilder(SIGNER_ALGORITHM);
-        builder.setProvider(BC_PROVIDER_NAME);
+        if (p11AuthProvider != null) {
+            builder.setProvider(p11AuthProvider);
+        } else {
+            builder.setProvider(BC_PROVIDER_NAME);
+        }
         ContentSigner signer = builder.build(signerPrivateKey);
         return new JcaX509CertificateConverter().setProvider(BC_PROVIDER_NAME).getCertificate(certV3Bldr.build(signer));
     }
@@ -193,7 +197,8 @@ public class CertificateBuilder {
      */
     public X509Certificate generateCertForEntity(BigInteger serialNumber, String country, String orgName, String type,
                                                  String callName, String email, String uid, PublicKey publickey,
-                                                 Map<String, String> customAttr, String signingAlias, String baseCrlOcspURI) throws CertificateException, OperatorCreationException, CertIOException, NoSuchAlgorithmException {
+                                                 Map<String, String> customAttr, String signingAlias, String baseCrlOcspURI,
+                                                 AuthProvider p11AuthProvider) throws CertificateException, OperatorCreationException, CertIOException, NoSuchAlgorithmException {
         KeyStore.PrivateKeyEntry signingCertEntry = keystoreHandler.getSigningCertEntry(signingAlias);
         Certificate signingCert = signingCertEntry.getCertificate();
         X509Certificate signingX509Cert = (X509Certificate) signingCert;
@@ -224,7 +229,7 @@ public class CertificateBuilder {
         String crlUrl = baseCrlOcspURI + "crl/" + alias;
         return buildAndSignCert(serialNumber, signingCertEntry.getPrivateKey(), signingX509Cert.getPublicKey(),
                     publickey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(orgSubjectDn), customAttr, "ENTITY",
-                    ocspUrl, crlUrl);
+                    ocspUrl, crlUrl, p11AuthProvider);
     }
 
     /**
@@ -250,23 +255,18 @@ public class CertificateBuilder {
 
     /**
      * Generates a keypair (public and private) based on Elliptic curves on a HSM using PKCS#11
-     * @param pkcs11ProviderName the name of the PKCS#11 provider
      * @return The generated keypair
      */
-    public static KeyPair generateKeyPairPKCS11(String pkcs11ProviderName, char[] pin) throws LoginException {
+    public static KeyPair generateKeyPairPKCS11(AuthProvider provider) {
         ECGenParameterSpec ecGenSpec = new ECGenParameterSpec(ELLIPTIC_CURVE);
         KeyPairGenerator g;
-        AuthProvider provider;
         try {
-            provider = (AuthProvider) Security.getProvider(pkcs11ProviderName);
-            provider.login(null, new PasswordHandler(pin));
             g = KeyPairGenerator.getInstance("EC", provider);
             g.initialize(ecGenSpec, SecureRandom.getInstance("PKCS11", provider));
-        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | LoginException e) {
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
         }
         KeyPair keyPair = g.generateKeyPair();
-        provider.logout();
         return keyPair;
     }
 
@@ -275,16 +275,16 @@ public class CertificateBuilder {
      *
      * @return a unique serialnumber
      */
-    public BigInteger generateSerialNumber(String pkcs11ProviderName) {
+    public BigInteger generateSerialNumber(AuthProvider p11AuthProvider) {
         // BigInteger => NUMERICAL(50) MySQL
         // Max number supported in X509 serial number 2^159-1 = 730750818665451459101842416358141509827966271487
         BigInteger maxValue = new BigInteger("730750818665451459101842416358141509827966271487");
         // Min number 2^32-1 = 4294967296 - we set a minimum value to avoid collisions with old certificates that has used seq numbers
         BigInteger minValue = BigInteger.ZERO;
-        if (pkcs11ProviderName != null) {
+        if (p11AuthProvider != null) {
             try {
-                BigIntegers.createRandomInRange(minValue, maxValue, SecureRandom.getInstance("PKCS11", pkcs11ProviderName));
-            } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+                BigIntegers.createRandomInRange(minValue, maxValue, SecureRandom.getInstance("PKCS11", p11AuthProvider));
+            } catch (NoSuchAlgorithmException e) {
                 throw new PKIRuntimeException(e.getMessage(), e);
             }
         }

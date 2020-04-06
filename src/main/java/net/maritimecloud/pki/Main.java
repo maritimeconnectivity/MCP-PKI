@@ -1,5 +1,6 @@
 package net.maritimecloud.pki;
 
+import net.maritimecloud.pki.pkcs11.P11PKIConfiguration;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -102,7 +103,7 @@ public class Main {
             System.err.println("The init with PKCS#11 requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD, X500_NAME, CRL_ENDPOINT, ROOT_CA_ALIAS, PKCS11_CONFIG));
             return;
         }
-        PKIConfiguration pkiConfiguration = new PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS), cmd.getOptionValue(PKCS11_CONFIG), cmd.getOptionValue(PKCS11_PIN));
+        PKIConfiguration pkiConfiguration = new P11PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS), cmd.getOptionValue(PKCS11_CONFIG), cmd.getOptionValue(PKCS11_PIN));
         pkiConfiguration.setTruststorePath(cmd.getOptionValue(TRUSTSTORE));
         pkiConfiguration.setTruststorePassword(cmd.getOptionValue(TRUSTSTORE_PASSWORD));
 

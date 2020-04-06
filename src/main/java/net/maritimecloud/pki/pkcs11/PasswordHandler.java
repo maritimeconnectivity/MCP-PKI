@@ -20,6 +20,9 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.PasswordCallback;
 
+/**
+ * Class used to be able to login to an HSM
+ */
 public class PasswordHandler implements CallbackHandler {
 
     private char[] password;

@@ -22,7 +22,7 @@ public class PKIConstants {
     //public static final String ROOT_CERT_ALIAS = "urn:mrn:mcl:ca:maritimecloud"; // removed for distributed MIR
     public static final String BC_PROVIDER_NAME = "BC";
     public static final String KEYSTORE_TYPE = "jks";
-    public static final String SIGNER_ALGORITHM = "SHA256withECDSA";
+    public static final String SIGNER_ALGORITHM = "SHA384withECDSA";
     public static final String ELLIPTIC_CURVE = "secp384r1";
 
     // OIDs used for the extra info stored in the SubjectAlternativeName extension
