@@ -24,6 +24,7 @@ import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.operator.OperatorCreationException;
 
+import javax.security.auth.login.LoginException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -169,6 +170,7 @@ public class CAHandler {
      *
      * @param rootCertX500Name The DN of the new root CA Certificate
      * @param crlUrl CRL endpoint
+     * @param rootCAAlias The alias of the root CA
      */
     public void initRootCA(String rootCertX500Name, String crlUrl, String rootCAAlias) {
         KeyPair cakp = CertificateBuilder.generateKeyPair();
@@ -210,9 +212,21 @@ public class CAHandler {
         }
     }
 
+    /**
+     * Generates a self-signed certificate and saves it and the private key in a HSM using PKCS#11 and the certificate only in a truststore.
+     *
+     * @param rootCertX500Name The DN of the new root CA Certificate
+     * @param crlUrl CRL endpoint
+     * @param rootCAAlias The alias of the root CA
+     */
     public void initRootCAPKCS11(String rootCertX500Name, String crlUrl, String rootCAAlias) {
         String pkcs11ProviderName = pkiConfiguration.getPkcs11ProviderName();
-        KeyPair caKeyPair = CertificateBuilder.generateKeyPairPKCS11(pkcs11ProviderName);
+        KeyPair caKeyPair = null;
+        try {
+            caKeyPair = CertificateBuilder.generateKeyPairPKCS11(pkcs11ProviderName, pkiConfiguration.getPkcs11Pin());
+        } catch (LoginException e) {
+            e.printStackTrace();
+        }
         KeyStore rootKeyStore;
         KeyStore trustStore;
         try (FileOutputStream tsFos = new FileOutputStream(pkiConfiguration.getTruststorePath())) {

@@ -36,6 +36,7 @@ public class Main {
     private static final String NO_ROOT_CA_ALIAS_REQUIRED = "";
     private static final String PKCS11 = "pkcs11";
     private static final String PKCS11_CONFIG = "pkcs11-conf";
+    private static final String PKCS11_PIN = "pkcs11-pin";
 
     private Options setupOptions() {
         // Create Options object
@@ -72,8 +73,9 @@ public class Main {
         options.addOption("pc", PRINT_OUT_CERTIFICATE, true, "Print out a certificate in human readable text");
 
         // Use HSM using PKCS#11
-        options.addOption("p11", PKCS11, false, "Use PKCS#11 to interact with an HSM");
-        options.addOption("p11c", PKCS11_CONFIG, true, "Path to a PKCS#11 config file");
+        options.addOption("p11", PKCS11, false, "Use PKCS#11 to interact with an HSM.");
+        options.addOption("p11c", PKCS11_CONFIG, true, "Path to a PKCS#11 config file.");
+        options.addOption("pin", PKCS11_PIN, true, "PIN for HSM slot. If not given when using a HSM, it will be requested on runtime.");
         return options;
     }
 
@@ -82,7 +84,7 @@ public class Main {
             System.err.println("The init requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD, ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD, X500_NAME, CRL_ENDPOINT, ROOT_CA_ALIAS));
             return;
         }
-        PKIConfiguration pkiConfiguration = new PKIConfiguration(ROOT_CA_ALIAS);
+        PKIConfiguration pkiConfiguration = new PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS));
         pkiConfiguration.setTruststorePath(cmd.getOptionValue(TRUSTSTORE));
         pkiConfiguration.setTruststorePassword(cmd.getOptionValue(TRUSTSTORE_PASSWORD));
         pkiConfiguration.setRootCaKeystorePath(cmd.getOptionValue(ROOT_KEYSTORE));
@@ -100,7 +102,14 @@ public class Main {
             System.err.println("The init with PKCS#11 requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD, X500_NAME, CRL_ENDPOINT, ROOT_CA_ALIAS, PKCS11_CONFIG));
             return;
         }
-        PKIConfiguration pkiConfiguration = new PKIConfiguration()
+        PKIConfiguration pkiConfiguration = new PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS), cmd.getOptionValue(PKCS11_CONFIG), cmd.getOptionValue(PKCS11_PIN));
+        pkiConfiguration.setTruststorePath(cmd.getOptionValue(TRUSTSTORE));
+        pkiConfiguration.setTruststorePassword(cmd.getOptionValue(TRUSTSTORE_PASSWORD));
+
+        KeystoreHandler keystoreHandler = new KeystoreHandler(pkiConfiguration);
+        CertificateBuilder certificateBuilder = new CertificateBuilder(keystoreHandler);
+        CAHandler caHandler = new CAHandler(certificateBuilder, pkiConfiguration);
+        caHandler.initRootCAPKCS11(cmd.getOptionValue(X500_NAME), cmd.getOptionValue(CRL_ENDPOINT), cmd.getOptionValue(ROOT_CA_ALIAS));
     }
 
     private void genRootCRL(CommandLine cmd) {
@@ -108,7 +117,7 @@ public class Main {
             System.err.println("Generating the root CRL requires the parameters: " + String.join(", ", ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD, ROOT_CRL_PATH, REVOKED_SUBCA_FILE, ROOT_CA_ALIAS));
             return;
         }
-        PKIConfiguration pkiConfiguration = new PKIConfiguration(ROOT_CA_ALIAS);
+        PKIConfiguration pkiConfiguration = new PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS));
         pkiConfiguration.setRootCaKeystorePath(cmd.getOptionValue(ROOT_KEYSTORE));
         pkiConfiguration.setRootCaKeystorePassword(cmd.getOptionValue(ROOT_KEYSTORE_PASSWORD));
         pkiConfiguration.setRootCaKeyPassword(cmd.getOptionValue(ROOT_KEY_PASSWORD));
@@ -124,7 +133,7 @@ public class Main {
             System.err.println("Creating a sub CA requires the parameters: " + String.join(", ", ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD, TRUSTSTORE, TRUSTSTORE_PASSWORD, SUBCA_KEYSTORE, SUBCA_KEYSTORE_PASSWORD, SUBCA_KEY_PASSWORD, X500_NAME, ROOT_CA_ALIAS));
             return;
         }
-        PKIConfiguration pkiConfiguration = new PKIConfiguration(ROOT_CA_ALIAS);
+        PKIConfiguration pkiConfiguration = new PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS));
         pkiConfiguration.setTruststorePath(cmd.getOptionValue(TRUSTSTORE));
         pkiConfiguration.setTruststorePassword(cmd.getOptionValue(TRUSTSTORE_PASSWORD));
         pkiConfiguration.setRootCaKeystorePath(cmd.getOptionValue(ROOT_KEYSTORE));

@@ -17,6 +17,7 @@ package net.maritimecloud.pki;
 
 
 import net.maritimecloud.pki.exception.PKIRuntimeException;
+import net.maritimecloud.pki.pkcs11.PasswordHandler;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
@@ -47,7 +48,9 @@ import org.bouncycastle.util.BigIntegers;
 import sun.security.pkcs11.SunPKCS11;
 import sun.security.pkcs11.wrapper.PKCS11;
 
+import javax.security.auth.login.LoginException;
 import java.math.BigInteger;
+import java.security.AuthProvider;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -55,6 +58,7 @@ import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -249,16 +253,21 @@ public class CertificateBuilder {
      * @param pkcs11ProviderName the name of the PKCS#11 provider
      * @return The generated keypair
      */
-    public static KeyPair generateKeyPairPKCS11(String pkcs11ProviderName) {
+    public static KeyPair generateKeyPairPKCS11(String pkcs11ProviderName, char[] pin) throws LoginException {
         ECGenParameterSpec ecGenSpec = new ECGenParameterSpec(ELLIPTIC_CURVE);
         KeyPairGenerator g;
+        AuthProvider provider;
         try {
-            g = KeyPairGenerator.getInstance("EC", pkcs11ProviderName);
-            g.initialize(ecGenSpec, SecureRandom.getInstance("PKCS11", pkcs11ProviderName));
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
+            provider = (AuthProvider) Security.getProvider(pkcs11ProviderName);
+            provider.login(null, new PasswordHandler(pin));
+            g = KeyPairGenerator.getInstance("EC", provider);
+            g.initialize(ecGenSpec, SecureRandom.getInstance("PKCS11", provider));
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | LoginException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
         }
-        return g.generateKeyPair();
+        KeyPair keyPair = g.generateKeyPair();
+        provider.logout();
+        return keyPair;
     }
 
     /**

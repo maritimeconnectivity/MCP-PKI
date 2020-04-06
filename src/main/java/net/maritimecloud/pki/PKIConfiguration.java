@@ -76,9 +76,7 @@ public class PKIConfiguration {
         this.isUsingPkcs11 = true;
         this.pkcs11ProviderName = provider.getName();
         // If pkcs11Pin is null the user will be prompted to input it in the console
-        System.out.println("Bla");
         if (pkcs11Pin == null) {
-            System.out.println("Got here!");
             Console console = System.console();
             System.out.println("Please input HSM slot pin: ");
             this.pkcs11Pin = console.readPassword();
