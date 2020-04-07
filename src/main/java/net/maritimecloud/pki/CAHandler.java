@@ -220,6 +220,7 @@ public class CAHandler {
             trustStore.store(tsFos, pkiConfiguration.getTruststorePassword().toCharArray());
             p11PKIConfiguration.providerLogout();
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | OperatorCreationException e) {
+            p11PKIConfiguration.providerLogout();
             throw new PKIRuntimeException(e.getMessage(), e);
         }
     }
@@ -275,19 +276,19 @@ public class CAHandler {
      *
      * @param outputCaCrlPath Output path where to place the CRL.
      * @param revocationFile Path to the CSV file which contains revocation info.
+     * @param rootCAAlias The alias of the root CA.
      */
     public void generateRootCRL(String outputCaCrlPath, String revocationFile, String rootCAAlias) {
         List<RevocationInfo> revocationInfos = loadRevocationFile(revocationFile);
 
-        try {
+        try (InputStream readStream = new FileInputStream(pkiConfiguration.getRootCaKeystorePath())) {
             KeyStore rootks = KeyStore.getInstance(KEYSTORE_TYPE);
-            InputStream readStream = new FileInputStream(pkiConfiguration.getRootCaKeystorePath());
             rootks.load(readStream, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
             KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(pkiConfiguration.getRootCaKeystorePassword().toCharArray());
             KeyStore.PrivateKeyEntry rootCertEntry;
             rootCertEntry = (KeyStore.PrivateKeyEntry) rootks.getEntry(rootCAAlias, protParam);
             String rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject().toString();
-            Revocation.generateRootCACRL(rootCertX500Name, revocationInfos, rootCertEntry, outputCaCrlPath);
+            Revocation.generateRootCACRL(rootCertX500Name, revocationInfos, rootCertEntry, outputCaCrlPath, null);
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
             throw new PKIRuntimeException("Unable to generate RootCACRL", e);
         } catch (CertificateException e) {
@@ -296,6 +297,32 @@ public class CAHandler {
             throw new PKIRuntimeException("Could not find root keystore!", e);
         } catch (IOException e) {
             throw new PKIRuntimeException("Could not load root keystore!", e);
+        }
+    }
+
+    /**
+     * Generates a root CA CRL using a private key stored in an HSM.
+     *
+     * @param outputCaCrlPath Output path where to place the CRL.
+     * @param revocationFile Path to the CSV file which contains revocation info.
+     * @param rootCAAlias The alias of the root CA.
+     */
+    public void generateRootCRLP11(String outputCaCrlPath, String revocationFile, String rootCAAlias) {
+        List<RevocationInfo> revocationInfos = loadRevocationFile(revocationFile);
+        P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
+
+        p11PKIConfiguration.providerLogin();
+        KeyStore rootKeyStore;
+        try {
+            rootKeyStore = KeyStore.getInstance("PKCS11", p11PKIConfiguration.getProvider());
+            rootKeyStore.load(null, p11PKIConfiguration.getPkcs11Pin());
+            KeyStore.PrivateKeyEntry rootCertEntry = (KeyStore.PrivateKeyEntry) rootKeyStore.getEntry(rootCAAlias, null);
+            String rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject().toString();
+            Revocation.generateRootCACRL(rootCertX500Name, revocationInfos, rootCertEntry, outputCaCrlPath, p11PKIConfiguration.getProvider());
+            p11PKIConfiguration.providerLogout();
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | UnrecoverableEntryException e) {
+            p11PKIConfiguration.providerLogout();
+            throw new PKIRuntimeException("Could not generate CRL", e);
         }
     }
 }

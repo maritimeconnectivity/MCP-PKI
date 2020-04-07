@@ -226,7 +226,7 @@ public class CertificateHandler {
         // Restore some needed newlines
         certificateContent = certificateContent.replace("-----BEGIN" + System.lineSeparator() + "CERTIFICATE-----", "-----BEGIN CERTIFICATE-----");
         certificateContent = certificateContent.replace("-----END" + System.lineSeparator() + "CERTIFICATE-----", "-----END CERTIFICATE-----");
-        if (certificateContent == null || certificateContent.length() < 10) {
+        if (certificateContent.trim().isEmpty() || certificateContent.length() < 10) {
             log.debug("No certificate content found");
             return null;
         }
@@ -303,7 +303,7 @@ public class CertificateHandler {
         if (san != null) {
             // Use the type OtherName to search for the certified server name
             StringBuilder permissions = new StringBuilder();
-            for (List item : san) {
+            for (List<?> item : san) {
                 Integer type = (Integer) item.get(0);
                 if (type == 0) {
                     // Type OtherName found so return the associated value

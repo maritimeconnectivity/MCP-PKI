@@ -1,5 +1,6 @@
 package net.maritimecloud.pki;
 
+import lombok.extern.slf4j.Slf4j;
 import net.maritimecloud.pki.pkcs11.P11PKIConfiguration;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -9,10 +10,12 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.cert.X509Certificate;
 
+@Slf4j
 public class Main {
 
     private static final String HELP = "help";
@@ -82,7 +85,7 @@ public class Main {
 
     private void initCA(CommandLine cmd) {
         if (!cmd.hasOption(TRUSTSTORE) || !cmd.hasOption(TRUSTSTORE_PASSWORD) || !cmd.hasOption(ROOT_KEYSTORE) || !cmd.hasOption(ROOT_KEYSTORE_PASSWORD) || !cmd.hasOption(ROOT_KEY_PASSWORD) || !cmd.hasOption(CRL_ENDPOINT) || !cmd.hasOption(X500_NAME) || !cmd.hasOption(ROOT_CA_ALIAS)) {
-            System.err.println("The init requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD, ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD, X500_NAME, CRL_ENDPOINT, ROOT_CA_ALIAS));
+            log.error("The init requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD, ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD, X500_NAME, CRL_ENDPOINT, ROOT_CA_ALIAS));
             return;
         }
         PKIConfiguration pkiConfiguration = new PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS));
@@ -100,7 +103,7 @@ public class Main {
 
     private void initCAPKCS11(CommandLine cmd) {
         if (!cmd.hasOption(TRUSTSTORE) || !cmd.hasOption(TRUSTSTORE_PASSWORD) || !cmd.hasOption(CRL_ENDPOINT) || !cmd.hasOption(X500_NAME) || !cmd.hasOption(ROOT_CA_ALIAS) || !cmd.hasOption(PKCS11_CONFIG)) {
-            System.err.println("The init with PKCS#11 requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD, X500_NAME, CRL_ENDPOINT, ROOT_CA_ALIAS, PKCS11_CONFIG));
+            log.error("The init with PKCS#11 requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD, X500_NAME, CRL_ENDPOINT, ROOT_CA_ALIAS, PKCS11_CONFIG));
             return;
         }
         PKIConfiguration pkiConfiguration = new P11PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS), cmd.getOptionValue(PKCS11_CONFIG), cmd.getOptionValue(PKCS11_PIN));
@@ -115,7 +118,7 @@ public class Main {
 
     private void genRootCRL(CommandLine cmd) {
         if (!cmd.hasOption(ROOT_KEYSTORE) || !cmd.hasOption(ROOT_KEYSTORE_PASSWORD) || !cmd.hasOption(ROOT_KEY_PASSWORD) || !cmd.hasOption(ROOT_CRL_PATH) || !cmd.hasOption(REVOKED_SUBCA_FILE) || !cmd.hasOption(ROOT_CA_ALIAS)) {
-            System.err.println("Generating the root CRL requires the parameters: " + String.join(", ", ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD, ROOT_CRL_PATH, REVOKED_SUBCA_FILE, ROOT_CA_ALIAS));
+            log.error("Generating the root CRL requires the parameters: " + String.join(", ", ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD, ROOT_CRL_PATH, REVOKED_SUBCA_FILE, ROOT_CA_ALIAS));
             return;
         }
         PKIConfiguration pkiConfiguration = new PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS));
@@ -129,9 +132,22 @@ public class Main {
         caHandler.generateRootCRL(cmd.getOptionValue(ROOT_CRL_PATH), cmd.getOptionValue(REVOKED_SUBCA_FILE), cmd.getOptionValue(ROOT_CA_ALIAS));
     }
 
+    private void genRootCRLPKCS11(CommandLine cmd) {
+        if (!cmd.hasOption(ROOT_CRL_PATH) || !cmd.hasOption(REVOKED_SUBCA_FILE) || !cmd.hasOption(ROOT_CA_ALIAS) || !cmd.hasOption(PKCS11_CONFIG)) {
+            log.error("Generating the root CA with PKCS#11 requires the parameters: " + String.join(", ", ROOT_CRL_PATH, REVOKED_SUBCA_FILE, ROOT_CA_ALIAS, PKCS11_CONFIG));
+            return;
+        }
+        PKIConfiguration pkiConfiguration = new P11PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS), cmd.getOptionValue(PKCS11_CONFIG), cmd.getOptionValue(PKCS11_PIN));
+
+        KeystoreHandler keystoreHandler = new KeystoreHandler(pkiConfiguration);
+        CertificateBuilder certificateBuilder = new CertificateBuilder(keystoreHandler);
+        CAHandler caHandler = new CAHandler(certificateBuilder, pkiConfiguration);
+        caHandler.generateRootCRLP11(cmd.getOptionValue(ROOT_CRL_PATH), cmd.getOptionValue(REVOKED_SUBCA_FILE), cmd.getOptionValue(ROOT_CA_ALIAS));
+    }
+
     private void createSubCA(CommandLine cmd) {
         if (!cmd.hasOption(ROOT_KEYSTORE) || !cmd.hasOption(ROOT_KEYSTORE_PASSWORD) || !cmd.hasOption(ROOT_KEY_PASSWORD) || !cmd.hasOption(TRUSTSTORE) || !cmd.hasOption(TRUSTSTORE_PASSWORD) || !cmd.hasOption(SUBCA_KEYSTORE) || !cmd.hasOption(SUBCA_KEYSTORE_PASSWORD) || !cmd.hasOption(SUBCA_KEY_PASSWORD) || !cmd.hasOption(X500_NAME) || !cmd.hasOption(ROOT_CA_ALIAS)) {
-            System.err.println("Creating a sub CA requires the parameters: " + String.join(", ", ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD, TRUSTSTORE, TRUSTSTORE_PASSWORD, SUBCA_KEYSTORE, SUBCA_KEYSTORE_PASSWORD, SUBCA_KEY_PASSWORD, X500_NAME, ROOT_CA_ALIAS));
+            log.error("Creating a sub CA requires the parameters: " + String.join(", ", ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD, TRUSTSTORE, TRUSTSTORE_PASSWORD, SUBCA_KEYSTORE, SUBCA_KEYSTORE_PASSWORD, SUBCA_KEY_PASSWORD, X500_NAME, ROOT_CA_ALIAS));
             return;
         }
         PKIConfiguration pkiConfiguration = new PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS));
@@ -153,7 +169,7 @@ public class Main {
 
     public void verifyCertificate(CommandLine cmd) {
         if (!cmd.hasOption(TRUSTSTORE) || !cmd.hasOption(TRUSTSTORE_PASSWORD)) {
-            System.err.println("Verifying a certificate requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD));
+            log.error("Verifying a certificate requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD));
             return;
         }
         PKIConfiguration pkiConfiguration = new PKIConfiguration(NO_ROOT_CA_ALIAS_REQUIRED);
@@ -165,7 +181,7 @@ public class Main {
         try {
             pemCert = new String(Files.readAllBytes(Paths.get(certPath)));
         } catch (IOException e) {
-            System.err.println("Could not load certificate from " + certPath);
+            log.error("Could not load certificate from " + certPath);
             return;
         }
         X509Certificate cert = CertificateHandler.getCertFromPem(pemCert);
@@ -176,9 +192,9 @@ public class Main {
         KeystoreHandler keystoreHandler = new KeystoreHandler(pkiConfiguration);
         try {
             CertificateHandler.verifyCertificateChain(cert, keystoreHandler.getTrustStore());
-            System.out.println("Certificate is valid!");
+            log.info("Certificate is valid!");
         } catch (Exception e) {
-            System.out.println("Certificate is not valid!\n" + e);
+            log.error("Certificate is not valid!\n" + e);
             return;
         }
         PKIIdentity identity = CertificateHandler.getIdentityFromCert(cert);
@@ -199,7 +215,7 @@ public class Main {
         try {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
-            System.err.println("Parsing failed. Reason: " + e.getMessage());
+            log.error("Parsing failed. Reason: " + e.getMessage());
             return;
         }
         if (cmd.hasOption(INIT)) {
@@ -211,7 +227,11 @@ public class Main {
 
         // Generate root CRL
         } else if (cmd.hasOption(GENERATE_ROOT_CRL)) {
-            main.genRootCRL(cmd);
+            if (cmd.hasOption(PKCS11)) {
+                main.genRootCRLPKCS11(cmd);
+            } else {
+                main.genRootCRL(cmd);
+            }
 
         // Create sub ca
         } else if (cmd.hasOption(CREATE_SUBCA)) {
@@ -224,9 +244,9 @@ public class Main {
             String certPath = cmd.getOptionValue(PRINT_OUT_CERTIFICATE);
             try {
                 PKIIdentity identity = CertificateHandler.getIdentityFromCert(main.getCertificate(certPath));
-                System.out.println(identity);
+                log.info(identity.toString());
             } catch (IOException e) {
-                System.err.println("Parsing of certificate failed. Reason: " + e.getMessage());
+                log.error("Parsing of certificate failed. Reason: " + e.getMessage());
             }
 
             // Default to show the help message
