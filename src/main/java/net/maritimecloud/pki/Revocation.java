@@ -146,6 +146,7 @@ public class Revocation {
      * @param revokedCerts  List of the serialnumbers that should be revoked.
      * @param keyEntry Private key to sign the CRL
      * @param outputCaCrlPath Where to place the CRL
+     * @param pkcs11Provider PKCS#11 provider. If null default BC provider will be used.
      */
     public static void generateRootCACRL(String signName, List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, String outputCaCrlPath, AuthProvider pkcs11Provider) {
         Date now = new Date();
