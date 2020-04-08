@@ -83,6 +83,10 @@ import static org.bouncycastle.asn1.x500.style.IETFUtils.valueToString;
 @Slf4j
 public class CertificateHandler {
 
+    private CertificateHandler() {
+        // Left empty on purpose
+    }
+
     /**
      * Verify a single certificate against the public key of the issueing certificate. Does *not* check revocation
      * status against CRL/OCSP.
@@ -145,7 +149,8 @@ public class CertificateHandler {
      * @throws InvalidAlgorithmParameterException Thrown if keystore loading fails
      * @throws CertPathValidatorException Thrown if certificate is invalid.
      */
-    public static boolean verifyCertificateChain(X509Certificate certificate, KeyStore ks) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, InvalidAlgorithmParameterException, CertPathValidatorException {
+    public static boolean verifyCertificateChain(X509Certificate certificate, KeyStore ks) throws KeyStoreException,
+            NoSuchAlgorithmException, CertificateException, InvalidAlgorithmParameterException, CertPathValidatorException {
 
         // Create the certificate path to verify - in this case just the given certificate
         List<Certificate> certList = Collections.singletonList(certificate);

@@ -9,8 +9,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import java.io.Console;
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.cert.X509Certificate;
@@ -41,6 +41,10 @@ public class Main {
     private static final String PKCS11 = "pkcs11";
     private static final String PKCS11_CONFIG = "pkcs11-conf";
     private static final String PKCS11_PIN = "pkcs11-pin";
+    private static final String PKCS11_ROOT_CONFIG = "pkcs11-root-conf";
+    private static final String PKCS11_ROOT_PIN = "pkcs11-root-pin";
+    private static final String PKCS11_SUB_CONFIG = "pkcs11-sub-conf";
+    private static final String PKCS11_SUB_PIN = "pkcs11-sub-pin";
 
     private Options setupOptions() {
         // Create Options object
@@ -80,6 +84,10 @@ public class Main {
         options.addOption("p11", PKCS11, false, "Use PKCS#11 to interact with an HSM.");
         options.addOption("p11c", PKCS11_CONFIG, true, "Path to a PKCS#11 config file.");
         options.addOption("pin", PKCS11_PIN, true, "PIN for HSM slot. If not given when using a HSM, it will be requested on runtime.");
+        options.addOption("p11r", PKCS11_ROOT_CONFIG, true, "Path to a PKCS#11 config file for root CA.");
+        options.addOption("pinr", PKCS11_ROOT_PIN, true, "PIN for root CA HSM slot. If not given when using a HSM, it will be requested on runtime.");
+        options.addOption("p11s", PKCS11_SUB_CONFIG, true, "Path to a PKCS#11 config for intermediate CA.");
+        options.addOption("pins", PKCS11_SUB_PIN, true, "PIN for intermediate CA HSM slot. If not given when using a HSM, it will be requested on runtime.");
         return options;
     }
 
@@ -167,6 +175,45 @@ public class Main {
         caHandler.createSubCa(cmd.getOptionValue(X500_NAME), cmd.getOptionValue(ROOT_CA_ALIAS));
     }
 
+    private void createSubCAPKCS11(CommandLine cmd) {
+        if (!cmd.hasOption(TRUSTSTORE) || !cmd.hasOption(TRUSTSTORE_PASSWORD) || !cmd.hasOption(X500_NAME) || !cmd.hasOption(ROOT_CA_ALIAS) || !cmd.hasOption(PKCS11_ROOT_CONFIG) || !cmd.hasOption(PKCS11_SUB_CONFIG)) {
+            log.error("Creating a sub CA requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD, X500_NAME, ROOT_CA_ALIAS, PKCS11_ROOT_CONFIG, PKCS11_SUB_CONFIG));
+        }
+        char[] rootCaPin;
+        char[] subCaPin;
+        Console console = System.console();
+        // Check if root CA PIN has been given
+        if (!cmd.hasOption(PKCS11_ROOT_PIN)) {
+            log.error("Please input root CA HSM slot PIN: ");
+            rootCaPin = console.readPassword();
+        } else {
+            rootCaPin = cmd.getOptionValue(PKCS11_ROOT_PIN).toCharArray();
+        }
+        // Check if sub CA PIN has been given
+        if (!cmd.hasOption(PKCS11_SUB_PIN)) {
+            log.error("Please input sub CA HSM slot PIN: ");
+            subCaPin = console.readPassword();
+        } else {
+            subCaPin = cmd.getOptionValue(PKCS11_SUB_PIN).toCharArray();
+        }
+        if (console != null)
+            console.flush();
+
+        PKIConfiguration rootPkiConfiguration = new P11PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS), cmd.getOptionValue(PKCS11_ROOT_CONFIG), rootCaPin);
+        rootPkiConfiguration.setTruststorePath(cmd.getOptionValue(TRUSTSTORE));
+        rootPkiConfiguration.setTruststorePassword(cmd.getOptionValue(TRUSTSTORE_PASSWORD));
+
+        PKIConfiguration subPkiConfiguration = new P11PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS), cmd.getOptionValue(PKCS11_SUB_CONFIG), subCaPin);
+        subPkiConfiguration.setTruststorePath(cmd.getOptionValue(TRUSTSTORE));
+        subPkiConfiguration.setTruststorePassword(cmd.getOptionValue(TRUSTSTORE_PASSWORD));
+
+        KeystoreHandler keystoreHandler = new KeystoreHandler(rootPkiConfiguration);
+        CertificateBuilder certificateBuilder = new CertificateBuilder(keystoreHandler);
+        CAHandler caHandler = new CAHandler(certificateBuilder, rootPkiConfiguration);
+
+        caHandler.createSubCAPKCS11(cmd.getOptionValue(X500_NAME), cmd.getOptionValue(ROOT_CA_ALIAS), subPkiConfiguration);
+    }
+
     public void verifyCertificate(CommandLine cmd) {
         if (!cmd.hasOption(TRUSTSTORE) || !cmd.hasOption(TRUSTSTORE_PASSWORD)) {
             log.error("Verifying a certificate requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD));
@@ -186,7 +233,7 @@ public class Main {
         }
         X509Certificate cert = CertificateHandler.getCertFromPem(pemCert);
         if (cert == null) {
-            System.err.println("Could not load certificate, is it in valid PEM format?");
+            log.error("Could not load certificate, is it in valid PEM format?");
             return;
         }
         KeystoreHandler keystoreHandler = new KeystoreHandler(pkiConfiguration);
@@ -198,7 +245,7 @@ public class Main {
             return;
         }
         PKIIdentity identity = CertificateHandler.getIdentityFromCert(cert);
-        System.out.println(identity);
+        log.info(identity.toString());
     }
 
     public X509Certificate getCertificate(String certPath) throws IOException {
@@ -235,7 +282,11 @@ public class Main {
 
         // Create sub ca
         } else if (cmd.hasOption(CREATE_SUBCA)) {
-            main.createSubCA(cmd);
+            if (cmd.hasOption(PKCS11)) {
+                main.createSubCAPKCS11(cmd);
+            } else {
+                main.createSubCA(cmd);
+            }
 
         // Verify certificate
         } else if (cmd.hasOption(VERIFY_CERTIFICATE)) {

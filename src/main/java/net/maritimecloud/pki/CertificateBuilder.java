@@ -222,8 +222,8 @@ public class CertificateBuilder {
         String ocspUrl  = baseCrlOcspURI + "ocsp/" + alias;
         String crlUrl = baseCrlOcspURI + "crl/" + alias;
         return buildAndSignCert(serialNumber, signingCertEntry.getPrivateKey(), signingX509Cert.getPublicKey(),
-                    publickey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(orgSubjectDn), customAttr, "ENTITY",
-                    ocspUrl, crlUrl, p11AuthProvider);
+                    publickey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(orgSubjectDn),
+                    customAttr, "ENTITY", ocspUrl, crlUrl, p11AuthProvider);
     }
 
     /**

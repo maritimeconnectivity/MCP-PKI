@@ -52,6 +52,7 @@ import java.util.Date;
 import java.util.List;
 
 import static net.maritimecloud.pki.PKIConstants.KEYSTORE_TYPE;
+import static net.maritimecloud.pki.PKIConstants.PKCS11;
 
 @Slf4j
 @AllArgsConstructor
@@ -67,6 +68,7 @@ public class CAHandler {
      * a RootCaKeystore is defined in PKIConfiguration and exists.
      *
      * @param subCaCertDN The DN of the new sub CA certificate.
+     * @param rootCAAlias The alias of the root CA
      */
     public void createSubCa(String subCaCertDN, String rootCAAlias) {
 
@@ -76,7 +78,7 @@ public class CAHandler {
         KeyStore truststore;
         try (InputStream rootKeystoreIS = new FileInputStream(pkiConfiguration.getRootCaKeystorePath());
              FileInputStream subCaFis = new FileInputStream(pkiConfiguration.getSubCaKeystorePath());
-             FileInputStream trustFis = new FileInputStream(pkiConfiguration.getTruststorePath());
+             FileInputStream trustFis = new FileInputStream(pkiConfiguration.getTruststorePath())
         ) {
             // Open the root keystore
             rootKeystore = KeyStore.getInstance(KEYSTORE_TYPE);
@@ -95,7 +97,7 @@ public class CAHandler {
             truststore.load(trustFis, pkiConfiguration.getTruststorePassword().toCharArray());
 
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            throw new PKIRuntimeException(e);
+            throw new PKIRuntimeException(e.getMessage(), e);
         }
 
         // Extract the root certificate
@@ -107,13 +109,13 @@ public class CAHandler {
             rootCertEntry = (KeyStore.PrivateKeyEntry) rootKeystore.getEntry(rootCAAlias, protParam);
             rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject();
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
-            throw new PKIRuntimeException(e);
+            throw new PKIRuntimeException(e.getMessage(), e);
         }
         try {
             List<String> crlPoints = CRLVerifier.getCrlDistributionPoints((X509Certificate) rootCertEntry.getCertificate());
             crlUrl = crlPoints.get(0);
         } catch (IOException e) {
-            throw new PKIRuntimeException(e);
+            throw new PKIRuntimeException(e.getMessage(), e);
         }
 
         // Create the sub CA certificate
@@ -145,7 +147,88 @@ public class CAHandler {
             truststore.store(trustFos, pkiConfiguration.getTruststorePassword().toCharArray());
 
         } catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException e) {
-            throw new PKIRuntimeException(e);
+            throw new PKIRuntimeException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Creates a sub Certificate Authority for the MC PKI using an HSM. The certificate and keypair are placed in the
+     * HSM using the given configuration. It is also expected that
+     * a RootCaKeystore is defined in PKIConfiguration and exists.
+     *
+     * @param subCaCertDN The DN of the new sub CA certificate.
+     * @param rootCAAlias The alias of the root CA
+     * @param subCaConfiguration Holds the configuration for the sub CA HSM. Must be a P11PKIConfiguration
+     */
+    public void createSubCAPKCS11(String subCaCertDN, String rootCAAlias, PKIConfiguration subCaConfiguration) {
+        if (!(pkiConfiguration instanceof P11PKIConfiguration) || !(subCaConfiguration instanceof P11PKIConfiguration)) {
+            throw new PKIRuntimeException("This function can only be called when used with an HSM");
+        }
+        P11PKIConfiguration rootP11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
+        P11PKIConfiguration subCaP11PKIConfiguration = (P11PKIConfiguration) subCaConfiguration;
+        KeyStore rootStore;
+        KeyStore subCaStore;
+        KeyStore trustStore;
+        try (FileInputStream trustFileInputStream = new FileInputStream(rootP11PKIConfiguration.getTruststorePath())) {
+            // Create root CA keystore
+            rootStore = KeyStore.getInstance(PKCS11, rootP11PKIConfiguration.getProvider());
+            rootStore.load(null, rootP11PKIConfiguration.getPkcs11Pin());
+
+            // Create sub CA keystore
+            subCaStore = KeyStore.getInstance(PKCS11, ((P11PKIConfiguration) subCaConfiguration).getProvider());
+            subCaStore.load(null, subCaP11PKIConfiguration.getPkcs11Pin());
+
+            // Open the truststore
+            trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(trustFileInputStream, pkiConfiguration.getTruststorePassword().toCharArray());
+        } catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
+            throw new PKIRuntimeException(e.getMessage(), e);
+        }
+
+        // Extract the root certificate
+        KeyStore.PrivateKeyEntry rootCertEntry;
+        X500Name rootCertX500Name;
+        String crlUrl;
+        try {
+            rootCertEntry = (KeyStore.PrivateKeyEntry) rootStore.getEntry(rootCAAlias, null);
+            rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject();
+        } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
+            throw new PKIRuntimeException(e.getMessage(), e);
+        }
+        try {
+            List<String> crlPoints = CRLVerifier.getCrlDistributionPoints((X509Certificate) rootCertEntry.getCertificate());
+            crlUrl = crlPoints.get(0);
+        } catch (IOException e) {
+            throw new PKIRuntimeException(e.getMessage(), e);
+        }
+
+        // Create the sub CA certificate
+        KeyPair subCaKeyPair = CertificateBuilder.generateKeyPairPKCS11(subCaP11PKIConfiguration.getProvider());
+        X509Certificate subCaCert;
+        X500Name subCaCertX500Name = new X500Name(subCaCertDN);
+        String alias = CertificateHandler.getElement(subCaCertX500Name, BCStyle.UID);
+        if (alias == null || alias.trim().isEmpty()) {
+            throw new PKIRuntimeException("UID must be defined for sub CA! It will be used as the sub CA alias.");
+        }
+        try {
+            subCaCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(rootP11PKIConfiguration.getProvider()), rootCertEntry.getPrivateKey(), rootCertEntry.getCertificate().getPublicKey(),
+                    subCaKeyPair.getPublic(), rootCertX500Name, subCaCertX500Name, null, "INTERMEDIATE", null, crlUrl, rootP11PKIConfiguration.getProvider());
+        } catch (Exception e) {
+            throw new PKIRuntimeException("Could not create sub CA certificate!", e);
+        }
+
+        // Store the sub CA certificate in the Sub CA keystore and the MC truststore
+        try (FileOutputStream trustFos = new FileOutputStream(pkiConfiguration.getTruststorePath())) {
+            Certificate[] certChain = new Certificate[2];
+            certChain[0] = subCaCert;
+            certChain[1] = rootCertEntry.getCertificate();
+            subCaStore.setKeyEntry(alias, subCaKeyPair.getPrivate(), null, certChain);
+
+            trustStore.setCertificateEntry(alias, subCaCert);
+            trustStore.store(trustFos, pkiConfiguration.getTruststorePassword().toCharArray());
+
+        } catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException e) {
+            throw new PKIRuntimeException(e.getMessage(), e);
         }
     }
 
@@ -190,6 +273,7 @@ public class CAHandler {
 
     /**
      * Generates a self-signed certificate and saves it and the private key in a HSM using PKCS#11 and the certificate only in a truststore.
+     * If an entry already exists in the specified HSM slot it will be overwritten.
      *
      * @param rootCertX500Name The DN of the new root CA Certificate
      * @param crlUrl CRL endpoint
@@ -205,7 +289,7 @@ public class CAHandler {
         KeyStore rootKeyStore;
         KeyStore trustStore;
         try (FileOutputStream tsFos = new FileOutputStream(pkiConfiguration.getTruststorePath())) {
-            rootKeyStore = KeyStore.getInstance("PKCS11", p11PKIConfiguration.getProvider());
+            rootKeyStore = KeyStore.getInstance(PKCS11, p11PKIConfiguration.getProvider());
             rootKeyStore.load(null, p11PKIConfiguration.getPkcs11Pin());
             X509Certificate caCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(p11PKIConfiguration.getProvider()), caKeyPair.getPrivate(), caKeyPair.getPublic(), caKeyPair.getPublic(),
                     new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl, p11PKIConfiguration.getProvider());
@@ -308,13 +392,16 @@ public class CAHandler {
      * @param rootCAAlias The alias of the root CA.
      */
     public void generateRootCRLP11(String outputCaCrlPath, String revocationFile, String rootCAAlias) {
+        if (!(pkiConfiguration instanceof P11PKIConfiguration)) {
+            throw new PKIRuntimeException("This function can only be called when used with an HSM");
+        }
         List<RevocationInfo> revocationInfos = loadRevocationFile(revocationFile);
         P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
 
         p11PKIConfiguration.providerLogin();
         KeyStore rootKeyStore;
         try {
-            rootKeyStore = KeyStore.getInstance("PKCS11", p11PKIConfiguration.getProvider());
+            rootKeyStore = KeyStore.getInstance(PKCS11, p11PKIConfiguration.getProvider());
             rootKeyStore.load(null, p11PKIConfiguration.getPkcs11Pin());
             KeyStore.PrivateKeyEntry rootCertEntry = (KeyStore.PrivateKeyEntry) rootKeyStore.getEntry(rootCAAlias, null);
             String rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject().toString();
