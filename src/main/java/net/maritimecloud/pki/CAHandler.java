@@ -119,7 +119,7 @@ public class CAHandler {
         }
 
         // Create the sub CA certificate
-        KeyPair subCaKeyPair = CertificateBuilder.generateKeyPair();
+        KeyPair subCaKeyPair = CertificateBuilder.generateKeyPair(null);
         X509Certificate subCaCert;
         X500Name subCaCertX500Name = new X500Name(subCaCertDN);
         String alias = CertificateHandler.getElement(subCaCertX500Name, BCStyle.UID);
@@ -164,8 +164,11 @@ public class CAHandler {
         if (!(pkiConfiguration instanceof P11PKIConfiguration) || !(subCaConfiguration instanceof P11PKIConfiguration)) {
             throw new PKIRuntimeException("This function can only be called when used with an HSM");
         }
+        // Prepare PKCS#11 crypto providers
         P11PKIConfiguration rootP11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
+        rootP11PKIConfiguration.providerLogin();
         P11PKIConfiguration subCaP11PKIConfiguration = (P11PKIConfiguration) subCaConfiguration;
+        subCaP11PKIConfiguration.providerLogin();
         KeyStore rootStore;
         KeyStore subCaStore;
         KeyStore trustStore;
@@ -182,6 +185,8 @@ public class CAHandler {
             trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(trustFileInputStream, pkiConfiguration.getTruststorePassword().toCharArray());
         } catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
+            rootP11PKIConfiguration.providerLogout();
+            subCaP11PKIConfiguration.providerLogout();
             throw new PKIRuntimeException(e.getMessage(), e);
         }
 
@@ -193,12 +198,16 @@ public class CAHandler {
             rootCertEntry = (KeyStore.PrivateKeyEntry) rootStore.getEntry(rootCAAlias, null);
             rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject();
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
+            rootP11PKIConfiguration.providerLogout();
+            subCaP11PKIConfiguration.providerLogout();
             throw new PKIRuntimeException(e.getMessage(), e);
         }
         try {
             List<String> crlPoints = CRLVerifier.getCrlDistributionPoints((X509Certificate) rootCertEntry.getCertificate());
             crlUrl = crlPoints.get(0);
         } catch (IOException e) {
+            rootP11PKIConfiguration.providerLogout();
+            subCaP11PKIConfiguration.providerLogout();
             throw new PKIRuntimeException(e.getMessage(), e);
         }
 
@@ -208,12 +217,16 @@ public class CAHandler {
         X500Name subCaCertX500Name = new X500Name(subCaCertDN);
         String alias = CertificateHandler.getElement(subCaCertX500Name, BCStyle.UID);
         if (alias == null || alias.trim().isEmpty()) {
+            rootP11PKIConfiguration.providerLogout();
+            subCaP11PKIConfiguration.providerLogout();
             throw new PKIRuntimeException("UID must be defined for sub CA! It will be used as the sub CA alias.");
         }
         try {
             subCaCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(rootP11PKIConfiguration.getProvider()), rootCertEntry.getPrivateKey(), rootCertEntry.getCertificate().getPublicKey(),
                     subCaKeyPair.getPublic(), rootCertX500Name, subCaCertX500Name, null, "INTERMEDIATE", null, crlUrl, rootP11PKIConfiguration.getProvider());
         } catch (Exception e) {
+            rootP11PKIConfiguration.providerLogout();
+            subCaP11PKIConfiguration.providerLogout();
             throw new PKIRuntimeException("Could not create sub CA certificate!", e);
         }
 
@@ -228,8 +241,12 @@ public class CAHandler {
             trustStore.store(trustFos, pkiConfiguration.getTruststorePassword().toCharArray());
 
         } catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException e) {
+            rootP11PKIConfiguration.providerLogout();
+            subCaP11PKIConfiguration.providerLogout();
             throw new PKIRuntimeException(e.getMessage(), e);
         }
+        rootP11PKIConfiguration.providerLogout();
+        subCaP11PKIConfiguration.providerLogout();
     }
 
     /**
@@ -242,7 +259,7 @@ public class CAHandler {
      * @param rootCAAlias The alias of the root CA
      */
     public void initRootCA(String rootCertX500Name, String crlUrl, String rootCAAlias) {
-        KeyPair cakp = CertificateBuilder.generateKeyPair();
+        KeyPair cakp = CertificateBuilder.generateKeyPair(null);
         KeyStore rootks;
         KeyStore ts;
         try (FileOutputStream rootfos = new FileOutputStream(pkiConfiguration.getRootCaKeystorePath());

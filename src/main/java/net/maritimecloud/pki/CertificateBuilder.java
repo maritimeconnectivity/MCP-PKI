@@ -44,6 +44,7 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.util.BigIntegers;
+import sun.security.pkcs11.SunPKCS11;
 
 import java.math.BigInteger;
 import java.security.AuthProvider;
@@ -71,6 +72,7 @@ import java.util.Map;
 import static net.maritimecloud.pki.PKIConstants.BC_PROVIDER_NAME;
 import static net.maritimecloud.pki.PKIConstants.CERT_EXPIRE_YEAR;
 import static net.maritimecloud.pki.PKIConstants.ELLIPTIC_CURVE;
+import static net.maritimecloud.pki.PKIConstants.PKCS11;
 import static net.maritimecloud.pki.PKIConstants.SIGNER_ALGORITHM;
 
 public class CertificateBuilder {
@@ -231,7 +233,7 @@ public class CertificateBuilder {
      *
      * @return The generated keypair
      */
-    public static KeyPair generateKeyPair() {
+    public static KeyPair generateKeyPair(AuthProvider provider) {
         ECGenParameterSpec ecGenSpec = new ECGenParameterSpec(ELLIPTIC_CURVE);
         KeyPairGenerator g;
         try {
@@ -240,8 +242,14 @@ public class CertificateBuilder {
             throw new PKIRuntimeException(e.getMessage(), e);
         }
         try {
-            g.initialize(ecGenSpec, new SecureRandom());
-        } catch (InvalidAlgorithmParameterException e) {
+            SecureRandom secureRandom;
+            if (provider instanceof SunPKCS11) {
+                secureRandom = SecureRandom.getInstance(PKCS11, provider);
+            } else {
+                secureRandom = new SecureRandom();
+            }
+            g.initialize(ecGenSpec, secureRandom);
+        } catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
         }
         return g.generateKeyPair();
@@ -256,7 +264,7 @@ public class CertificateBuilder {
         KeyPairGenerator g;
         try {
             g = KeyPairGenerator.getInstance("EC", provider);
-            g.initialize(ecGenSpec, SecureRandom.getInstance("PKCS11", provider));
+            g.initialize(ecGenSpec, SecureRandom.getInstance(PKCS11, provider));
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
         }
@@ -274,9 +282,9 @@ public class CertificateBuilder {
         BigInteger maxValue = new BigInteger("730750818665451459101842416358141509827966271487");
         // Min number 2^32-1 = 4294967296 - we set a minimum value to avoid collisions with old certificates that has used seq numbers
         BigInteger minValue = BigInteger.ZERO;
-        if (p11AuthProvider != null) {
+        if (p11AuthProvider instanceof SunPKCS11) {
             try {
-                BigIntegers.createRandomInRange(minValue, maxValue, SecureRandom.getInstance("PKCS11", p11AuthProvider));
+                return BigIntegers.createRandomInRange(minValue, maxValue, SecureRandom.getInstance("PKCS11", p11AuthProvider));
             } catch (NoSuchAlgorithmException e) {
                 throw new PKIRuntimeException(e.getMessage(), e);
             }
@@ -293,7 +301,7 @@ public class CertificateBuilder {
         HashMap<String, String> commasConverted = new HashMap<>();
         String[] values = new String[] {orgName, type, callName, uid};
         for (int i = 0; i < values.length; i++) {
-            values[i] = values[i].replaceAll(",", "\u201A");
+            values[i] = values[i].replace(",", "\u201A");
         }
 
         commasConverted.put("orgName", values[0]);

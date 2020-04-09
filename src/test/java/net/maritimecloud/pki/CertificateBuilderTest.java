@@ -38,7 +38,7 @@ class CertificateBuilderTest {
 
     @Test
     void generateCertForEntity() {
-        KeyPair certKeyPair = CertificateBuilder.generateKeyPair();
+        KeyPair certKeyPair = CertificateBuilder.generateKeyPair(null);
         String userMrn = "urn:mrn:mcl:user:dma:thc";
         String permissions = "NONE";
         String baseCrlOcspPath = "https://localhost/x509/api/certificates/";
@@ -62,7 +62,7 @@ class CertificateBuilderTest {
 
     @Test
     void generateKeyPairTest() {
-        KeyPair keyPair = CertificateBuilder.generateKeyPair();
+        KeyPair keyPair = CertificateBuilder.generateKeyPair(null);
         assertNotNull(keyPair);
         assertNotNull(keyPair.getPrivate());
         assertNotNull(keyPair.getPublic());
