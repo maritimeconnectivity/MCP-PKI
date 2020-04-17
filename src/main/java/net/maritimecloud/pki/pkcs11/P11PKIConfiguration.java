@@ -17,6 +17,7 @@
 package net.maritimecloud.pki.pkcs11;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.maritimecloud.pki.PKIConfiguration;
 import net.maritimecloud.pki.exception.PKIRuntimeException;
@@ -41,7 +42,7 @@ public class P11PKIConfiguration extends PKIConfiguration {
 
     private boolean loggedIn;
 
-    public P11PKIConfiguration(String rootCAAlias, String pkcs11ConfigPath, String pkcs11Pin) {
+    public P11PKIConfiguration(@NonNull String rootCAAlias, String pkcs11ConfigPath, String pkcs11Pin) {
         super(rootCAAlias);
         AuthProvider authProvider = new SunPKCS11(pkcs11ConfigPath);
         Security.addProvider(authProvider);
@@ -63,7 +64,7 @@ public class P11PKIConfiguration extends PKIConfiguration {
         this.loggedIn = false;
     }
 
-    public P11PKIConfiguration(String rootCAAlias, String pkcs11ConfigPath, char[] pkcs11Pin) {
+    public P11PKIConfiguration(@NonNull String rootCAAlias, String pkcs11ConfigPath, char[] pkcs11Pin) {
         super(rootCAAlias);
         AuthProvider authProvider = new SunPKCS11(pkcs11ConfigPath);
         Security.addProvider(authProvider);
