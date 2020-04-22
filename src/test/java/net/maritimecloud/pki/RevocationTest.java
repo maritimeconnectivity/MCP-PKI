@@ -61,7 +61,7 @@ class RevocationTest {
 
         // Generate the CRL
         KeyStore.PrivateKeyEntry keyEntry = kh.getSigningCertEntry("urn:mrn:mcl:ca:maritimecloud-idreg");
-        X509CRL crl = Revocation.generateCRL(infos, keyEntry);
+        X509CRL crl = Revocation.generateCRL(infos, keyEntry, null);
 
         // Verify that the CRL was signed
         try {

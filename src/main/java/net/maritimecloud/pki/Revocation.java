@@ -38,6 +38,7 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import sun.security.pkcs11.SunPKCS11;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -99,7 +100,7 @@ public class Revocation {
      * @param keyEntry Private key to sign the CRL
      * @return a CRL
      */
-    public static X509CRL generateCRL(List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry) {
+    public static X509CRL generateCRL(List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, AuthProvider authProvider) {
         Date now = new Date();
         Calendar cal = Calendar.getInstance();
         cal.setTime(now);
@@ -118,7 +119,11 @@ public class Revocation {
         }
 
         JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder(SIGNER_ALGORITHM);
-        signBuilder.setProvider(BC_PROVIDER_NAME);
+        if (authProvider instanceof SunPKCS11) {
+            signBuilder.setProvider(authProvider);
+        } else {
+            signBuilder.setProvider(BC_PROVIDER_NAME);
+        }
         ContentSigner signer;
         try {
             signer = signBuilder.build(keyEntry.getPrivateKey());
