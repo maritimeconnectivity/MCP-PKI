@@ -2,18 +2,41 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>net.maritimecloud.pki</groupId>
-    <artifactId>mc-pki</artifactId>
+    <groupId>net.maritimeconnectivity.pki</groupId>
+    <artifactId>mcp-pki</artifactId>
     <version>0.11.0-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>mc-pki</name>
-    <url>http://maritimeconnectivity.net</url>
+    <name>mcp-pki</name>
+    <url>https://maritimeconnectivity.net</url>
+    <description>PKI library for the MCP</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <skip.signing>true</skip.signing>
         <bouncycastle.version>1.65</bouncycastle.version>
     </properties>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git://github.com/MaritimeConnectivityPlatform/MCP-PKI.git</connection>
+        <developerConnection>scm:git:ssh://github.com:MaritimeConnectivityPlatform/MCP-PKI.git</developerConnection>
+        <url>https://github.com/MaritimeConnectivityPlatform/MCP-PKI</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>Oliver Haagh</name>
+            <email>oliver@dmc.international</email>
+            <organization>Maritime Connectivity Platform Consortium</organization>
+            <organizationUrl>https://maritimeconnectivity.net/</organizationUrl>
+        </developer>
+    </developers>
 
     <dependencies>
         <dependency>
@@ -158,7 +181,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>net.maritimecloud.pki.Main</mainClass>
+                            <mainClass>net.maritimeconnectivity.pki.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
