@@ -189,13 +189,15 @@ public final class CRLVerifier {
         if (crldpExt == null) {
             return new ArrayList<>();
         }
-        ASN1InputStream oAsnInStream = new ASN1InputStream(crldpExt);
-        DEROctetString dosCrlDP = (DEROctetString) oAsnInStream.readObject();
-        byte[] crldpExtOctets = dosCrlDP.getOctets();
-        ASN1InputStream oAsnInStream2 = new ASN1InputStream(new ByteArrayInputStream(crldpExtOctets));
-        CRLDistPoint crlDistPoint = CRLDistPoint.getInstance(oAsnInStream2.readObject());
-        oAsnInStream.close();
-        oAsnInStream2.close();
+        ASN1InputStream oAsnInStream2;
+        CRLDistPoint crlDistPoint;
+        try (ASN1InputStream oAsnInStream = new ASN1InputStream(crldpExt)) {
+            DEROctetString dosCrlDP = (DEROctetString) oAsnInStream.readObject();
+            byte[] crldpExtOctets = dosCrlDP.getOctets();
+            oAsnInStream2 = new ASN1InputStream(new ByteArrayInputStream(crldpExtOctets));
+            crlDistPoint = CRLDistPoint.getInstance(oAsnInStream2.readObject());
+            oAsnInStream2.close();
+        }
         List<String> crlUrls = new ArrayList<>();
         for (DistributionPoint dp : crlDistPoint.getDistributionPoints()) {
             DistributionPointName dpn = dp.getDistributionPoint();
