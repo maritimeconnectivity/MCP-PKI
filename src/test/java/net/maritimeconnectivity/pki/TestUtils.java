@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package net.maritimecloud.pki;
+package net.maritimeconnectivity.pki;
 
 
 import java.io.IOException;
@@ -22,7 +22,7 @@ import java.nio.file.Paths;
 import java.security.cert.X509Certificate;
 import java.util.stream.Collectors;
 
-import static net.maritimecloud.pki.CertificateHandler.getCertFromPem;
+import static net.maritimeconnectivity.pki.CertificateHandler.getCertFromPem;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestUtils {

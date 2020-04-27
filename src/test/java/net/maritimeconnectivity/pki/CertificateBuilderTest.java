@@ -1,7 +1,5 @@
-package net.maritimecloud.pki;
+package net.maritimeconnectivity.pki;
 
-import net.maritimecloud.pki.PKIConfiguration;
-import net.maritimecloud.pki.PKIConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +36,7 @@ class CertificateBuilderTest {
 
     @Test
     void generateCertForEntity() {
-        KeyPair certKeyPair = CertificateBuilder.generateKeyPair();
+        KeyPair certKeyPair = CertificateBuilder.generateKeyPair(null);
         String userMrn = "urn:mrn:mcl:user:dma:thc";
         String permissions = "NONE";
         String baseCrlOcspPath = "https://localhost/x509/api/certificates/";
@@ -50,7 +48,7 @@ class CertificateBuilderTest {
         attrs.put(PKIConstants.MC_OID_HOME_MMS_URL, "http://smartnav.org/");
         X509Certificate userCert;
         try {
-            userCert = cb.generateCertForEntity(BigInteger.ONE, "DK", "urn:mrn:mcl:org:dma", "user", "Thomas Christensen", "thc@dma.dk", userMrn, certKeyPair.getPublic(), attrs, signingAlias, baseCrlOcspPath);
+            userCert = cb.generateCertForEntity(BigInteger.ONE, "DK", "urn:mrn:mcl:org:dma", "user", "Thomas Christensen", "thc@dma.dk", userMrn, certKeyPair.getPublic(), attrs, signingAlias, baseCrlOcspPath, null);
         } catch (Exception e) {
             e.printStackTrace();
             fail("An exception was thrown!");
@@ -62,7 +60,7 @@ class CertificateBuilderTest {
 
     @Test
     void generateKeyPairTest() {
-        KeyPair keyPair = CertificateBuilder.generateKeyPair();
+        KeyPair keyPair = CertificateBuilder.generateKeyPair(null);
         assertNotNull(keyPair);
         assertNotNull(keyPair.getPrivate());
         assertNotNull(keyPair.getPublic());
@@ -70,7 +68,7 @@ class CertificateBuilderTest {
 
     @Test
     void generateSerialNumber() {
-        BigInteger sn = cb.generateSerialNumber();
+        BigInteger sn = cb.generateSerialNumber(null);
         assertNotNull(sn);
     }
 

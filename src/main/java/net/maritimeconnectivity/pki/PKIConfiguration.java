@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package net.maritimecloud.pki;
+package net.maritimeconnectivity.pki;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -54,7 +54,8 @@ public class PKIConfiguration {
     @NonNull
     private String rootCAAlias;
 
-    public PKIConfiguration(String rootCAAlias){
+    public PKIConfiguration(@NonNull String rootCAAlias){
         this.rootCAAlias = rootCAAlias;
     }
+
 }

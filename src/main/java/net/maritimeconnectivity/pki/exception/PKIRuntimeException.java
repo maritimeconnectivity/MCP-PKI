@@ -1,4 +1,4 @@
-package net.maritimecloud.pki.exception;
+package net.maritimeconnectivity.pki.exception;
 
 public class PKIRuntimeException extends RuntimeException {
 

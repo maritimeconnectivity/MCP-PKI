@@ -13,11 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package net.maritimecloud.pki;
+package net.maritimeconnectivity.pki;
 
 
 import lombok.extern.slf4j.Slf4j;
-import net.maritimecloud.pki.exception.PKIRuntimeException;
+import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -64,24 +64,15 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
-import static net.maritimecloud.pki.PKIConstants.BC_PROVIDER_NAME;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_AIS_SHIPTYPE;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_CALLSIGN;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_FLAGSTATE;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_HOME_MMS_URL;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_IMO_NUMBER;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_MMSI_NUMBER;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_MRN;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_MRN_SUBSIDIARY;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_PERMISSIONS;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_PORT_OF_REGISTER;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_SHIP_MRN;
-import static net.maritimecloud.pki.PKIConstants.MC_OID_URL;
 import static org.bouncycastle.asn1.x500.style.IETFUtils.valueToString;
 
 
 @Slf4j
 public class CertificateHandler {
+
+    private CertificateHandler() {
+        // Left empty on purpose
+    }
 
     /**
      * Verify a single certificate against the public key of the issueing certificate. Does *not* check revocation
@@ -106,7 +97,7 @@ public class CertificateHandler {
 
         ContentVerifierProvider contentVerifierProvider;
         try {
-            contentVerifierProvider = new JcaContentVerifierProviderBuilder().setProvider(BC_PROVIDER_NAME).build(verificationPubKey);
+            contentVerifierProvider = new JcaContentVerifierProviderBuilder().setProvider(PKIConstants.BC_PROVIDER_NAME).build(verificationPubKey);
         } catch (OperatorCreationException e) {
             log.error("Could not create ContentVerifierProvider from public key", e);
             return false;
@@ -145,7 +136,8 @@ public class CertificateHandler {
      * @throws InvalidAlgorithmParameterException Thrown if keystore loading fails
      * @throws CertPathValidatorException Thrown if certificate is invalid.
      */
-    public static boolean verifyCertificateChain(X509Certificate certificate, KeyStore ks) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, InvalidAlgorithmParameterException, CertPathValidatorException {
+    public static boolean verifyCertificateChain(X509Certificate certificate, KeyStore ks) throws KeyStoreException,
+            NoSuchAlgorithmException, CertificateException, InvalidAlgorithmParameterException, CertPathValidatorException {
 
         // Create the certificate path to verify - in this case just the given certificate
         List<Certificate> certList = Collections.singletonList(certificate);
@@ -226,7 +218,7 @@ public class CertificateHandler {
         // Restore some needed newlines
         certificateContent = certificateContent.replace("-----BEGIN" + System.lineSeparator() + "CERTIFICATE-----", "-----BEGIN CERTIFICATE-----");
         certificateContent = certificateContent.replace("-----END" + System.lineSeparator() + "CERTIFICATE-----", "-----END CERTIFICATE-----");
-        if (certificateContent == null || certificateContent.length() < 10) {
+        if (certificateContent.trim().isEmpty() || certificateContent.length() < 10) {
             log.debug("No certificate content found");
             return null;
         }
@@ -303,7 +295,7 @@ public class CertificateHandler {
         if (san != null) {
             // Use the type OtherName to search for the certified server name
             StringBuilder permissions = new StringBuilder();
-            for (List item : san) {
+            for (List<?> item : san) {
                 Integer type = (Integer) item.get(0);
                 if (type == 0) {
                     // Type OtherName found so return the associated value
@@ -336,40 +328,40 @@ public class CertificateHandler {
                     }
                     log.debug("oid: " + oid + ", value: " + value);
                     switch (oid) {
-                        case MC_OID_FLAGSTATE:
+                        case PKIConstants.MC_OID_FLAGSTATE:
                             identity.setFlagState(value);
                             break;
-                        case MC_OID_CALLSIGN:
+                        case PKIConstants.MC_OID_CALLSIGN:
                             identity.setCallSign(value);
                             break;
-                        case MC_OID_IMO_NUMBER:
+                        case PKIConstants.MC_OID_IMO_NUMBER:
                             identity.setImoNumber(value);
                             break;
-                        case MC_OID_MMSI_NUMBER:
+                        case PKIConstants.MC_OID_MMSI_NUMBER:
                             identity.setMmsiNumber(value);
                             break;
-                        case MC_OID_AIS_SHIPTYPE:
+                        case PKIConstants.MC_OID_AIS_SHIPTYPE:
                             identity.setAisShipType(value);
                             break;
-                        case MC_OID_PORT_OF_REGISTER:
+                        case PKIConstants.MC_OID_PORT_OF_REGISTER:
                             identity.setPortOfRegister(value);
                             break;
-                        case MC_OID_MRN: // primary MRN
+                        case PKIConstants.MC_OID_MRN: // primary MRN
                             identity.setMrn(value);
                             break;
-                        case MC_OID_MRN_SUBSIDIARY:
+                        case PKIConstants.MC_OID_MRN_SUBSIDIARY:
                             identity.setMrnSubsidiary(value);
                             break;
-                        case MC_OID_HOME_MMS_URL:
+                        case PKIConstants.MC_OID_HOME_MMS_URL:
                             identity.setHomeMmsUrl(value);
                             break;
-                        case MC_OID_SHIP_MRN:
+                        case PKIConstants.MC_OID_SHIP_MRN:
                             identity.setShipMrn(value);
                             break;
-                        case MC_OID_URL:
+                        case PKIConstants.MC_OID_URL:
                             identity.setUrl(value);
                             break;
-                        case MC_OID_PERMISSIONS:
+                        case PKIConstants.MC_OID_PERMISSIONS:
                             if (value != null && !value.trim().isEmpty()) {
                                 if (permissions.length() == 0) {
                                     permissions = new StringBuilder(value);

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package net.maritimecloud.pki;
+package net.maritimeconnectivity.pki;
 
 
 public class PKIConstants {
@@ -24,6 +24,7 @@ public class PKIConstants {
     public static final String KEYSTORE_TYPE = "jks";
     public static final String SIGNER_ALGORITHM = "SHA384withECDSA";
     public static final String ELLIPTIC_CURVE = "secp384r1";
+    public static final String PKCS11 = "PKCS11";
 
     // OIDs used for the extra info stored in the SubjectAlternativeName extension
     // Generate more random OIDs at http://www.itu.int/en/ITU-T/asn1/Pages/UUID/generate_uuid.aspx

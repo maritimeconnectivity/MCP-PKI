@@ -1,4 +1,4 @@
-package net.maritimecloud.pki.ocsp;
+package net.maritimeconnectivity.pki.ocsp;
 
 /*
  * The MIT License
@@ -23,19 +23,14 @@ package net.maritimecloud.pki.ocsp;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+//package org.poreid.verify.ocsp;
 
 /**
  *
  * @author POReID
  */
-public class OCSPValidationException extends Exception{
-
-    public OCSPValidationException(String msg, Throwable cause){
-        super(msg, cause);
-    }
-
-    public OCSPValidationException(String msg) {
-        super(msg);
-    }
-
+public enum CertStatus {
+    GOOD,
+    REVOKED,
+    UNKNOWN
 }

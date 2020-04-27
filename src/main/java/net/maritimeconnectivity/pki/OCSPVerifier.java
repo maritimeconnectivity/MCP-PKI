@@ -13,10 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package net.maritimecloud.pki;
+package net.maritimeconnectivity.pki;
 
-import net.maritimecloud.pki.ocsp.OCSPClient;
-import net.maritimecloud.pki.ocsp.OCSPValidationException;
+import net.maritimeconnectivity.pki.ocsp.OCSPClient;
+import net.maritimeconnectivity.pki.ocsp.OCSPValidationException;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.ocsp.RevokedStatus;
@@ -26,8 +26,13 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.CRLReason;
 import java.security.cert.X509Certificate;
+import java.util.Optional;
 
 public class OCSPVerifier {
+
+    private OCSPVerifier() {
+        // empty on purpose
+    }
 
     /**
      * Verifies a certificate against a its issuer using OCSP. In most cases you should probably use
@@ -66,8 +71,9 @@ public class OCSPVerifier {
             info.setStatus(ocspClient.getCertificateStatus());
         } else {
             info.setStatus(ocspClient.getCertificateStatus());
-            if (ocspClient.getRevokedStatus().isPresent()) {
-                RevokedStatus rs = ocspClient.getRevokedStatus().get();
+            Optional<RevokedStatus> revokedStatus = ocspClient.getRevokedStatus();
+            if (revokedStatus.isPresent()) {
+                RevokedStatus rs = revokedStatus.get();
                 info.setRevokeReason(CRLReason.values()[rs.getRevocationReason()]);
                 info.setRevokedAt(rs.getRevocationTime());
             }

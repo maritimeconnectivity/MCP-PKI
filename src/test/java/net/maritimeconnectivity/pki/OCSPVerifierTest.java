@@ -13,14 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package net.maritimecloud.pki;
+package net.maritimeconnectivity.pki;
 
-import net.maritimecloud.pki.ocsp.CertStatus;
-import net.maritimecloud.pki.ocsp.OCSPClient;
-import net.maritimecloud.pki.ocsp.OCSPValidationException;
+import net.maritimeconnectivity.pki.ocsp.CertStatus;
+import net.maritimeconnectivity.pki.ocsp.OCSPClient;
+import net.maritimeconnectivity.pki.ocsp.OCSPValidationException;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.net.URL;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;

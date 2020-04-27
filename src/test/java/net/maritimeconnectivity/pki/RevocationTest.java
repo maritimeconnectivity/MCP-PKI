@@ -13,9 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package net.maritimecloud.pki;
+package net.maritimeconnectivity.pki;
 
-import net.maritimecloud.pki.ocsp.CertStatus;
+import net.maritimeconnectivity.pki.ocsp.CertStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,7 +61,7 @@ class RevocationTest {
 
         // Generate the CRL
         KeyStore.PrivateKeyEntry keyEntry = kh.getSigningCertEntry("urn:mrn:mcl:ca:maritimecloud-idreg");
-        X509CRL crl = Revocation.generateCRL(infos, keyEntry);
+        X509CRL crl = Revocation.generateCRL(infos, keyEntry, null);
 
         // Verify that the CRL was signed
         try {

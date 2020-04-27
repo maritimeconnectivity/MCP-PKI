@@ -13,11 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package net.maritimecloud.pki;
+package net.maritimeconnectivity.pki;
 
 
 import lombok.extern.slf4j.Slf4j;
-import net.maritimecloud.pki.exception.PKIRuntimeException;
+import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
+import net.maritimeconnectivity.pki.pkcs11.P11PKIConfiguration;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.FileInputStream;
@@ -31,8 +32,6 @@ import java.security.Security;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-
-import static net.maritimecloud.pki.PKIConstants.KEYSTORE_TYPE;
 
 @Slf4j
 public class KeystoreHandler {
@@ -52,8 +51,25 @@ public class KeystoreHandler {
      * @return a PrivateKeyEntry of the signing certificate
      */
     public KeyStore.PrivateKeyEntry getSigningCertEntry(String alias) {
+        if (pkiConfiguration instanceof P11PKIConfiguration) {
+            P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
+            try {
+                KeyStore keyStore = KeyStore.getInstance("PKCS11", p11PKIConfiguration.getProvider());
+                keyStore.load(null, p11PKIConfiguration.getPkcs11Pin());
+                return (KeyStore.PrivateKeyEntry) keyStore.getEntry(alias, null);
+            } catch (KeyStoreException e) {
+                log.error("Could not create PKCS#11 keystore");
+                throw new PKIRuntimeException(e.getMessage(), e);
+            } catch (NoSuchAlgorithmException | CertificateException | IOException e) {
+                log.error("Could not open PKCS#11 keystore");
+                throw new PKIRuntimeException(e.getMessage(), e);
+            } catch (UnrecoverableEntryException e) {
+                log.error("Could not get CA entry from PKCS#11 keystore");
+                throw new PKIRuntimeException(e.getMessage(), e);
+            }
+        }
         try (FileInputStream is = new FileInputStream(pkiConfiguration.getSubCaKeystorePath())) {
-            KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
+            KeyStore keyStore = KeyStore.getInstance(PKIConstants.KEYSTORE_TYPE);
             keyStore.load(is, pkiConfiguration.getSubCaKeystorePassword().toCharArray());
             KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(pkiConfiguration.getSubCaKeyPassword().toCharArray());
             return (KeyStore.PrivateKeyEntry) keyStore.getEntry(alias, protParam);
@@ -75,7 +91,7 @@ public class KeystoreHandler {
     public Certificate getMCPCertificate(String alias) {
         log.debug(pkiConfiguration.getTruststorePath());
         try (FileInputStream is = new FileInputStream(pkiConfiguration.getTruststorePath())) {
-            KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
+            KeyStore keyStore = KeyStore.getInstance(PKIConstants.KEYSTORE_TYPE);
             keyStore.load(is, pkiConfiguration.getTruststorePassword().toCharArray());
             return keyStore.getCertificate(alias);
         } catch (FileNotFoundException e) {
@@ -94,7 +110,7 @@ public class KeystoreHandler {
      */
     public KeyStore getTrustStore() {
         try (FileInputStream is = new FileInputStream(pkiConfiguration.getTruststorePath())) {
-            KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
+            KeyStore keyStore = KeyStore.getInstance(PKIConstants.KEYSTORE_TYPE);
             keyStore.load(is, pkiConfiguration.getTruststorePassword().toCharArray());
             return keyStore;
         } catch (FileNotFoundException e) {

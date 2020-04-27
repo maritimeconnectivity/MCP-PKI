@@ -13,9 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package net.maritimecloud.pki;
+package net.maritimeconnectivity.pki;
 
-import net.maritimecloud.pki.ocsp.CertStatus;
+import net.maritimeconnectivity.pki.ocsp.CertStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,13 +23,12 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.security.cert.CRLException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateParsingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
-import static net.maritimecloud.pki.TestUtils.getEcdisCert;
-import static net.maritimecloud.pki.TestUtils.getMyBoatCert;
+import static net.maritimeconnectivity.pki.TestUtils.getEcdisCert;
+import static net.maritimeconnectivity.pki.TestUtils.getMyBoatCert;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;

@@ -13,10 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package net.maritimecloud.pki;
+package net.maritimeconnectivity.pki;
 
 
-import net.maritimecloud.pki.exception.PKIRuntimeException;
+import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
@@ -44,8 +44,10 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.util.BigIntegers;
+import sun.security.pkcs11.SunPKCS11;
 
 import java.math.BigInteger;
+import java.security.AuthProvider;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -66,11 +68,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-
-import static net.maritimecloud.pki.PKIConstants.BC_PROVIDER_NAME;
-import static net.maritimecloud.pki.PKIConstants.CERT_EXPIRE_YEAR;
-import static net.maritimecloud.pki.PKIConstants.ELLIPTIC_CURVE;
-import static net.maritimecloud.pki.PKIConstants.SIGNER_ALGORITHM;
 
 public class CertificateBuilder {
 
@@ -100,11 +97,11 @@ public class CertificateBuilder {
      * @throws Exception Throws exception on certificate generation errors.
      */
     public X509Certificate buildAndSignCert(BigInteger serialNumber, PrivateKey signerPrivateKey, PublicKey signerPublicKey, PublicKey subjectPublicKey, X500Name issuer, X500Name subject,
-                                            Map<String, String> customAttrs, String type, String ocspUrl, String crlUrl) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException {
+                                            Map<String, String> customAttrs, String type, String ocspUrl, String crlUrl, AuthProvider p11AuthProvider) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException {
         // Dates are converted to GMT/UTC inside the cert builder
         Calendar cal = Calendar.getInstance();
         Date now = cal.getTime();
-        Date expire = new GregorianCalendar(CERT_EXPIRE_YEAR, 0, 1).getTime();
+        Date expire = new GregorianCalendar(PKIConstants.CERT_EXPIRE_YEAR, 0, 1).getTime();
         X509v3CertificateBuilder certV3Bldr = new JcaX509v3CertificateBuilder(issuer,
                 serialNumber,
                 now, // Valid from now...
@@ -166,10 +163,14 @@ public class CertificateBuilder {
             certV3Bldr.addExtension(Extension.authorityInfoAccess, false, authorityInformationAccess);
         }
         // Create the key signer
-        JcaContentSignerBuilder builder = new JcaContentSignerBuilder(SIGNER_ALGORITHM);
-        builder.setProvider(BC_PROVIDER_NAME);
+        JcaContentSignerBuilder builder = new JcaContentSignerBuilder(PKIConstants.SIGNER_ALGORITHM);
+        if (p11AuthProvider != null) {
+            builder.setProvider(p11AuthProvider);
+        } else {
+            builder.setProvider(PKIConstants.BC_PROVIDER_NAME);
+        }
         ContentSigner signer = builder.build(signerPrivateKey);
-        return new JcaX509CertificateConverter().setProvider(BC_PROVIDER_NAME).getCertificate(certV3Bldr.build(signer));
+        return new JcaX509CertificateConverter().setProvider(PKIConstants.BC_PROVIDER_NAME).getCertificate(certV3Bldr.build(signer));
     }
 
     /**
@@ -186,7 +187,8 @@ public class CertificateBuilder {
      */
     public X509Certificate generateCertForEntity(BigInteger serialNumber, String country, String orgName, String type,
                                                  String callName, String email, String uid, PublicKey publickey,
-                                                 Map<String, String> customAttr, String signingAlias, String baseCrlOcspURI) throws CertificateException, OperatorCreationException, CertIOException, NoSuchAlgorithmException {
+                                                 Map<String, String> customAttr, String signingAlias, String baseCrlOcspURI,
+                                                 AuthProvider p11AuthProvider) throws CertificateException, OperatorCreationException, CertIOException, NoSuchAlgorithmException {
         KeyStore.PrivateKeyEntry signingCertEntry = keystoreHandler.getSigningCertEntry(signingAlias);
         Certificate signingCert = signingCertEntry.getCertificate();
         X509Certificate signingX509Cert = (X509Certificate) signingCert;
@@ -216,8 +218,8 @@ public class CertificateBuilder {
         String ocspUrl  = baseCrlOcspURI + "ocsp/" + alias;
         String crlUrl = baseCrlOcspURI + "crl/" + alias;
         return buildAndSignCert(serialNumber, signingCertEntry.getPrivateKey(), signingX509Cert.getPublicKey(),
-                    publickey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(orgSubjectDn), customAttr, "ENTITY",
-                    ocspUrl, crlUrl);
+                    publickey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(orgSubjectDn),
+                    customAttr, "ENTITY", ocspUrl, crlUrl, p11AuthProvider);
     }
 
     /**
@@ -225,17 +227,39 @@ public class CertificateBuilder {
      *
      * @return The generated keypair
      */
-    public static KeyPair generateKeyPair() {
-        ECGenParameterSpec ecGenSpec = new ECGenParameterSpec(ELLIPTIC_CURVE);
+    public static KeyPair generateKeyPair(AuthProvider provider) {
+        ECGenParameterSpec ecGenSpec = new ECGenParameterSpec(PKIConstants.ELLIPTIC_CURVE);
         KeyPairGenerator g;
         try {
-            g = KeyPairGenerator.getInstance("ECDSA", BC_PROVIDER_NAME);
+            g = KeyPairGenerator.getInstance("ECDSA", PKIConstants.BC_PROVIDER_NAME);
         } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
         }
         try {
-            g.initialize(ecGenSpec, new SecureRandom());
-        } catch (InvalidAlgorithmParameterException e) {
+            SecureRandom secureRandom;
+            if (provider instanceof SunPKCS11) {
+                secureRandom = SecureRandom.getInstance(PKIConstants.PKCS11, provider);
+            } else {
+                secureRandom = new SecureRandom();
+            }
+            g.initialize(ecGenSpec, secureRandom);
+        } catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
+            throw new PKIRuntimeException(e.getMessage(), e);
+        }
+        return g.generateKeyPair();
+    }
+
+    /**
+     * Generates a keypair (public and private) based on Elliptic curves on a HSM using PKCS#11
+     * @return The generated keypair
+     */
+    public static KeyPair generateKeyPairPKCS11(AuthProvider provider) {
+        ECGenParameterSpec ecGenSpec = new ECGenParameterSpec(PKIConstants.ELLIPTIC_CURVE);
+        KeyPairGenerator g;
+        try {
+            g = KeyPairGenerator.getInstance("EC", provider);
+            g.initialize(ecGenSpec, SecureRandom.getInstance(PKIConstants.PKCS11, provider));
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
         }
         return g.generateKeyPair();
@@ -246,14 +270,20 @@ public class CertificateBuilder {
      *
      * @return a unique serialnumber
      */
-    public BigInteger generateSerialNumber() {
+    public BigInteger generateSerialNumber(AuthProvider p11AuthProvider) {
         // BigInteger => NUMERICAL(50) MySQL
         // Max number supported in X509 serial number 2^159-1 = 730750818665451459101842416358141509827966271487
         BigInteger maxValue = new BigInteger("730750818665451459101842416358141509827966271487");
         // Min number 2^32-1 = 4294967296 - we set a minimum value to avoid collisions with old certificates that has used seq numbers
-        BigInteger minValue = new BigInteger("4294967296");
+        BigInteger minValue = BigInteger.ZERO;
+        if (p11AuthProvider instanceof SunPKCS11) {
+            try {
+                return BigIntegers.createRandomInRange(minValue, maxValue, SecureRandom.getInstance("PKCS11", p11AuthProvider));
+            } catch (NoSuchAlgorithmException e) {
+                throw new PKIRuntimeException(e.getMessage(), e);
+            }
+        }
         return BigIntegers.createRandomInRange(minValue, maxValue, random);
-        //return new BigInteger(159, random).abs();
     }
 
     /**
@@ -265,7 +295,7 @@ public class CertificateBuilder {
         HashMap<String, String> commasConverted = new HashMap<>();
         String[] values = new String[] {orgName, type, callName, uid};
         for (int i = 0; i < values.length; i++) {
-            values[i] = values[i].replaceAll(",", "\u201A");
+            values[i] = values[i].replace(",", "\u201A");
         }
 
         commasConverted.put("orgName", values[0]);

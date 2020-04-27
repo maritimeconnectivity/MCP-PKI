@@ -13,9 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package net.maritimecloud.pki;
+package net.maritimeconnectivity.pki;
 
 import lombok.extern.slf4j.Slf4j;
+import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.CRLReason;
@@ -37,10 +38,12 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import sun.security.pkcs11.SunPKCS11;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.AuthProvider;
 import java.security.KeyStore;
 import java.security.PublicKey;
 import java.security.cert.CRLException;
@@ -51,9 +54,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import static net.maritimecloud.pki.CertificateHandler.getPemFromEncoded;
-import static net.maritimecloud.pki.PKIConstants.BC_PROVIDER_NAME;
-import static net.maritimecloud.pki.PKIConstants.SIGNER_ALGORITHM;
+import static net.maritimeconnectivity.pki.CertificateHandler.getPemFromEncoded;
+import static net.maritimeconnectivity.pki.PKIConstants.BC_PROVIDER_NAME;
+import static net.maritimeconnectivity.pki.PKIConstants.SIGNER_ALGORITHM;
 
 @Slf4j
 public class Revocation {
@@ -97,7 +100,7 @@ public class Revocation {
      * @param keyEntry Private key to sign the CRL
      * @return a CRL
      */
-    public static X509CRL generateCRL(List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry) {
+    public static X509CRL generateCRL(List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, AuthProvider authProvider) {
         Date now = new Date();
         Calendar cal = Calendar.getInstance();
         cal.setTime(now);
@@ -106,7 +109,7 @@ public class Revocation {
         try {
             signCertX500Name = new JcaX509CertificateHolder((X509Certificate) keyEntry.getCertificate()).getSubject().toString();
         } catch (CertificateEncodingException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return null;
         }
         X509v2CRLBuilder crlBuilder = new X509v2CRLBuilder(new X500Name(signCertX500Name), now);
@@ -114,17 +117,18 @@ public class Revocation {
         for (RevocationInfo cert : revokedCerts) {
             crlBuilder.addCRLEntry(cert.getSerialNumber(), cert.getRevokedAt(), cert.getRevokeReason().ordinal());
         }
-        //crlBuilder.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
-        //crlBuilder.addExtension(X509Extensions.CRLNumber, false, new CRLNumber(BigInteger.valueOf(1)));
 
         JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder(SIGNER_ALGORITHM);
-        signBuilder.setProvider(BC_PROVIDER_NAME);
+        if (authProvider instanceof SunPKCS11) {
+            signBuilder.setProvider(authProvider);
+        } else {
+            signBuilder.setProvider(BC_PROVIDER_NAME);
+        }
         ContentSigner signer;
         try {
             signer = signBuilder.build(keyEntry.getPrivateKey());
         } catch (OperatorCreationException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            log.error(e1.getMessage(), e1);
             return null;
         }
 
@@ -135,8 +139,7 @@ public class Revocation {
         try {
             crl = converter.getCRL(cRLHolder);
         } catch (CRLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
         return crl;
     }
@@ -148,8 +151,9 @@ public class Revocation {
      * @param revokedCerts  List of the serialnumbers that should be revoked.
      * @param keyEntry Private key to sign the CRL
      * @param outputCaCrlPath Where to place the CRL
+     * @param pkcs11Provider PKCS#11 provider. If null default BC provider will be used.
      */
-    public static void generateRootCACRL(String signName, List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, String outputCaCrlPath) {
+    public static void generateRootCACRL(String signName, List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, String outputCaCrlPath, AuthProvider pkcs11Provider) {
         Date now = new Date();
         Calendar cal = Calendar.getInstance();
         cal.setTime(now);
@@ -161,17 +165,18 @@ public class Revocation {
                 crlBuilder.addCRLEntry(cert.getSerialNumber(), cert.getRevokedAt(), cert.getRevokeReason().ordinal());
             }
         }
-        //crlBuilder.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
-        //crlBuilder.addExtension(X509Extensions.CRLNumber, false, new CRLNumber(BigInteger.valueOf(1)));
 
         JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder(SIGNER_ALGORITHM);
-        signBuilder.setProvider(BC_PROVIDER_NAME);
+        if (pkcs11Provider != null) {
+            signBuilder.setProvider(pkcs11Provider);
+        } else {
+            signBuilder.setProvider(BC_PROVIDER_NAME);
+        }
         ContentSigner signer;
         try {
             signer = signBuilder.build(keyEntry.getPrivateKey());
         } catch (OperatorCreationException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            log.error(e1.getMessage(), e1);
             return;
         }
 
@@ -182,21 +187,19 @@ public class Revocation {
         try {
             crl = converter.getCRL(cRLHolder);
         } catch (CRLException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new PKIRuntimeException(e.getMessage(), e);
         }
         String pemCrl;
         try {
             pemCrl = getPemFromEncoded("X509 CRL", crl.getEncoded());
         } catch (CRLException e) {
-            //log.warn("unable to generate RootCACRL", e);
+            log.error("unable to generate RootCACRL", e);
             return;
         }
-        try {
-            BufferedWriter writer = new BufferedWriter( new FileWriter(outputCaCrlPath));
+        try (BufferedWriter writer = new BufferedWriter( new FileWriter(outputCaCrlPath))) {
             writer.write(pemCrl);
-            writer.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 

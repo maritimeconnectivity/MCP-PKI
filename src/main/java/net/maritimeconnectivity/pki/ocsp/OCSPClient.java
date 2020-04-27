@@ -1,4 +1,4 @@
-package net.maritimecloud.pki.ocsp;
+package net.maritimeconnectivity.pki.ocsp;
 
 /*
  * The MIT License
@@ -30,7 +30,7 @@ package net.maritimecloud.pki.ocsp;
  * @author POReID
  */
 
-import net.maritimecloud.pki.PKIConstants;
+import net.maritimeconnectivity.pki.PKIConstants;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEROctetString;
