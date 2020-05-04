@@ -38,6 +38,7 @@ public class Main {
     private static final String PRINT_OUT_CERTIFICATE = "print-certificate";
     private static final String ROOT_CA_ALIAS = "root-ca-alias";
     private static final String NO_ROOT_CA_ALIAS_REQUIRED = "";
+    private static final String VALIDITY_PERIOD = "validity-period";
     private static final String PKCS11 = "pkcs11";
     private static final String PKCS11_CONFIG = "pkcs11-conf";
     private static final String PKCS11_PIN = "pkcs11-pin";
@@ -62,6 +63,7 @@ public class Main {
         options.addOption("xn", X500_NAME, true, "Key password.");
         options.addOption("crl", CRL_ENDPOINT, true, "CRL endpoint");
         options.addOption("rt", ROOT_CA_ALIAS, true, "Root CA alias");
+        options.addOption("vp", VALIDITY_PERIOD, true, "Validity period in year");
 
         // Generate root CRL
         options.addOption("grc", GENERATE_ROOT_CRL, false, "Generate CRL for root CA. Requires the parameters: " + String.join(", ", ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD, ROOT_CRL_PATH, REVOKED_SUBCA_FILE));
@@ -106,7 +108,7 @@ public class Main {
         KeystoreHandler keystoreHandler = new KeystoreHandler(pkiConfiguration);
         CertificateBuilder certificateBuilder = new CertificateBuilder(keystoreHandler);
         CAHandler caHandler = new CAHandler(certificateBuilder, pkiConfiguration);
-        caHandler.initRootCA(cmd.getOptionValue(X500_NAME), cmd.getOptionValue(CRL_ENDPOINT), cmd.getOptionValue(ROOT_CA_ALIAS));
+        caHandler.initRootCA(cmd.getOptionValue(X500_NAME), cmd.getOptionValue(CRL_ENDPOINT), cmd.getOptionValue(ROOT_CA_ALIAS), Integer.parseInt(cmd.getOptionValue(VALIDITY_PERIOD)));
     }
 
     private void initCAPKCS11(CommandLine cmd) {
@@ -121,7 +123,7 @@ public class Main {
         KeystoreHandler keystoreHandler = new KeystoreHandler(pkiConfiguration);
         CertificateBuilder certificateBuilder = new CertificateBuilder(keystoreHandler);
         CAHandler caHandler = new CAHandler(certificateBuilder, pkiConfiguration);
-        caHandler.initRootCAPKCS11(cmd.getOptionValue(X500_NAME), cmd.getOptionValue(CRL_ENDPOINT), cmd.getOptionValue(ROOT_CA_ALIAS));
+        caHandler.initRootCAPKCS11(cmd.getOptionValue(X500_NAME), cmd.getOptionValue(CRL_ENDPOINT), cmd.getOptionValue(ROOT_CA_ALIAS), Integer.parseInt(cmd.getOptionValue(VALIDITY_PERIOD)));
     }
 
     private void genRootCRL(CommandLine cmd) {
@@ -172,7 +174,7 @@ public class Main {
         CertificateBuilder certificateBuilder = new CertificateBuilder(keystoreHandler);
         CAHandler caHandler = new CAHandler(certificateBuilder, pkiConfiguration);
 
-        caHandler.createSubCa(cmd.getOptionValue(X500_NAME), cmd.getOptionValue(ROOT_CA_ALIAS));
+        caHandler.createSubCa(cmd.getOptionValue(X500_NAME), cmd.getOptionValue(ROOT_CA_ALIAS), Integer.parseInt(cmd.getOptionValue(VALIDITY_PERIOD)));
     }
 
     private void createSubCAPKCS11(CommandLine cmd) {
@@ -211,7 +213,7 @@ public class Main {
         CertificateBuilder certificateBuilder = new CertificateBuilder(keystoreHandler);
         CAHandler caHandler = new CAHandler(certificateBuilder, rootPkiConfiguration);
 
-        caHandler.createSubCAPKCS11(cmd.getOptionValue(X500_NAME), cmd.getOptionValue(ROOT_CA_ALIAS), subPkiConfiguration);
+        caHandler.createSubCAPKCS11(cmd.getOptionValue(X500_NAME), cmd.getOptionValue(ROOT_CA_ALIAS), subPkiConfiguration, Integer.parseInt(cmd.getOptionValue(VALIDITY_PERIOD)));
     }
 
     public void verifyCertificate(CommandLine cmd) {

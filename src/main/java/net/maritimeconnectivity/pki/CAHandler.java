@@ -67,7 +67,7 @@ public class CAHandler {
      * @param subCaCertDN The DN of the new sub CA certificate.
      * @param rootCAAlias The alias of the root CA
      */
-    public void createSubCa(String subCaCertDN, String rootCAAlias) {
+    public void createSubCa(String subCaCertDN, String rootCAAlias, int validityPeriod) {
 
         // Open the various keystores
         KeyStore rootKeystore;
@@ -125,7 +125,7 @@ public class CAHandler {
         }
         try {
             subCaCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(null), rootCertEntry.getPrivateKey(), rootCertEntry.getCertificate().getPublicKey(),
-                    subCaKeyPair.getPublic(), rootCertX500Name, subCaCertX500Name, null, "INTERMEDIATE", null, crlUrl, null);
+                    subCaKeyPair.getPublic(), rootCertX500Name, subCaCertX500Name, null, "INTERMEDIATE", null, crlUrl, null, validityPeriod);
         } catch (Exception e) {
             throw new PKIRuntimeException("Could not create sub CA certificate!", e);
         }
@@ -157,7 +157,7 @@ public class CAHandler {
      * @param rootCAAlias The alias of the root CA
      * @param subCaConfiguration Holds the configuration for the sub CA HSM. Must be a P11PKIConfiguration
      */
-    public void createSubCAPKCS11(String subCaCertDN, String rootCAAlias, PKIConfiguration subCaConfiguration) {
+    public void createSubCAPKCS11(String subCaCertDN, String rootCAAlias, PKIConfiguration subCaConfiguration, int validityPeriod) {
         if (!(pkiConfiguration instanceof P11PKIConfiguration) || !(subCaConfiguration instanceof P11PKIConfiguration)) {
             throw new PKIRuntimeException("This function can only be called when used with an HSM");
         }
@@ -220,7 +220,7 @@ public class CAHandler {
         }
         try {
             subCaCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(rootP11PKIConfiguration.getProvider()), rootCertEntry.getPrivateKey(), rootCertEntry.getCertificate().getPublicKey(),
-                    subCaKeyPair.getPublic(), rootCertX500Name, subCaCertX500Name, null, "INTERMEDIATE", null, crlUrl, rootP11PKIConfiguration.getProvider());
+                    subCaKeyPair.getPublic(), rootCertX500Name, subCaCertX500Name, null, "INTERMEDIATE", null, crlUrl, rootP11PKIConfiguration.getProvider(), validityPeriod);
         } catch (Exception e) {
             rootP11PKIConfiguration.providerLogout();
             subCaP11PKIConfiguration.providerLogout();
@@ -255,7 +255,7 @@ public class CAHandler {
      * @param crlUrl CRL endpoint
      * @param rootCAAlias The alias of the root CA
      */
-    public void initRootCA(String rootCertX500Name, String crlUrl, String rootCAAlias) {
+    public void initRootCA(String rootCertX500Name, String crlUrl, String rootCAAlias, int validityPeriod) {
         KeyPair cakp = CertificateBuilder.generateKeyPair(null);
         KeyStore rootks;
         KeyStore ts;
@@ -266,7 +266,7 @@ public class CAHandler {
             rootks.load(null, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
             // Store away the keystore.
             X509Certificate cacert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(null), cakp.getPrivate(), cakp.getPublic(), cakp.getPublic(),
-                        new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl, null);
+                        new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl, null, validityPeriod);
 
             Certificate[] certChain = new Certificate[1];
             certChain[0] = cacert;
@@ -293,7 +293,7 @@ public class CAHandler {
      * @param crlUrl CRL endpoint
      * @param rootCAAlias The alias of the root CA
      */
-    public void initRootCAPKCS11(String rootCertX500Name, String crlUrl, String rootCAAlias) {
+    public void initRootCAPKCS11(String rootCertX500Name, String crlUrl, String rootCAAlias, int validityPeriod) {
         if (!(pkiConfiguration instanceof P11PKIConfiguration)) {
             throw new PKIRuntimeException("This function can only be called when used with an HSM");
         }
@@ -306,7 +306,7 @@ public class CAHandler {
             rootKeyStore = KeyStore.getInstance(PKIConstants.PKCS11, p11PKIConfiguration.getProvider());
             rootKeyStore.load(null, p11PKIConfiguration.getPkcs11Pin());
             X509Certificate caCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(p11PKIConfiguration.getProvider()), caKeyPair.getPrivate(), caKeyPair.getPublic(), caKeyPair.getPublic(),
-                    new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl, p11PKIConfiguration.getProvider());
+                    new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl, p11PKIConfiguration.getProvider(), validityPeriod);
             Certificate[] certChain = new Certificate[1];
             certChain[0] = caCert;
             rootKeyStore.setKeyEntry(rootCAAlias, caKeyPair.getPrivate(), null, certChain);

@@ -61,6 +61,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -97,11 +98,15 @@ public class CertificateBuilder {
      * @throws Exception Throws exception on certificate generation errors.
      */
     public X509Certificate buildAndSignCert(BigInteger serialNumber, PrivateKey signerPrivateKey, PublicKey signerPublicKey, PublicKey subjectPublicKey, X500Name issuer, X500Name subject,
-                                            Map<String, String> customAttrs, String type, String ocspUrl, String crlUrl, AuthProvider p11AuthProvider) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException {
+                                            Map<String, String> customAttrs, String type, String ocspUrl, String crlUrl, AuthProvider p11AuthProvider, int validityPeriod) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException {
         // Dates are converted to GMT/UTC inside the cert builder
         Calendar cal = Calendar.getInstance();
         Date now = cal.getTime();
-        Date expire = new GregorianCalendar(PKIConstants.CERT_EXPIRE_YEAR, 0, 1).getTime();
+        if (validityPeriod <= 0) {
+            throw new IllegalArgumentException("The validity period length should be a positive integer number.");
+        }
+        cal.add(Calendar.YEAR, validityPeriod);
+        Date expire = cal.getTime();
         X509v3CertificateBuilder certV3Bldr = new JcaX509v3CertificateBuilder(issuer,
                 serialNumber,
                 now, // Valid from now...
@@ -188,7 +193,7 @@ public class CertificateBuilder {
     public X509Certificate generateCertForEntity(BigInteger serialNumber, String country, String orgName, String type,
                                                  String callName, String email, String uid, PublicKey publickey,
                                                  Map<String, String> customAttr, String signingAlias, String baseCrlOcspURI,
-                                                 AuthProvider p11AuthProvider) throws CertificateException, OperatorCreationException, CertIOException, NoSuchAlgorithmException {
+                                                 AuthProvider p11AuthProvider, int validityPeriod) throws CertificateException, OperatorCreationException, CertIOException, NoSuchAlgorithmException {
         KeyStore.PrivateKeyEntry signingCertEntry = keystoreHandler.getSigningCertEntry(signingAlias);
         Certificate signingCert = signingCertEntry.getCertificate();
         X509Certificate signingX509Cert = (X509Certificate) signingCert;
@@ -219,7 +224,7 @@ public class CertificateBuilder {
         String crlUrl = baseCrlOcspURI + "crl/" + alias;
         return buildAndSignCert(serialNumber, signingCertEntry.getPrivateKey(), signingX509Cert.getPublicKey(),
                     publickey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(orgSubjectDn),
-                    customAttr, "ENTITY", ocspUrl, crlUrl, p11AuthProvider);
+                    customAttr, "ENTITY", ocspUrl, crlUrl, p11AuthProvider, validityPeriod);
     }
 
     /**
