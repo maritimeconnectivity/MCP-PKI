@@ -36,6 +36,12 @@
             <organization>Maritime Connectivity Platform Consortium</organization>
             <organizationUrl>https://maritimeconnectivity.net/</organizationUrl>
         </developer>
+        <developer>
+            <name>Jinki Jung</name>
+            <email>jinki@dmc.international</email>
+            <organization>Maritime Connectivity Platform Consortium</organization>
+            <organizationUrl>https://maritimeconnectivity.net/</organizationUrl>
+        </developer>
     </developers>
 
     <dependencies>
