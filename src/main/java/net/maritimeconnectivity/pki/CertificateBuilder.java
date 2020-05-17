@@ -189,9 +189,9 @@ public class CertificateBuilder {
      * @return Returns a signed X509Certificate
      */
     public X509Certificate generateCertForEntity(BigInteger serialNumber, String country, String orgName, String type,
-                                                 String callName, String email, String uid, PublicKey publickey,
+                                                 String callName, String email, String uid, int validityPeriod, PublicKey publickey,
                                                  Map<String, String> customAttr, String signingAlias, String baseCrlOcspURI,
-                                                 AuthProvider p11AuthProvider, int validityPeriod) throws CertificateException, OperatorCreationException, CertIOException, NoSuchAlgorithmException {
+                                                 AuthProvider p11AuthProvider) throws CertificateException, OperatorCreationException, CertIOException, NoSuchAlgorithmException {
         KeyStore.PrivateKeyEntry signingCertEntry = keystoreHandler.getSigningCertEntry(signingAlias);
         Certificate signingCert = signingCertEntry.getCertificate();
         X509Certificate signingX509Cert = (X509Certificate) signingCert;

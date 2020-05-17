@@ -48,7 +48,7 @@ class CertificateBuilderTest {
         attrs.put(PKIConstants.MC_OID_HOME_MMS_URL, "http://smartnav.org/");
         X509Certificate userCert;
         try {
-            userCert = cb.generateCertForEntity(BigInteger.ONE, "DK", "urn:mrn:mcl:org:dma", "user", "Thomas Christensen", "thc@dma.dk", userMrn, certKeyPair.getPublic(), attrs, signingAlias, baseCrlOcspPath, null, 1);
+            userCert = cb.generateCertForEntity(BigInteger.ONE, "DK", "urn:mrn:mcl:org:dma", "user", "Thomas Christensen", "thc@dma.dk", userMrn, 1, certKeyPair.getPublic(), attrs, signingAlias, baseCrlOcspPath, null);
         } catch (Exception e) {
             e.printStackTrace();
             fail("An exception was thrown!");
