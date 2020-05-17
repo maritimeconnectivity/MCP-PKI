@@ -106,19 +106,27 @@ public class CertificateHandler {
             log.error("Created ContentVerifierProvider from root public key is null");
             return false;
         }
-        try {
-            if (certHolder.isSignatureValid(contentVerifierProvider)) {
-                if (verificationDate == null) {
-                    verificationDate = new Date();
-                }
-                if (verificationDate.after(certToVerify.getNotBefore()) && verificationDate.before(certToVerify.getNotAfter())) {
-                    return true;
-                }
-            }
-        } catch (CertException e) {
+        boolean signatureValidity = false;
+        try{
+            signatureValidity = certHolder.isSignatureValid(contentVerifierProvider);
+        } catch (CertException e){
             log.error("Error when trying to validate signature", e);
             return false;
         }
+
+        if(signatureValidity){
+            if (verificationDate == null) {
+                verificationDate = new Date();
+            }
+            if (verificationDate.after(certToVerify.getNotBefore()) && verificationDate.before(certToVerify.getNotAfter())) {
+                return true;
+            }
+            else{
+                log.error("Out of certificate validity period.");
+                return false;
+            }
+        }
+
         log.debug("Certificate does not seem to be valid!");
         return false;
     }
