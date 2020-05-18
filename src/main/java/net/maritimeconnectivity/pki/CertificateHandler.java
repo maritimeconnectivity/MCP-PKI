@@ -122,7 +122,7 @@ public class CertificateHandler {
                 return true;
             }
             else{
-                log.error("Out of certificate validity period.");
+                log.debug("Out of certificate validity period.");
                 return false;
             }
         }
