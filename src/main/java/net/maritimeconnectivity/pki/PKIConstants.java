@@ -17,8 +17,6 @@ package net.maritimeconnectivity.pki;
 
 
 public class PKIConstants {
-
-    public static final int CERT_EXPIRE_YEAR = 2025;
     //public static final String ROOT_CERT_ALIAS = "urn:mrn:mcl:ca:maritimecloud"; // removed for distributed MIR
     public static final String BC_PROVIDER_NAME = "BC";
     public static final String KEYSTORE_TYPE = "jks";
@@ -41,7 +39,6 @@ public class PKIConstants {
     public static final String MC_OID_MRN_SUBSIDIARY   = "2.25.133833610339604538603087183843785923701";
     public static final String MC_OID_HOME_MMS_URL     = "2.25.171344478791913547554566856023141401757";
     public static final String MC_OID_URL              = "2.25.245076023612240385163414144226581328607";
-
 
     // Used to identify the DNSName attribute in the X509 Extension: Subject Alternative Name.
     // String representation of org.bouncycastle.asn1.x509.GeneralName.dNSName
