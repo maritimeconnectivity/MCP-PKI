@@ -41,7 +41,7 @@ public class OCSPVerifier {
      *
      * @param cert Certificate to validate
      * @param trustStore Truststore containing the issuer certificate
-     * @return
+     * @return an OCSP result
      * @throws IOException
      * @throws KeyStoreException
      * @throws OCSPValidationException
@@ -60,7 +60,7 @@ public class OCSPVerifier {
      *
      * @param cert Certificate to validate
      * @param issuerCert The issuer certificate
-     * @return
+     * @return an OCSP result
      * @throws IOException
      * @throws OCSPValidationException
      */

@@ -126,7 +126,7 @@ public class KeystoreHandler {
      * Returns the public key of the sub CA certificate with the given alias
      *
      * @param alias Alias of a sub CA
-     * @return
+     * @return the public key of the specified sub CA
      */
     public PublicKey getPubKey(String alias) {
         Certificate cert = getMCPCertificate(alias);
