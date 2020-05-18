@@ -64,9 +64,9 @@ class CertificateBuilderTest {
 
         // check the validity period
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.YEAR, validityPeriod); // to get previous year add -1
+        cal.add(Calendar.YEAR, validityPeriod); // add one year to have an invalid date
         Date outOfBorder = cal.getTime();
-        cal.add(Calendar.DAY_OF_MONTH, -1); // to get previous year add -1
+        cal.add(Calendar.DAY_OF_MONTH, -1); // and minus one day from the invalid date to make it valid.
         Date withinBorder = cal.getTime();
         boolean withinBorderResult = CertificateHandler.verifyCertificate(kh.getPubKey(signingAlias), userCert, withinBorder);
         assertTrue(withinBorderResult);
