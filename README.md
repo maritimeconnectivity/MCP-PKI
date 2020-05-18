@@ -50,7 +50,8 @@ java -jar mc-pki-0.10.0-SNAPSHOT-jar-with-dependencies.jar \
     --root-key-password changeit \
     --root-ca-alias "urn:mrn:mcl:ca:maritimecloud" \
     --x500-name "C=DK, ST=Denmark, L=Copenhagen, O=MCP Test, OU=MCP Test, CN=MCP Test Root Certificate, E=info@maritimecloud.net" \
-    --crl-endpoint "https://localhost/x509/api/certificates/crl/urn:mrn:mcl:ca:maritimecloud"
+    --crl-endpoint "https://localhost/x509/api/certificates/crl/urn:mrn:mcl:ca:maritimecloud" \
+    --validity-period 10
 ```
 Note that the truststore and root-keystore will be overwritten! Also note that crl-endpoint should end with `urn:mrn:mcl:ca:maritimecloud` which is the value of *root-ca-alias*.
 
@@ -95,7 +96,8 @@ java -jar mc-pki-0.10.0-SNAPSHOT-jar-with-dependencies.jar \
     --subca-key-password changeit \
     --root-ca-alias "urn:mrn:mcl:ca:maritimecloud" \
     --x500-name "UID=urn:mrn:mcl:ca:maritimecloud-idreg, C=DK, ST=Denmark, L=Copenhagen, O=MaritimeCloud Test, OU=MaritimeCloud Test, CN=MaritimeCloud Test Identity Registry, E=info@maritimecloud.net" \
-    --crl-endpoint "https://localhost/x509/api/certificates/crl/urn:mrn:mcl:ca:maritimecloud-idreg"
+    --crl-endpoint "https://localhost/x509/api/certificates/crl/urn:mrn:mcl:ca:maritimecloud-idreg" \
+    --validity-period 5
 ```
 
 The UID will be used as alias when stored in the truststore and subca-keystore. The root-keystore and truststore is expected to exists, while the subca-keystore will be created if it does not exists.
