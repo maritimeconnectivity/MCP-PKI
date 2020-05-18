@@ -6,7 +6,7 @@ This is a library / cmdline tool used to manage and check certificates in the MC
 
 Building using maven should be as simple as running `mvn install`.
 
-The Maritime Connectivity Platform was formerly known as the Maritime Cloud and therefore there might still be references to that in this project.  
+Maritime Connectivity Platform is formerly known as the Maritime Cloud and therefore there might still be references to that in this project.  
 
 MCP-PKI implements the *certificate attributes* described in [the developer's page of identity registry](https://developers.maritimeconnectivity.net/identity/index.html#certificate-attributes) and used in [Maritime Identity Registry](https://github.com/MaritimeConnectivityPlatform/IdentityRegistry). 
 
@@ -53,7 +53,7 @@ java -jar mc-pki-0.10.0-SNAPSHOT-jar-with-dependencies.jar \
     --crl-endpoint "https://localhost/x509/api/certificates/crl/urn:mrn:mcl:ca:maritimecloud" \
     --validity-period 10
 ```
-Note that the truststore and root-keystore will be overwritten! Also note that crl-endpoint should end with `urn:mrn:mcl:ca:maritimecloud` which is the value of *root-ca-alias*.
+Note that the truststore and root-keystore will be overwritten! Also note that crl-endpoint should end with `urn:mrn:mcl:ca:maritimecloud` which is the value of *root-ca-alias*. The unit of *validity period* field is year. The root CA in this example will be valid for 10 years from the issued date.
 
 Change the passwords as you see fit.
 
