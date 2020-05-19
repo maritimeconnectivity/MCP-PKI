@@ -74,7 +74,6 @@ public class CAHandler {
         KeyStore subCaKeystore;
         KeyStore truststore;
         try (InputStream rootKeystoreIS = new FileInputStream(pkiConfiguration.getRootCaKeystorePath());
-             FileInputStream subCaFis = new FileInputStream(pkiConfiguration.getSubCaKeystorePath());
              FileInputStream trustFis = new FileInputStream(pkiConfiguration.getTruststorePath())
         ) {
             // Open the root keystore
@@ -84,6 +83,7 @@ public class CAHandler {
             // Open or create the sub CA keystore
             subCaKeystore = KeyStore.getInstance(PKIConstants.KEYSTORE_TYPE);
             if (new File(pkiConfiguration.getSubCaKeystorePath()).exists()) {
+                FileInputStream subCaFis = new FileInputStream(pkiConfiguration.getSubCaKeystorePath());
                 subCaKeystore.load(subCaFis, pkiConfiguration.getSubCaKeystorePassword().toCharArray());
             } else {
                 subCaKeystore.load(null, pkiConfiguration.getSubCaKeystorePassword().toCharArray());
