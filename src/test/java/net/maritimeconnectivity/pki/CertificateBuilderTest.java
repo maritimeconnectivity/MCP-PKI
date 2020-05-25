@@ -45,7 +45,7 @@ class CertificateBuilderTest {
         String permissions = "NONE";
         String baseCrlOcspPath = "https://localhost/x509/api/certificates/";
         String signingAlias = "urn:mrn:mcl:ca:maritimecloud-idreg";
-        int validityPeriod = 1;
+        int validityPeriod = 12;
         Map<String, String> attrs= new HashMap<String, String>();
         attrs.put(PKIConstants.MC_OID_MRN, userMrn);
         attrs.put(PKIConstants.MC_OID_PERMISSIONS, permissions);
@@ -64,7 +64,7 @@ class CertificateBuilderTest {
 
         // check the validity period
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.YEAR, validityPeriod); // add one year to have an invalid date
+        cal.add(Calendar.MONTH, validityPeriod); // add one year to have an invalid date
         Date outOfBorder = cal.getTime();
         cal.add(Calendar.DAY_OF_MONTH, -1); // and minus one day from the invalid date to make it valid.
         Date withinBorder = cal.getTime();

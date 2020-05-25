@@ -51,7 +51,7 @@ java -jar mcp-pki-0.11.0-SNAPSHOT-jar-with-dependencies.jar \
     --root-ca-alias "urn:mrn:mcl:ca:maritimecloud" \
     --x500-name "C=DK, ST=Denmark, L=Copenhagen, O=MCP Test, OU=MCP Test, CN=MCP Test Root Certificate, E=info@maritimecloud.net" \
     --crl-endpoint "https://localhost/x509/api/certificates/crl/urn:mrn:mcl:ca:maritimecloud" \
-    --validity-period 10
+    --validity-period 120
 ```
 Note that the truststore and root-keystore will be overwritten! Also note that crl-endpoint should end with `urn:mrn:mcl:ca:maritimecloud` which is the value of *root-ca-alias*. The unit of *validity period* field is year. The root CA in this example will be valid for 10 years from the issued date.
 
@@ -97,7 +97,7 @@ java -jar mcp-pki-0.11.0-SNAPSHOT-jar-with-dependencies.jar \
     --root-ca-alias "urn:mrn:mcl:ca:maritimecloud" \
     --x500-name "UID=urn:mrn:mcl:ca:maritimecloud-idreg, C=DK, ST=Denmark, L=Copenhagen, O=MaritimeCloud Test, OU=MaritimeCloud Test, CN=MaritimeCloud Test Identity Registry, E=info@maritimecloud.net" \
     --crl-endpoint "https://localhost/x509/api/certificates/crl/urn:mrn:mcl:ca:maritimecloud-idreg" \
-    --validity-period 5
+    --validity-period 60
 ```
 
 The UID will be used as alias when stored in the truststore and subca-keystore. The root-keystore and truststore is expected to exists, while the subca-keystore will be created if it does not exists.

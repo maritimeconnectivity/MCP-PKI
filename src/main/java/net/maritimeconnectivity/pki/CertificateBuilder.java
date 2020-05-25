@@ -103,7 +103,7 @@ public class CertificateBuilder {
         if (validityPeriod <= 0) {
             throw new IllegalArgumentException("The validity period length should be a positive integer number.");
         }
-        cal.add(Calendar.YEAR, validityPeriod);
+        cal.add(Calendar.MONTH, validityPeriod);
         Date expire = cal.getTime();
         X509v3CertificateBuilder certV3Bldr = new JcaX509v3CertificateBuilder(issuer,
                 serialNumber,
