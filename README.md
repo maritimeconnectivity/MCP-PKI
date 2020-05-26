@@ -53,7 +53,7 @@ java -jar mcp-pki-0.11.0-SNAPSHOT-jar-with-dependencies.jar \
     --crl-endpoint "https://localhost/x509/api/certificates/crl/urn:mrn:mcl:ca:maritimecloud" \
     --validity-period 120
 ```
-Note that the truststore and root-keystore will be overwritten! Also note that crl-endpoint should end with `urn:mrn:mcl:ca:maritimecloud` which is the value of *root-ca-alias*. The unit of *validity period* field is year. The root CA in this example will be valid for 10 years from the issued date.
+Note that the truststore and root-keystore will be overwritten! Also note that crl-endpoint should end with `urn:mrn:mcl:ca:maritimecloud` which is the value of *root-ca-alias*. The unit of *validity period* field is months. The root CA in this example will be valid for 10 years from the issued date.
 
 Change the passwords as you see fit.
 
