@@ -83,8 +83,9 @@ public class CAHandler {
             // Open or create the sub CA keystore
             subCaKeystore = KeyStore.getInstance(PKIConstants.KEYSTORE_TYPE);
             if (new File(pkiConfiguration.getSubCaKeystorePath()).exists()) {
-                FileInputStream subCaFis = new FileInputStream(pkiConfiguration.getSubCaKeystorePath());
-                subCaKeystore.load(subCaFis, pkiConfiguration.getSubCaKeystorePassword().toCharArray());
+                try (FileInputStream subCaFis = new FileInputStream(pkiConfiguration.getSubCaKeystorePath())) {
+                    subCaKeystore.load(subCaFis, pkiConfiguration.getSubCaKeystorePassword().toCharArray());
+                }
             } else {
                 subCaKeystore.load(null, pkiConfiguration.getSubCaKeystorePassword().toCharArray());
             }
