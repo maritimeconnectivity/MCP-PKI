@@ -234,9 +234,15 @@ public class Revocation {
      * @param signingCert PrivateKeyEntry of the signing certificate.
      * @return a OCSPResp
      */
-    public static OCSPResp generateOCSPResponse(BasicOCSPRespBuilder respBuilder, KeyStore.PrivateKeyEntry signingCert) {
+    public static OCSPResp generateOCSPResponse(BasicOCSPRespBuilder respBuilder, KeyStore.PrivateKeyEntry signingCert, AuthProvider authProvider) {
         try {
-            ContentSigner contentSigner = new JcaContentSignerBuilder(SIGNER_ALGORITHM).setProvider(BC_PROVIDER_NAME).build(signingCert.getPrivateKey());
+            JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder(SIGNER_ALGORITHM);
+            if (authProvider instanceof SunPKCS11) {
+                signBuilder.setProvider(authProvider);
+            } else {
+                signBuilder.setProvider(BC_PROVIDER_NAME);
+            }
+            ContentSigner contentSigner = signBuilder.build(signingCert.getPrivateKey());
             BasicOCSPResp basicResp = respBuilder.build(contentSigner,
                     new X509CertificateHolder[] { new X509CertificateHolder(signingCert.getCertificate().getEncoded()) }, new Date());
             // Set response as successful
