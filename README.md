@@ -102,6 +102,14 @@ java -jar mcp-pki-0.11.0-SNAPSHOT-jar-with-dependencies.jar \
 
 The UID will be used as alias when stored in the truststore and subca-keystore. The root-keystore and truststore is expected to exists, while the subca-keystore will be created if it does not exists.
 
+### Checking client certificate
+You can check the attributes of an MCP client certificate like this:
+```sh
+java -jar mcp-pki-0.11.0-SNAPSHOT-jar-with-dependencies.jar --print-certificate <certificate-name>.pem
+```
+
+Alternatively the [Identity Extractor Service](https://github.com/MaritimeConnectivityPlatform/IdentityExtractorService) which is the reference implementation of a web service visualizing the MCP certificate is available.
+
 ## License
 This software is distributed under the Apache License, Version 2.0.
 
