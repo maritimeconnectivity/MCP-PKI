@@ -61,17 +61,21 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 public class CertificateBuilder {
 
     private KeystoreHandler keystoreHandler;
     private SecureRandom random;
+
+    private final Set<Character> reservedCharacters = new HashSet<>(Arrays.asList(',', '+', '"', '\\', '<', '>', ';', '\f', '\r', '=', '/'));
 
     public CertificateBuilder(KeystoreHandler keystoreHandler) {
         this.keystoreHandler = keystoreHandler;
@@ -206,13 +210,11 @@ public class CertificateBuilder {
             }
         }
 
-        Map<String, String> commasConverted = convertCommas(orgName, type, callName, uid);
-
         String orgSubjectDn = "C=" + orgCountryCode + ", " +
-                "O=" + commasConverted.get("orgName") + ", " +
-                "OU=" + commasConverted.get("type") + ", " +
-                "CN=" + commasConverted.get("callName") + ", " +
-                "UID=" + commasConverted.get("uid");
+                "O=" + escapeSpecialCharacters(orgName) + ", " +
+                "OU=" + escapeSpecialCharacters(type) + ", " +
+                "CN=" + escapeSpecialCharacters(callName) + ", " +
+                "UID=" + escapeSpecialCharacters(uid);
         if (email != null && !email.isEmpty()) {
             orgSubjectDn += ", E=" + email;
         }
@@ -290,22 +292,28 @@ public class CertificateBuilder {
     }
 
     /**
-     * Converts any commas in the given strings to something that looks like a comma, but isn't
+     * Escapes characters that are reserved for DN attributes.
      *
-     * @return a HashMap of the converted strings
+     * @param string The string that is going to be escaped
+     * @return A string where reserved characters are escaped
      */
-    public Map<String, String> convertCommas(String orgName, String type, String callName, String uid) {
-        HashMap<String, String> commasConverted = new HashMap<>();
-        String[] values = new String[] {orgName, type, callName, uid};
-        for (int i = 0; i < values.length; i++) {
-            values[i] = values[i].replace(",", "\u201A");
+    public String escapeSpecialCharacters(String string) {
+        String escapedString = string.trim();
+        char[] stringChars = escapedString.toCharArray();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (char c : stringChars) {
+            String escaped = "";
+            if (reservedCharacters.contains(c)) {
+                escaped = "\\" + c;
+            } else {
+                escaped += c;
+            }
+            stringBuilder.append(escaped);
         }
-
-        commasConverted.put("orgName", values[0]);
-        commasConverted.put("type", values[1]);
-        commasConverted.put("callName", values[2]);
-        commasConverted.put("uid", values[3]);
-
-        return commasConverted;
+        escapedString = stringBuilder.toString();
+        if (escapedString.startsWith("#")) {
+            escapedString = escapedString.replaceFirst("#", "\\#");
+        }
+        return escapedString;
     }
 }
