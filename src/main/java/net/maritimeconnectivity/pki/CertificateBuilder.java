@@ -75,7 +75,7 @@ public class CertificateBuilder {
     private KeystoreHandler keystoreHandler;
     private SecureRandom random;
 
-    private final Set<Character> reservedCharacters = new HashSet<>(Arrays.asList(',', '+', '"', '\\', '<', '>', ';', '\f', '\r', '=', '/'));
+    private final Set<Character> reservedCharacters = new HashSet<>(Arrays.asList(',', '+', '"', '\\', '<', '>', ';', '=', '/'));
 
     public CertificateBuilder(KeystoreHandler keystoreHandler) {
         this.keystoreHandler = keystoreHandler;
@@ -298,21 +298,31 @@ public class CertificateBuilder {
      * @return A string where reserved characters are escaped
      */
     public String escapeSpecialCharacters(String string) {
-        String escapedString = string.trim();
+        String escapedString = string;
         char[] stringChars = escapedString.toCharArray();
         StringBuilder stringBuilder = new StringBuilder();
         for (char c : stringChars) {
             String escaped = "";
             if (reservedCharacters.contains(c)) {
                 escaped = "\\" + c;
+            } else if (c == '\u0000') {
+                escaped = "\\00";
+            } else if (c == '\f') {
+                escaped = "\\0A";
+            } else if (c == '\r') {
+                escaped = "\\0D";
             } else {
                 escaped += c;
             }
             stringBuilder.append(escaped);
         }
         escapedString = stringBuilder.toString();
-        if (escapedString.startsWith("#")) {
-            escapedString = escapedString.replaceFirst("#", "\\#");
+        if (escapedString.startsWith("#") || escapedString.startsWith(" ")) {
+            escapedString = "\\" + escapedString;
+        }
+        if (escapedString.endsWith(" ")) {
+            String tmp = escapedString.substring(0, escapedString.length() - 1);
+            escapedString = tmp + "\\ ";
         }
         return escapedString;
     }
