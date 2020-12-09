@@ -216,7 +216,7 @@ public class CertificateBuilder {
                 "CN=" + escapeSpecialCharacters(callName) + ", " +
                 "UID=" + escapeSpecialCharacters(uid);
         if (email != null && !email.isEmpty()) {
-            orgSubjectDn += ", E=" + email;
+            orgSubjectDn += ", E=" + escapeSpecialCharacters(email);
         }
         X500Name subCaCertX500Name = new X500Name(signingX509Cert.getSubjectDN().getName());
         String alias = CertificateHandler.getElement(subCaCertX500Name, BCStyle.UID);
