@@ -64,6 +64,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
+import static org.bouncycastle.asn1.x500.style.IETFUtils.rDNsFromString;
 import static org.bouncycastle.asn1.x500.style.IETFUtils.valueToString;
 
 
@@ -268,17 +269,18 @@ public class CertificateHandler {
     public static PKIIdentity getIdentityFromCert(X509Certificate userCertificate) {
         PKIIdentity identity = new PKIIdentity();
         String certDN = userCertificate.getSubjectDN().getName();
+        RDN[] rdns = rDNsFromString(certDN, BCStyle.INSTANCE);
         X500Name x500name = new X500Name(certDN);
-        String name = getElement(x500name, BCStyle.CN);
-        String uid = getElement(x500name, BCStyle.UID);
+        String name = getElement(rdns, BCStyle.CN);
+        String uid = getElement(rdns, BCStyle.UID);
         identity.setMrn(uid);
         identity.setDn(certDN);
         identity.setCn(name);
         identity.setSn(name);
-        identity.setO(getElement(x500name, BCStyle.O));
-        identity.setOu(getElement(x500name, BCStyle.OU));
-        identity.setCountry(getElement(x500name, BCStyle.C));
-        identity.setEmail(getElement(x500name, BCStyle.EmailAddress));
+        identity.setO(getElement(rdns, BCStyle.O));
+        identity.setOu(getElement(rdns, BCStyle.OU));
+        identity.setCountry(getElement(rdns, BCStyle.C));
+        identity.setEmail(getElement(rdns, BCStyle.EmailAddress));
         // Extract first and last name from full name
         String lastName = "";
         String firstName = "";
@@ -408,5 +410,14 @@ public class CertificateHandler {
         } catch (ArrayIndexOutOfBoundsException e) {
             return null;
         }
+    }
+
+    public static String getElement(RDN[] rdns, ASN1ObjectIdentifier objectId) {
+        for (RDN rdn : rdns) {
+            if (rdn.getFirst().getType().equals(objectId)) {
+                return valueToString(rdn.getFirst().getValue());
+            }
+        }
+        return null;
     }
 }
