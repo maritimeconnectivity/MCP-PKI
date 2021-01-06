@@ -271,7 +271,6 @@ public class CertificateHandler {
         PKIIdentity identity = new PKIIdentity();
         String certDN = userCertificate.getSubjectDN().getName();
         RDN[] rdns = rDNsFromString(certDN, BCStyle.INSTANCE);
-        X500Name x500name = new X500Name(certDN);
         String name = getElement(rdns, BCStyle.CN);
         String uid = getElement(rdns, BCStyle.UID);
         identity.setMrn(uid);
@@ -413,6 +412,13 @@ public class CertificateHandler {
         }
     }
 
+    /**
+     * Extract a value from the DN extracted from a certificate
+     *
+     * @param rdns The full DN from certificate
+     * @param objectId The Identifier to find
+     * @return the value of the identifier, or null if not found.
+     */
     public static String getElement(RDN[] rdns, ASN1ObjectIdentifier objectId) {
         for (RDN rdn : rdns) {
             if (rdn.getFirst().getType().equals(objectId)) {
