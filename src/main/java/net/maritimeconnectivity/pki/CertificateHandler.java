@@ -21,6 +21,7 @@ import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.DLSequence;
@@ -415,7 +416,7 @@ public class CertificateHandler {
     public static String getElement(RDN[] rdns, ASN1ObjectIdentifier objectId) {
         for (RDN rdn : rdns) {
             if (rdn.getFirst().getType().equals(objectId)) {
-                return valueToString(rdn.getFirst().getValue());
+                return ((ASN1String) rdn.getFirst().getValue()).getString();
             }
         }
         return null;
