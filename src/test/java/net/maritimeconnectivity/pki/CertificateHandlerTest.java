@@ -15,6 +15,8 @@
  */
 package net.maritimeconnectivity.pki;
 
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -257,6 +259,20 @@ public class CertificateHandlerTest {
         assertEquals("12345678", identity.getImoNumber());
         assertEquals("urn:mrn:mcl:vessel:dma:myboat", identity.getMrn());
         assertEquals(null, identity.getPermissions());
+    }
+
+    @Test
+    void getIdentityFromCertWithEscapedCharacters() {
+        X509Certificate cert = TestUtils.getTestUserCert();
+
+        String certDN = cert.getSubjectDN().getName();
+        X500Name x500Name = new X500Name(certDN);
+        String email = CertificateHandler.getElement(x500Name, BCStyle.EmailAddress);
+        assertEquals("info\\+test@maritimeconnectivity.net", email);
+
+        PKIIdentity identity = CertificateHandler.getIdentityFromCert(cert);
+        assertNotNull(identity);
+        assertEquals("info+test@maritimeconnectivity.net", identity.getEmail());
     }
 
 }

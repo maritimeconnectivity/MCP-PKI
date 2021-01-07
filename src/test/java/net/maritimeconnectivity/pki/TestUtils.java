@@ -51,6 +51,16 @@ public class TestUtils {
         return getCertFromPem(getEcdisCertPem());
     }
 
+    public static String getTestUserCertPem() {
+        String certFile = "src/test/resources/Certificate_TestUser.pem";
+        String contents = loadTxtFile(certFile);
+        return contents;
+    }
+
+    public static X509Certificate getTestUserCert() {
+        return getCertFromPem(getTestUserCertPem());
+    }
+
     public static String loadTxtFile(String path) {
         try {
             return Files.lines(Paths.get(path)).collect(Collectors.joining("\n"));
