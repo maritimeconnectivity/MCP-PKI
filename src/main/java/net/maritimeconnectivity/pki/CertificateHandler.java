@@ -309,12 +309,10 @@ public class CertificateHandler {
                 Integer type = (Integer) item.get(0);
                 if (type == 0) {
                     // Type OtherName found so return the associated value
-                    ASN1InputStream decoder = null;
                     String oid;
                     String value;
-                    try {
+                    try (ASN1InputStream decoder = new ASN1InputStream((byte[]) item.toArray()[1])) {
                         // Value is encoded using ASN.1 so decode it to get it out again
-                        decoder = new ASN1InputStream((byte[]) item.toArray()[1]);
                         DLSequence seq = (DLSequence) decoder.readObject();
                         ASN1ObjectIdentifier asnOID = (ASN1ObjectIdentifier) seq.getObjectAt(0);
                         ASN1Encodable encoded = seq.getObjectAt(1);
@@ -327,14 +325,6 @@ public class CertificateHandler {
                     } catch (IOException e) {
                         log.error("Error decoding subjectAltName" + e.getLocalizedMessage(), e);
                         continue;
-                    } finally {
-                        if (decoder != null) {
-                            try {
-                                decoder.close();
-                            } catch (IOException e) {
-                                log.error("Stream could not be closed", e);
-                            }
-                        }
                     }
                     log.debug("oid: " + oid + ", value: " + value);
                     switch (oid) {

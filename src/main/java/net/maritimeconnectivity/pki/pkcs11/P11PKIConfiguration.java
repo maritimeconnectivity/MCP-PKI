@@ -28,6 +28,9 @@ import java.io.Console;
 import java.security.AuthProvider;
 import java.security.Security;
 
+/**
+ * Class for holding the configuration for PKCS#11 of an instance of the PKI
+ */
 @Slf4j
 public class P11PKIConfiguration extends PKIConfiguration {
 
