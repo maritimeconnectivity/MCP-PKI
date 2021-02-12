@@ -227,10 +227,12 @@ public class CertificateHandler {
     public static X509Certificate getCertFromNginxHeader(String certificateHeader) throws UnsupportedEncodingException {
         String certificateContent = URLDecoder.decode(certificateHeader, "UTF-8");
         // make sure that the + characters in the base64 encoded part have not been converted to spaces
-        String middle = certificateContent.split("-----BEGIN CERTIFICATE-----")[1].split("-----END CERTIFICATE-----")[0];
-        if (middle.contains(" ")) {
-            middle = middle.replace(" ", "+");
-            certificateContent = "-----BEGIN CERTIFICATE-----" + middle + "-----END CERTIFICATE-----";
+        if (certificateContent.startsWith(PKIConstants.CERT_HEADER) && certificateContent.endsWith(PKIConstants.CERT_FOOTER)) {
+            String middle = certificateContent.split(PKIConstants.CERT_HEADER)[1].split(PKIConstants.CERT_FOOTER)[0];
+            if (middle.contains(" ")) {
+                middle = middle.replace(" ", "+");
+                certificateContent = PKIConstants.CERT_HEADER + middle + PKIConstants.CERT_FOOTER;
+            }
         }
         if (certificateContent.trim().isEmpty() || certificateContent.length() < 10) {
             log.debug("No certificate content found");
