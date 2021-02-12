@@ -41,6 +41,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -220,14 +221,10 @@ public class CertificateHandler {
      *
      * @param certificateHeader The header containing the certificate
      * @return The extracted certificate. Returns null on failure.
+     * @throws UnsupportedEncodingException if given certificate cannot be URL decoded
      */
-    public static X509Certificate getCertFromNginxHeader(String certificateHeader) {
-        // nginx forwards the certificate in a header by replacing new lines with whitespaces.
-        // Also replace tabs, which nginx sometimes sends instead of whitespaces.
-        String certificateContent = certificateHeader.replaceAll("\\s+", System.lineSeparator().replaceAll("\\t+", System.lineSeparator()));
-        // Restore some needed newlines
-        certificateContent = certificateContent.replace("-----BEGIN" + System.lineSeparator() + "CERTIFICATE-----", "-----BEGIN CERTIFICATE-----");
-        certificateContent = certificateContent.replace("-----END" + System.lineSeparator() + "CERTIFICATE-----", "-----END CERTIFICATE-----");
+    public static X509Certificate getCertFromNginxHeader(String certificateHeader) throws UnsupportedEncodingException {
+        String certificateContent = URLDecoder.decode(certificateHeader, "UTF-8");
         if (certificateContent.trim().isEmpty() || certificateContent.length() < 10) {
             log.debug("No certificate content found");
             return null;
@@ -252,8 +249,8 @@ public class CertificateHandler {
 
         X509Certificate userCertificate;
         try {
-            userCertificate = (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(pemCertificate.getBytes("ISO-8859-11")));
-        } catch (CertificateException | UnsupportedEncodingException e) {
+            userCertificate = (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(pemCertificate.getBytes()));
+        } catch (CertificateException e) {
             log.error("Exception while converting certificate extracted from header", e);
             return null;
         }
