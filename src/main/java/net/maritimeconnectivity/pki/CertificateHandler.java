@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -225,6 +226,12 @@ public class CertificateHandler {
      */
     public static X509Certificate getCertFromNginxHeader(String certificateHeader) throws UnsupportedEncodingException {
         String certificateContent = URLDecoder.decode(certificateHeader, "UTF-8");
+        // make sure that the + characters in the base64 encoded part have not been converted to spaces
+        String middle = certificateContent.split("-----BEGIN CERTIFICATE-----")[1].split("-----END CERTIFICATE-----")[0];
+        if (middle.contains(" ")) {
+            middle = middle.replace(" ", "+");
+            certificateContent = "-----BEGIN CERTIFICATE-----" + middle + "-----END CERTIFICATE-----";
+        }
         if (certificateContent.trim().isEmpty() || certificateContent.length() < 10) {
             log.debug("No certificate content found");
             return null;
@@ -249,7 +256,7 @@ public class CertificateHandler {
 
         X509Certificate userCertificate;
         try {
-            userCertificate = (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(pemCertificate.getBytes()));
+            userCertificate = (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(pemCertificate.getBytes(StandardCharsets.UTF_8)));
         } catch (CertificateException e) {
             log.error("Exception while converting certificate extracted from header", e);
             return null;
