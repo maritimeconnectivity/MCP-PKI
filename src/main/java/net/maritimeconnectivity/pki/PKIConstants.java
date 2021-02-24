@@ -23,6 +23,8 @@ public class PKIConstants {
     public static final String SIGNER_ALGORITHM = "SHA384withECDSA";
     public static final String ELLIPTIC_CURVE = "secp384r1";
     public static final String PKCS11 = "PKCS11";
+    public static final String CERT_HEADER = "-----BEGIN CERTIFICATE-----";
+    public static final String CERT_FOOTER = "-----END CERTIFICATE-----";
 
     // OIDs used for the extra info stored in the SubjectAlternativeName extension
     // Generate more random OIDs at http://www.itu.int/en/ITU-T/asn1/Pages/UUID/generate_uuid.aspx
@@ -43,4 +45,8 @@ public class PKIConstants {
     // Used to identify the DNSName attribute in the X509 Extension: Subject Alternative Name.
     // String representation of org.bouncycastle.asn1.x509.GeneralName.dNSName
     public static final String X509_SAN_DNSNAME = "2";
+
+    private PKIConstants() {
+        // empty private constructor
+    }
 }

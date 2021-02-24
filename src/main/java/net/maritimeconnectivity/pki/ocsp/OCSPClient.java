@@ -185,11 +185,6 @@ public class OCSPClient {
                 }
             }
 
-            // SCEE Certificate Policy (?)
-            /*if (null == certHolder.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nocheck) || null == certHolder.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nocheck).getExtnId()) {
-                throw new OCSPValidationException("Extension id_pkix_ocsp_nocheck not found in certificate");
-            }*/
-
             SingleResp[] responses = basicResponse.getResponses();
             if (responses[0].getCertID().getSerialNumber().equals(certificate.getSerialNumber())) {
                 CertificateStatus status = responses[0].getCertStatus();

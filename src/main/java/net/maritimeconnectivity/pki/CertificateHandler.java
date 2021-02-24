@@ -41,6 +41,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -220,14 +222,18 @@ public class CertificateHandler {
      *
      * @param certificateHeader The header containing the certificate
      * @return The extracted certificate. Returns null on failure.
+     * @throws UnsupportedEncodingException if given certificate cannot be URL decoded
      */
-    public static X509Certificate getCertFromNginxHeader(String certificateHeader) {
-        // nginx forwards the certificate in a header by replacing new lines with whitespaces.
-        // Also replace tabs, which nginx sometimes sends instead of whitespaces.
-        String certificateContent = certificateHeader.replaceAll("\\s+", System.lineSeparator().replaceAll("\\t+", System.lineSeparator()));
-        // Restore some needed newlines
-        certificateContent = certificateContent.replace("-----BEGIN" + System.lineSeparator() + "CERTIFICATE-----", "-----BEGIN CERTIFICATE-----");
-        certificateContent = certificateContent.replace("-----END" + System.lineSeparator() + "CERTIFICATE-----", "-----END CERTIFICATE-----");
+    public static X509Certificate getCertFromNginxHeader(String certificateHeader) throws UnsupportedEncodingException {
+        String certificateContent = URLDecoder.decode(certificateHeader, "UTF-8");
+        // make sure that the + characters in the base64 encoded part have not been converted to spaces
+        if (certificateContent.startsWith(PKIConstants.CERT_HEADER) && certificateContent.contains(PKIConstants.CERT_FOOTER)) {
+            String middle = certificateContent.split(PKIConstants.CERT_HEADER)[1].split(PKIConstants.CERT_FOOTER)[0];
+            if (middle.contains(" ")) {
+                middle = middle.replace(" ", "+");
+                certificateContent = PKIConstants.CERT_HEADER + middle + PKIConstants.CERT_FOOTER;
+            }
+        }
         if (certificateContent.trim().isEmpty() || certificateContent.length() < 10) {
             log.debug("No certificate content found");
             return null;
@@ -252,8 +258,8 @@ public class CertificateHandler {
 
         X509Certificate userCertificate;
         try {
-            userCertificate = (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(pemCertificate.getBytes("ISO-8859-11")));
-        } catch (CertificateException | UnsupportedEncodingException e) {
+            userCertificate = (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(pemCertificate.getBytes(StandardCharsets.UTF_8)));
+        } catch (CertificateException e) {
             log.error("Exception while converting certificate extracted from header", e);
             return null;
         }
@@ -309,12 +315,10 @@ public class CertificateHandler {
                 Integer type = (Integer) item.get(0);
                 if (type == 0) {
                     // Type OtherName found so return the associated value
-                    ASN1InputStream decoder = null;
                     String oid;
                     String value;
-                    try {
+                    try (ASN1InputStream decoder = new ASN1InputStream((byte[]) item.toArray()[1])) {
                         // Value is encoded using ASN.1 so decode it to get it out again
-                        decoder = new ASN1InputStream((byte[]) item.toArray()[1]);
                         DLSequence seq = (DLSequence) decoder.readObject();
                         ASN1ObjectIdentifier asnOID = (ASN1ObjectIdentifier) seq.getObjectAt(0);
                         ASN1Encodable encoded = seq.getObjectAt(1);
@@ -327,14 +331,6 @@ public class CertificateHandler {
                     } catch (IOException e) {
                         log.error("Error decoding subjectAltName" + e.getLocalizedMessage(), e);
                         continue;
-                    } finally {
-                        if (decoder != null) {
-                            try {
-                                decoder.close();
-                            } catch (IOException e) {
-                                log.error("Stream could not be closed", e);
-                            }
-                        }
                     }
                     log.debug("oid: " + oid + ", value: " + value);
                     switch (oid) {

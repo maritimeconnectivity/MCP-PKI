@@ -76,6 +76,10 @@ import java.util.Map;
 @Slf4j
 public final class CRLVerifier {
 
+    private CRLVerifier() {
+        // empty private constructor
+    }
+
     /**
      * Extracts the CRL distribution points from the certificate (if available)
      * and checks the certificate revocation status against the CRLs coming from
