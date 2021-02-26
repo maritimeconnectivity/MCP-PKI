@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/MaritimeConnectivityPlatform/MCP-PKI.svg?branch=master)](https://travis-ci.org/MaritimeConnectivityPlatform/MCP-PKI)
+[![Java CI with Maven](https://github.com/MaritimeConnectivityPlatform/MCP-PKI/actions/workflows/maven.yml/badge.svg)](https://github.com/MaritimeConnectivityPlatform/MCP-PKI/actions/workflows/maven.yml)
 
 # Maritime Connectivity Platform (MCP) Public Key Infrastructure (PKI)
 
