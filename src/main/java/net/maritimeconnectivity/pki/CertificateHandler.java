@@ -47,6 +47,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertPath;
@@ -206,13 +207,18 @@ public class CertificateHandler {
         // Put them into a JKS keystore and write it to a byte[]
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            KeyStore ks = KeyStore.getInstance(type);
+            KeyStore ks;
+            if (type.equals("JKS")) {
+                ks = KeyStore.getInstance(type);
+            } else {
+                ks = KeyStore.getInstance(type, PKIConstants.BC_PROVIDER_NAME);
+            }
             ks.load(null);
             ks.setKeyEntry(alias, privateKey, password.toCharArray(), new java.security.cert.Certificate[]{certificate});
             ks.store(bos, password.toCharArray());
             bos.close();
             return bos.toByteArray();
-        } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException e) {
+        } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | NoSuchProviderException e) {
             throw new PKIRuntimeException(e);
         }
     }
