@@ -209,20 +209,20 @@ public class CertificateBuilder {
             }
         }
 
-        String orgSubjectDn = "C=" + orgCountryCode + ", " +
+        String subjectDn = "C=" + escapeSpecialCharacters(orgCountryCode) + ", " +
                 "O=" + escapeSpecialCharacters(orgName) + ", " +
                 "OU=" + escapeSpecialCharacters(type) + ", " +
                 "CN=" + escapeSpecialCharacters(callName) + ", " +
                 "UID=" + escapeSpecialCharacters(uid);
         if (email != null && !email.isEmpty()) {
-            orgSubjectDn += ", E=" + escapeSpecialCharacters(email);
+            subjectDn += ", E=" + escapeSpecialCharacters(email);
         }
         X500Name subCaCertX500Name = new X500Name(signingX509Cert.getSubjectDN().getName());
         String alias = CertificateHandler.getElement(subCaCertX500Name, BCStyle.UID);
         String ocspUrl  = baseCrlOcspURI + "ocsp/" + alias;
         String crlUrl = baseCrlOcspURI + "crl/" + alias;
         return buildAndSignCert(serialNumber, signingCertEntry.getPrivateKey(), signingX509Cert.getPublicKey(),
-                    publickey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(orgSubjectDn),
+                    publickey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(subjectDn),
                     customAttr, "ENTITY", ocspUrl, crlUrl, p11AuthProvider, validityPeriod);
     }
 
