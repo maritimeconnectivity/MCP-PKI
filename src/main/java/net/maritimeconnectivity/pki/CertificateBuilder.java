@@ -72,10 +72,10 @@ import java.util.Set;
 
 public class CertificateBuilder {
 
-    private KeystoreHandler keystoreHandler;
-    private SecureRandom random;
+    private final KeystoreHandler keystoreHandler;
+    private final SecureRandom random;
 
-    private final Set<Character> reservedCharacters = new HashSet<>(Arrays.asList(',', '+', '"', '\\', '<', '>', ';', '=', '/'));
+    private static final Set<Character> reservedCharacters = new HashSet<>(Arrays.asList(',', '+', '"', '\\', '<', '>', ';', '=', '/'));
 
     public CertificateBuilder(KeystoreHandler keystoreHandler) {
         this.keystoreHandler = keystoreHandler;
@@ -296,7 +296,7 @@ public class CertificateBuilder {
      * @param string The string that is going to be escaped
      * @return A string where reserved characters are escaped
      */
-    public String escapeSpecialCharacters(String string) {
+    public static String escapeSpecialCharacters(String string) {
         String escapedString = string;
         char[] stringChars = escapedString.toCharArray();
         StringBuilder stringBuilder = new StringBuilder();
