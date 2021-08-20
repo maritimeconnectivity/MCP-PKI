@@ -208,7 +208,7 @@ public class OCSPClient {
     }
 
 
-    public boolean checkOCSP() throws OCSPValidationException {
+    public boolean checkOCSP() {
         try {
             return getCertificateStatus() == CertStatus.GOOD;
         } catch (OCSPValidationException ex) {

@@ -39,13 +39,14 @@ import java.security.cert.X509Certificate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
-public class CertificateHandlerTest {
+class CertificateHandlerTest {
 
-    //@Test
+    @Test
     void verifyCertificateChain1() {
         X509Certificate cert = TestUtils.getMyBoatCert();
         PKIConfiguration pkiConf = new PKIConfiguration(TestUtils.getRootCAAlias());
@@ -56,15 +57,7 @@ public class CertificateHandlerTest {
         boolean valid = false;
         try {
             valid = CertificateHandler.verifyCertificateChain(cert, kh.getTrustStore());
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (CertificateException e) {
-            e.printStackTrace();
-        } catch (InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-        } catch (CertPathValidatorException e) {
+        } catch (KeyStoreException | CertPathValidatorException | InvalidAlgorithmParameterException | CertificateException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         assertTrue(valid);
@@ -83,13 +76,7 @@ public class CertificateHandlerTest {
         String reason = "None";
         try {
             valid = CertificateHandler.verifyCertificateChain(cert, kh.getTrustStore());
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (CertificateException e) {
-            e.printStackTrace();
-        } catch (InvalidAlgorithmParameterException e) {
+        } catch (KeyStoreException | InvalidAlgorithmParameterException | CertificateException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (CertPathValidatorException e) {
             reason = e.getReason().toString();
@@ -143,8 +130,7 @@ public class CertificateHandlerTest {
                     "laWn9dLCvirTEuYJDSS3x9DJzIiQa/aJRSLSuFDu/g6Dw5TmQGbl5kg5Crs=%1$s" +
                     "-----END CERTIFICATE-----%1$s", newlineChar));
         } catch (CertificateEncodingException e) {
-            e.printStackTrace();
-            fail("Unexpected Exception");
+            fail("Unexpected Exception", e);
         }
 
     }
@@ -231,7 +217,7 @@ public class CertificateHandlerTest {
         try {
             cert = CertificateHandler.getCertFromNginxHeader(nginxFormatedPemCert);
         } catch (UnsupportedEncodingException e) {
-            fail("Could not decode certificate");
+            fail("Could not decode certificate", e);
         }
         assertNotNull(cert);
         assertEquals("EMAILADDRESS=thc@dma.dk, UID=urn:mrn:mcl:user:dma:thc, CN=Thomas Christensen, OU=user, O=urn:mrn:mcl:org:dma, C=DK", cert.getSubjectDN().getName());
@@ -264,7 +250,7 @@ public class CertificateHandlerTest {
         assertEquals("My Boat", identity.getCn());
         assertEquals("12345678", identity.getImoNumber());
         assertEquals("urn:mrn:mcl:vessel:dma:myboat", identity.getMrn());
-        assertEquals(null, identity.getPermissions());
+        assertNull(identity.getPermissions());
     }
 
     @Test

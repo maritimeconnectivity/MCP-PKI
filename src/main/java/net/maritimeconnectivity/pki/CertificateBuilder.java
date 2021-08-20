@@ -72,8 +72,8 @@ import java.util.Set;
 
 public class CertificateBuilder {
 
-    private KeystoreHandler keystoreHandler;
-    private SecureRandom random;
+    private final KeystoreHandler keystoreHandler;
+    private final SecureRandom random;
 
     private final Set<Character> reservedCharacters = new HashSet<>(Arrays.asList(',', '+', '"', '\\', '<', '>', ';', '=', '/'));
 
@@ -278,7 +278,6 @@ public class CertificateBuilder {
         // BigInteger => NUMERICAL(50) MySQL
         // Max number supported in X509 serial number 2^159-1 = 730750818665451459101842416358141509827966271487
         BigInteger maxValue = new BigInteger("730750818665451459101842416358141509827966271487");
-        // Min number 2^32-1 = 4294967296 - we set a minimum value to avoid collisions with old certificates that has used seq numbers
         BigInteger minValue = BigInteger.ZERO;
         if (p11AuthProvider instanceof SunPKCS11) {
             try {
