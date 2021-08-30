@@ -23,7 +23,6 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
@@ -217,10 +216,8 @@ public class CertificateBuilder {
         if (email != null && !email.isEmpty()) {
             subjectDn += ", E=" + escapeSpecialCharacters(email);
         }
-        X500Name subCaCertX500Name = new X500Name(signingX509Cert.getSubjectDN().getName());
-        String alias = CertificateHandler.getElement(subCaCertX500Name, BCStyle.UID);
-        String ocspUrl  = baseCrlOcspURI + "ocsp/" + alias;
-        String crlUrl = baseCrlOcspURI + "crl/" + alias;
+        String ocspUrl  = baseCrlOcspURI + "ocsp/" + signingAlias;
+        String crlUrl = baseCrlOcspURI + "crl/" + signingAlias;
         return buildAndSignCert(serialNumber, signingCertEntry.getPrivateKey(), signingX509Cert.getPublicKey(),
                     publickey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(subjectDn),
                     customAttr, "ENTITY", ocspUrl, crlUrl, p11AuthProvider, validityPeriod);
@@ -254,7 +251,7 @@ public class CertificateBuilder {
     }
 
     /**
-     * Generates a keypair (public and private) based on Elliptic curves on a HSM using PKCS#11
+     * Generates a keypair (public and private) based on Elliptic curves on an HSM using PKCS#11
      * @return The generated keypair
      */
     public static KeyPair generateKeyPairPKCS11(AuthProvider provider) {
