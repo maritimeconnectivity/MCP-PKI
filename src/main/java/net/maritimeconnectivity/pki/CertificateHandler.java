@@ -16,6 +16,8 @@
 package net.maritimeconnectivity.pki;
 
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
 import org.bouncycastle.asn1.ASN1Encodable;
@@ -73,11 +75,8 @@ import static org.bouncycastle.asn1.x500.style.IETFUtils.valueToString;
 
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CertificateHandler {
-
-    private CertificateHandler() {
-        // Left empty on purpose
-    }
 
     /**
      * Verify a single certificate against the public key of the issueing certificate. Does *not* check revocation

@@ -15,6 +15,8 @@
  */
 package net.maritimeconnectivity.pki;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
@@ -59,6 +61,7 @@ import static net.maritimeconnectivity.pki.PKIConstants.BC_PROVIDER_NAME;
 import static net.maritimeconnectivity.pki.PKIConstants.SIGNER_ALGORITHM;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Revocation {
 
     /**
@@ -69,9 +72,7 @@ public class Revocation {
      */
     public static int getCRLReasonFromString(String certReason) {
         int reason = CRLReason.unspecified;
-        if ("unspecified".equals(certReason)) {
-            reason = CRLReason.unspecified;
-        } else if ("keycompromise".equals(certReason)) {
+        if ("keycompromise".equals(certReason)) {
             reason = CRLReason.keyCompromise;
         } else if ("cacompromise".equals(certReason)) {
             reason = CRLReason.cACompromise;

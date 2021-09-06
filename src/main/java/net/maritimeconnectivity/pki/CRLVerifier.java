@@ -38,6 +38,8 @@
 
 package net.maritimeconnectivity.pki;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.maritimeconnectivity.pki.ocsp.CertStatus;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -74,11 +76,8 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CRLVerifier {
-
-    private CRLVerifier() {
-        // empty private constructor
-    }
 
     /**
      * Extracts the CRL distribution points from the certificate (if available)

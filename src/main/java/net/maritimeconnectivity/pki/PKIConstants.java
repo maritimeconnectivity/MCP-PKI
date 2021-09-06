@@ -15,9 +15,11 @@
  */
 package net.maritimeconnectivity.pki;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PKIConstants {
-    //public static final String ROOT_CERT_ALIAS = "urn:mrn:mcl:ca:maritimecloud"; // removed for distributed MIR
     public static final String BC_PROVIDER_NAME = "BC";
     public static final String KEYSTORE_TYPE = "jks";
     public static final String SIGNER_ALGORITHM = "SHA384withECDSA";
@@ -45,8 +47,4 @@ public class PKIConstants {
     // Used to identify the DNSName attribute in the X509 Extension: Subject Alternative Name.
     // String representation of org.bouncycastle.asn1.x509.GeneralName.dNSName
     public static final String X509_SAN_DNSNAME = "2";
-
-    private PKIConstants() {
-        // empty private constructor
-    }
 }

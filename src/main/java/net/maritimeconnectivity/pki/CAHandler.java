@@ -55,8 +55,8 @@ import java.util.List;
 @AllArgsConstructor
 public class CAHandler {
 
-    private CertificateBuilder certificateBuilder;
-    private PKIConfiguration pkiConfiguration;
+    private final CertificateBuilder certificateBuilder;
+    private final PKIConfiguration pkiConfiguration;
 
     /**
      * Creates a sub Certificate Authority for the MC PKI. The certificate and keypair is placed in a "SubCaKeystore"

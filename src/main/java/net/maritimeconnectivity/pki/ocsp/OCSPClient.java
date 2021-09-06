@@ -76,10 +76,10 @@ import java.util.Optional;
 
 public class OCSPClient {
 
-    private static byte[] sentNonce;
+    private byte[] sentNonce;
     private final X509Certificate issuer;
     private final X509Certificate certificate;
-    private URL url;
+    private final URL url;
     private RevokedStatus revokedStatus = null;
 
     public OCSPClient(X509Certificate issuer, X509Certificate certificate) {
