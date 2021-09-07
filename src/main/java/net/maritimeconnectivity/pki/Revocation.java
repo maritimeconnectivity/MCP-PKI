@@ -72,24 +72,34 @@ public class Revocation {
      */
     public static int getCRLReasonFromString(String certReason) {
         int reason = CRLReason.unspecified;
-        if ("keycompromise".equals(certReason)) {
-            reason = CRLReason.keyCompromise;
-        } else if ("cacompromise".equals(certReason)) {
-            reason = CRLReason.cACompromise;
-        } else if ("affiliationchanged".equals(certReason)) {
-            reason = CRLReason.affiliationChanged;
-        } else if ("superseded".equals(certReason)) {
-            reason = CRLReason.superseded;
-        } else if ("cessationofoperation".equals(certReason)) {
-            reason = CRLReason.cessationOfOperation;
-        } else if ("certificatehold".equals(certReason)) {
-            reason = CRLReason.certificateHold;
-        } else if ("removefromcrl".equals(certReason)) {
-            reason = CRLReason.removeFromCRL;
-        } else if ("privilegewithdrawn".equals(certReason)) {
-            reason = CRLReason.privilegeWithdrawn;
-        } else if ("aacompromise".equals(certReason)) {
-            reason = CRLReason.aACompromise;
+        switch (certReason) {
+            case "keycompromise":
+                reason = CRLReason.keyCompromise;
+                break;
+            case "cacompromise":
+                reason = CRLReason.cACompromise;
+                break;
+            case "affiliationchanged":
+                reason = CRLReason.affiliationChanged;
+                break;
+            case "superseded":
+                reason = CRLReason.superseded;
+                break;
+            case "cessationofoperation":
+                reason = CRLReason.cessationOfOperation;
+                break;
+            case "certificatehold":
+                reason = CRLReason.certificateHold;
+                break;
+            case "removefromcrl":
+                reason = CRLReason.removeFromCRL;
+                break;
+            case "privilegewithdrawn":
+                reason = CRLReason.privilegeWithdrawn;
+                break;
+            case "aacompromise":
+                reason = CRLReason.aACompromise;
+                break;
         }
         return reason;
     }
