@@ -52,9 +52,11 @@ import java.security.cert.CRLException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import static net.maritimeconnectivity.pki.CertificateHandler.getPemFromEncoded;
 import static net.maritimeconnectivity.pki.PKIConstants.BC_PROVIDER_NAME;
@@ -112,10 +114,10 @@ public class Revocation {
      * @return a CRL
      */
     public static X509CRL generateCRL(List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, AuthProvider authProvider) {
-        Date now = new Date();
-        Calendar cal = Calendar.getInstance();
+        Date now = Date.from(Instant.now());
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTime(now);
-        cal.add(Calendar.DATE, 7);
+        cal.add(Calendar.DATE, 7); // Add a week to the calendar
         String signCertX500Name;
         try {
             signCertX500Name = new JcaX509CertificateHolder((X509Certificate) keyEntry.getCertificate()).getSubject().toString();
@@ -124,7 +126,7 @@ public class Revocation {
             return null;
         }
         X509v2CRLBuilder crlBuilder = new X509v2CRLBuilder(new X500Name(signCertX500Name), now);
-        crlBuilder.setNextUpdate(new Date(now.getTime() + 24 * 60 * 60 * 1000 * 7)); // The next CRL is next week (dummy value)
+        crlBuilder.setNextUpdate(cal.getTime()); // The next CRL is next week (dummy value)
         for (RevocationInfo cert : revokedCerts) {
             crlBuilder.addCRLEntry(cert.getSerialNumber(), cert.getRevokedAt(), cert.getRevokeReason().ordinal());
         }
@@ -165,8 +167,8 @@ public class Revocation {
      * @param pkcs11Provider PKCS#11 provider. If null default BC provider will be used.
      */
     public static void generateRootCACRL(String signName, List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, String outputCaCrlPath, AuthProvider pkcs11Provider) {
-        Date now = new Date();
-        Calendar cal = Calendar.getInstance();
+        Date now = Date.from(Instant.now());
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTime(now);
         cal.add(Calendar.YEAR, 1);
         X509v2CRLBuilder crlBuilder = new X509v2CRLBuilder(new X500Name(signName), now);
@@ -255,12 +257,13 @@ public class Revocation {
             }
             ContentSigner contentSigner = signBuilder.build(signingCert.getPrivateKey());
             BasicOCSPResp basicResp = respBuilder.build(contentSigner,
-                    new X509CertificateHolder[] { new X509CertificateHolder(signingCert.getCertificate().getEncoded()) }, new Date());
+                    new X509CertificateHolder[] { new X509CertificateHolder(signingCert.getCertificate().getEncoded()) }, Date.from(Instant.now()));
             // Set response as successful
             int response = OCSPRespBuilder.SUCCESSFUL;
             // build the response
             return new OCSPRespBuilder().build(response, basicResp);
         } catch (Exception e) {
+            log.error("Could not generate OCSP response", e);
             return null;
         }
     }

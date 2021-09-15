@@ -60,6 +60,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -68,6 +69,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 public class CertificateBuilder {
 
@@ -101,8 +103,10 @@ public class CertificateBuilder {
     public X509Certificate buildAndSignCert(BigInteger serialNumber, PrivateKey signerPrivateKey, PublicKey signerPublicKey, PublicKey subjectPublicKey, X500Name issuer, X500Name subject,
                                             Map<String, String> customAttrs, String type, String ocspUrl, String crlUrl, AuthProvider p11AuthProvider, int validityPeriod) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException {
         // Dates are converted to GMT/UTC inside the cert builder
-        Calendar cal = Calendar.getInstance();
-        Date now = cal.getTime();
+        Date now = Date.from(Instant.now());
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        cal.setTime(now);
+
         if (validityPeriod <= 0) {
             throw new IllegalArgumentException("The validity period length should be a positive integer number.");
         }

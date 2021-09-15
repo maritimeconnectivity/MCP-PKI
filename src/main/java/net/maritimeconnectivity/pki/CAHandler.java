@@ -55,6 +55,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CAHandler {
 
+    private static final String HSM_EXCEPTION_MESSAGE = "This function can only be called when used with an HSM";
     private final CertificateBuilder certificateBuilder;
     private final PKIConfiguration pkiConfiguration;
 
@@ -160,7 +161,7 @@ public class CAHandler {
      */
     public void createSubCAPKCS11(String subCaCertDN, String rootCAAlias, PKIConfiguration subCaConfiguration, int validityPeriod) {
         if (!(pkiConfiguration instanceof P11PKIConfiguration) || !(subCaConfiguration instanceof P11PKIConfiguration)) {
-            throw new PKIRuntimeException("This function can only be called when used with an HSM");
+            throw new PKIRuntimeException(HSM_EXCEPTION_MESSAGE);
         }
         // Prepare PKCS#11 crypto providers
         P11PKIConfiguration rootP11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
@@ -296,7 +297,7 @@ public class CAHandler {
      */
     public void initRootCAPKCS11(String rootCertX500Name, String crlUrl, String rootCAAlias, int validityPeriod) {
         if (!(pkiConfiguration instanceof P11PKIConfiguration)) {
-            throw new PKIRuntimeException("This function can only be called when used with an HSM");
+            throw new PKIRuntimeException(HSM_EXCEPTION_MESSAGE);
         }
         P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
         p11PKIConfiguration.providerLogin();
@@ -408,7 +409,7 @@ public class CAHandler {
      */
     public void generateRootCRLP11(String outputCaCrlPath, String revocationFile, String rootCAAlias) {
         if (!(pkiConfiguration instanceof P11PKIConfiguration)) {
-            throw new PKIRuntimeException("This function can only be called when used with an HSM");
+            throw new PKIRuntimeException(HSM_EXCEPTION_MESSAGE);
         }
         List<RevocationInfo> revocationInfos = loadRevocationFile(revocationFile);
         P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
