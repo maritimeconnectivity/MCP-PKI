@@ -17,6 +17,8 @@ package net.maritimeconnectivity.pki;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -30,6 +32,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertificateEncodingException;
@@ -45,6 +48,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 class CertificateHandlerTest {
+
+    @BeforeAll
+    static void setUp() {
+        Security.addProvider(new BouncyCastleProvider()); // Before Bouncy Castle as crypto provider
+    }
 
     @Test
     void verifyCertificateChain1() {
