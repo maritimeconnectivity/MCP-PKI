@@ -76,7 +76,7 @@ public class CertificateBuilder {
     private final KeystoreHandler keystoreHandler;
     private final SecureRandom random;
 
-    private static final Set<Character> reservedCharacters = new HashSet<>(Arrays.asList(',', '+', '"', '\\', '<', '>', ';', '=', '/'));
+    private static final Set<Character> RESERVED_CHARACTERS = new HashSet<>(Arrays.asList(',', '+', '"', '\\', '<', '>', ';', '=', '/'));
 
     public CertificateBuilder(KeystoreHandler keystoreHandler) {
         this.keystoreHandler = keystoreHandler;
@@ -302,7 +302,7 @@ public class CertificateBuilder {
         StringBuilder stringBuilder = new StringBuilder();
         for (char c : stringChars) {
             String escaped = "";
-            if (reservedCharacters.contains(c)) {
+            if (RESERVED_CHARACTERS.contains(c)) {
                 escaped = "\\" + c;
             } else if (c == '\u0000') {
                 escaped = "\\00";
