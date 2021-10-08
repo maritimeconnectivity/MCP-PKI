@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.maritimeconnectivity.pki</groupId>
     <artifactId>mcp-pki</artifactId>
-    <version>0.12.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>mcp-pki</name>
     <url>https://maritimeconnectivity.net</url>
@@ -13,20 +13,22 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <skip.signing>true</skip.signing>
-        <bouncycastle.version>1.68</bouncycastle.version>
+        <bouncycastle.version>1.69</bouncycastle.version>
+        <sl4j.version>1.7.32</sl4j.version>
+        <lombok.version>1.18.22</lombok.version>
     </properties>
 
     <licenses>
         <license>
             <name>The Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
 
     <scm>
-        <connection>scm:git:git://github.com/MaritimeConnectivityPlatform/MCP-PKI.git</connection>
-        <developerConnection>scm:git:ssh://github.com:MaritimeConnectivityPlatform/MCP-PKI.git</developerConnection>
-        <url>https://github.com/MaritimeConnectivityPlatform/MCP-PKI</url>
+        <connection>scm:git:git://github.com/maritimeconnectivity/MCP-PKI.git</connection>
+        <developerConnection>scm:git:ssh://github.com:maritimeconnectivity/MCP-PKI.git</developerConnection>
+        <url>https://github.com/maritimeconnectivity/MCP-PKI</url>
     </scm>
 
     <developers>
@@ -58,18 +60,18 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.18</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.30</version>
+            <version>${sl4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.30</version>
+            <version>${sl4j.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-cli</groupId>
@@ -79,13 +81,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.7.0</version>
+            <version>5.7.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
-            <version>1.7.0</version>
+            <version>1.7.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -118,7 +120,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.6</version>
+                <version>3.0.1</version>
                 <configuration>
                     <skip>${skip.signing}</skip>
                 </configuration>
@@ -145,7 +147,7 @@
                 <!-- Can be triggered by running mvn javadoc:javadoc -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.0</version>
                 <configuration>
                     <sourcepath>${project.basedir}/target/delombok</sourcepath>
                 </configuration>
@@ -161,7 +163,7 @@
             <plugin>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok-maven-plugin</artifactId>
-                <version>1.18.18.0</version>
+                <version>1.18.20.0</version>
                 <executions>
                     <execution>
                         <id>delombok</id>
@@ -242,7 +244,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.2.0</version>
+                        <version>3.3.0</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -255,7 +257,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <version>3.0.1</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>

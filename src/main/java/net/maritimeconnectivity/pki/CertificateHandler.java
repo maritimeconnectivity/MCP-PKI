@@ -16,6 +16,8 @@
 package net.maritimeconnectivity.pki;
 
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
 import org.bouncycastle.asn1.ASN1Encodable;
@@ -62,6 +64,7 @@ import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.PKIXParameters;
 import java.security.cert.PKIXRevocationChecker;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -73,11 +76,8 @@ import static org.bouncycastle.asn1.x500.style.IETFUtils.valueToString;
 
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CertificateHandler {
-
-    private CertificateHandler() {
-        // Left empty on purpose
-    }
 
     /**
      * Verify a single certificate against the public key of the issueing certificate. Does *not* check revocation
@@ -111,22 +111,22 @@ public class CertificateHandler {
             log.error("Created ContentVerifierProvider from root public key is null");
             return false;
         }
-        boolean signatureValidity = false;
-        try{
+        boolean signatureValidity;
+        try {
             signatureValidity = certHolder.isSignatureValid(contentVerifierProvider);
-        } catch (CertException e){
+        } catch (CertException e) {
             log.error("Error when trying to validate signature", e);
             return false;
         }
 
-        if(signatureValidity){
+        if (signatureValidity) {
             if (verificationDate == null) {
-                verificationDate = new Date();
+                verificationDate = Date.from(Instant.now());
             }
             if (verificationDate.after(certToVerify.getNotBefore()) && verificationDate.before(certToVerify.getNotAfter())) {
                 return true;
             }
-            else{
+            else {
                 log.debug("Out of certificate validity period.");
                 return false;
             }

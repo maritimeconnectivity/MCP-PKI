@@ -36,7 +36,7 @@ import java.security.cert.CertificateException;
 @Slf4j
 public class KeystoreHandler {
 
-    private PKIConfiguration pkiConfiguration;
+    private final PKIConfiguration pkiConfiguration;
 
     public KeystoreHandler(PKIConfiguration pkiConfiguration) {
         this.pkiConfiguration = pkiConfiguration;

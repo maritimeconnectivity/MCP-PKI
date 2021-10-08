@@ -16,6 +16,8 @@
 
 package net.maritimeconnectivity.pki.pkcs11;
 
+import lombok.AllArgsConstructor;
+
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.PasswordCallback;
@@ -23,13 +25,10 @@ import javax.security.auth.callback.PasswordCallback;
 /**
  * Class used to be able to login to an HSM
  */
+@AllArgsConstructor
 public class PasswordHandler implements CallbackHandler {
 
-    private char[] password;
-
-    public PasswordHandler(char[] password) {
-        this.password = password;
-    }
+    private final char[] password;
 
     @Override
     public void handle(Callback[] callbacks) {

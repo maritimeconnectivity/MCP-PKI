@@ -35,13 +35,13 @@ import java.security.Security;
 public class P11PKIConfiguration extends PKIConfiguration {
 
     @Getter
-    private String pkcs11ProviderName;
+    private final String pkcs11ProviderName;
 
     @Getter
-    private AuthProvider provider;
+    private final AuthProvider provider;
 
     @Getter
-    private char[] pkcs11Pin;
+    private final char[] pkcs11Pin;
 
     private boolean loggedIn;
 

@@ -23,7 +23,6 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
@@ -61,6 +60,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -69,13 +69,14 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 public class CertificateBuilder {
 
-    private KeystoreHandler keystoreHandler;
-    private SecureRandom random;
+    private final KeystoreHandler keystoreHandler;
+    private final SecureRandom random;
 
-    private final Set<Character> reservedCharacters = new HashSet<>(Arrays.asList(',', '+', '"', '\\', '<', '>', ';', '=', '/'));
+    private static final Set<Character> RESERVED_CHARACTERS = new HashSet<>(Arrays.asList(',', '+', '"', '\\', '<', '>', ';', '=', '/'));
 
     public CertificateBuilder(KeystoreHandler keystoreHandler) {
         this.keystoreHandler = keystoreHandler;
@@ -102,8 +103,10 @@ public class CertificateBuilder {
     public X509Certificate buildAndSignCert(BigInteger serialNumber, PrivateKey signerPrivateKey, PublicKey signerPublicKey, PublicKey subjectPublicKey, X500Name issuer, X500Name subject,
                                             Map<String, String> customAttrs, String type, String ocspUrl, String crlUrl, AuthProvider p11AuthProvider, int validityPeriod) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException {
         // Dates are converted to GMT/UTC inside the cert builder
-        Calendar cal = Calendar.getInstance();
-        Date now = cal.getTime();
+        Date now = Date.from(Instant.now());
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        cal.setTime(now);
+
         if (validityPeriod <= 0) {
             throw new IllegalArgumentException("The validity period length should be a positive integer number.");
         }
@@ -209,20 +212,18 @@ public class CertificateBuilder {
             }
         }
 
-        String orgSubjectDn = "C=" + orgCountryCode + ", " +
+        String subjectDn = "C=" + escapeSpecialCharacters(orgCountryCode) + ", " +
                 "O=" + escapeSpecialCharacters(orgName) + ", " +
                 "OU=" + escapeSpecialCharacters(type) + ", " +
                 "CN=" + escapeSpecialCharacters(callName) + ", " +
                 "UID=" + escapeSpecialCharacters(uid);
         if (email != null && !email.isEmpty()) {
-            orgSubjectDn += ", E=" + escapeSpecialCharacters(email);
+            subjectDn += ", E=" + escapeSpecialCharacters(email);
         }
-        X500Name subCaCertX500Name = new X500Name(signingX509Cert.getSubjectDN().getName());
-        String alias = CertificateHandler.getElement(subCaCertX500Name, BCStyle.UID);
-        String ocspUrl  = baseCrlOcspURI + "ocsp/" + alias;
-        String crlUrl = baseCrlOcspURI + "crl/" + alias;
+        String ocspUrl  = baseCrlOcspURI + "ocsp/" + signingAlias;
+        String crlUrl = baseCrlOcspURI + "crl/" + signingAlias;
         return buildAndSignCert(serialNumber, signingCertEntry.getPrivateKey(), signingX509Cert.getPublicKey(),
-                    publickey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(orgSubjectDn),
+                    publickey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(subjectDn),
                     customAttr, "ENTITY", ocspUrl, crlUrl, p11AuthProvider, validityPeriod);
     }
 
@@ -254,7 +255,7 @@ public class CertificateBuilder {
     }
 
     /**
-     * Generates a keypair (public and private) based on Elliptic curves on a HSM using PKCS#11
+     * Generates a keypair (public and private) based on Elliptic curves on an HSM using PKCS#11
      * @return The generated keypair
      */
     public static KeyPair generateKeyPairPKCS11(AuthProvider provider) {
@@ -278,7 +279,6 @@ public class CertificateBuilder {
         // BigInteger => NUMERICAL(50) MySQL
         // Max number supported in X509 serial number 2^159-1 = 730750818665451459101842416358141509827966271487
         BigInteger maxValue = new BigInteger("730750818665451459101842416358141509827966271487");
-        // Min number 2^32-1 = 4294967296 - we set a minimum value to avoid collisions with old certificates that has used seq numbers
         BigInteger minValue = BigInteger.ZERO;
         if (p11AuthProvider instanceof SunPKCS11) {
             try {
@@ -296,13 +296,13 @@ public class CertificateBuilder {
      * @param string The string that is going to be escaped
      * @return A string where reserved characters are escaped
      */
-    public String escapeSpecialCharacters(String string) {
+    public static String escapeSpecialCharacters(String string) {
         String escapedString = string;
         char[] stringChars = escapedString.toCharArray();
         StringBuilder stringBuilder = new StringBuilder();
         for (char c : stringChars) {
             String escaped = "";
-            if (reservedCharacters.contains(c)) {
+            if (RESERVED_CHARACTERS.contains(c)) {
                 escaped = "\\" + c;
             } else if (c == '\u0000') {
                 escaped = "\\00";

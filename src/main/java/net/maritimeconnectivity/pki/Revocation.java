@@ -15,6 +15,8 @@
  */
 package net.maritimeconnectivity.pki;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
@@ -50,15 +52,18 @@ import java.security.cert.CRLException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import static net.maritimeconnectivity.pki.CertificateHandler.getPemFromEncoded;
 import static net.maritimeconnectivity.pki.PKIConstants.BC_PROVIDER_NAME;
 import static net.maritimeconnectivity.pki.PKIConstants.SIGNER_ALGORITHM;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Revocation {
 
     /**
@@ -69,26 +74,34 @@ public class Revocation {
      */
     public static int getCRLReasonFromString(String certReason) {
         int reason = CRLReason.unspecified;
-        if ("unspecified".equals(certReason)) {
-            reason = CRLReason.unspecified;
-        } else if ("keycompromise".equals(certReason)) {
-            reason = CRLReason.keyCompromise;
-        } else if ("cacompromise".equals(certReason)) {
-            reason = CRLReason.cACompromise;
-        } else if ("affiliationchanged".equals(certReason)) {
-            reason = CRLReason.affiliationChanged;
-        } else if ("superseded".equals(certReason)) {
-            reason = CRLReason.superseded;
-        } else if ("cessationofoperation".equals(certReason)) {
-            reason = CRLReason.cessationOfOperation;
-        } else if ("certificatehold".equals(certReason)) {
-            reason = CRLReason.certificateHold;
-        } else if ("removefromcrl".equals(certReason)) {
-            reason = CRLReason.removeFromCRL;
-        } else if ("privilegewithdrawn".equals(certReason)) {
-            reason = CRLReason.privilegeWithdrawn;
-        } else if ("aacompromise".equals(certReason)) {
-            reason = CRLReason.aACompromise;
+        switch (certReason) {
+            case "keycompromise":
+                reason = CRLReason.keyCompromise;
+                break;
+            case "cacompromise":
+                reason = CRLReason.cACompromise;
+                break;
+            case "affiliationchanged":
+                reason = CRLReason.affiliationChanged;
+                break;
+            case "superseded":
+                reason = CRLReason.superseded;
+                break;
+            case "cessationofoperation":
+                reason = CRLReason.cessationOfOperation;
+                break;
+            case "certificatehold":
+                reason = CRLReason.certificateHold;
+                break;
+            case "removefromcrl":
+                reason = CRLReason.removeFromCRL;
+                break;
+            case "privilegewithdrawn":
+                reason = CRLReason.privilegeWithdrawn;
+                break;
+            case "aacompromise":
+                reason = CRLReason.aACompromise;
+                break;
         }
         return reason;
     }
@@ -101,10 +114,10 @@ public class Revocation {
      * @return a CRL
      */
     public static X509CRL generateCRL(List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, AuthProvider authProvider) {
-        Date now = new Date();
-        Calendar cal = Calendar.getInstance();
+        Date now = Date.from(Instant.now());
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTime(now);
-        cal.add(Calendar.DATE, 7);
+        cal.add(Calendar.DATE, 7); // Add a week to the calendar
         String signCertX500Name;
         try {
             signCertX500Name = new JcaX509CertificateHolder((X509Certificate) keyEntry.getCertificate()).getSubject().toString();
@@ -113,7 +126,7 @@ public class Revocation {
             return null;
         }
         X509v2CRLBuilder crlBuilder = new X509v2CRLBuilder(new X500Name(signCertX500Name), now);
-        crlBuilder.setNextUpdate(new Date(now.getTime() + 24 * 60 * 60 * 1000 * 7)); // The next CRL is next week (dummy value)
+        crlBuilder.setNextUpdate(cal.getTime()); // The next CRL is next week (dummy value)
         for (RevocationInfo cert : revokedCerts) {
             crlBuilder.addCRLEntry(cert.getSerialNumber(), cert.getRevokedAt(), cert.getRevokeReason().ordinal());
         }
@@ -154,8 +167,8 @@ public class Revocation {
      * @param pkcs11Provider PKCS#11 provider. If null default BC provider will be used.
      */
     public static void generateRootCACRL(String signName, List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, String outputCaCrlPath, AuthProvider pkcs11Provider) {
-        Date now = new Date();
-        Calendar cal = Calendar.getInstance();
+        Date now = Date.from(Instant.now());
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTime(now);
         cal.add(Calendar.YEAR, 1);
         X509v2CRLBuilder crlBuilder = new X509v2CRLBuilder(new X500Name(signName), now);
@@ -244,12 +257,13 @@ public class Revocation {
             }
             ContentSigner contentSigner = signBuilder.build(signingCert.getPrivateKey());
             BasicOCSPResp basicResp = respBuilder.build(contentSigner,
-                    new X509CertificateHolder[] { new X509CertificateHolder(signingCert.getCertificate().getEncoded()) }, new Date());
+                    new X509CertificateHolder[] { new X509CertificateHolder(signingCert.getCertificate().getEncoded()) }, Date.from(Instant.now()));
             // Set response as successful
             int response = OCSPRespBuilder.SUCCESSFUL;
             // build the response
             return new OCSPRespBuilder().build(response, basicResp);
         } catch (Exception e) {
+            log.error("Could not generate OCSP response", e);
             return null;
         }
     }

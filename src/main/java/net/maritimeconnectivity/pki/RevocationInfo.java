@@ -17,6 +17,7 @@ package net.maritimeconnectivity.pki;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import net.maritimeconnectivity.pki.ocsp.CertStatus;
 
@@ -27,13 +28,12 @@ import java.util.Date;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class RevocationInfo {
 
-    public RevocationInfo() {
-    }
     private BigInteger serialNumber;
     private CRLReason revokeReason;
-    private Date RevokedAt;
+    private Date revokedAt;
     private CertStatus status;
 
 }

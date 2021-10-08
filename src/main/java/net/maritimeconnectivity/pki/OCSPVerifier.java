@@ -15,6 +15,8 @@
  */
 package net.maritimeconnectivity.pki;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.maritimeconnectivity.pki.ocsp.OCSPClient;
 import net.maritimeconnectivity.pki.ocsp.OCSPValidationException;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -28,11 +30,8 @@ import java.security.cert.CRLReason;
 import java.security.cert.X509Certificate;
 import java.util.Optional;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class OCSPVerifier {
-
-    private OCSPVerifier() {
-        // empty on purpose
-    }
 
     /**
      * Verifies a certificate against a its issuer using OCSP. In most cases you should probably use
