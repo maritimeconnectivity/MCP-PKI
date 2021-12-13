@@ -16,11 +16,9 @@
 package net.maritimeconnectivity.pki;
 
 
+import lombok.extern.slf4j.Slf4j;
 import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
@@ -31,6 +29,7 @@ import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.OtherName;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
@@ -71,6 +70,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+@Slf4j
 public class CertificateBuilder {
 
     private final KeystoreHandler keystoreHandler;
@@ -146,9 +146,8 @@ public class CertificateBuilder {
                     if (PKIConstants.X509_SAN_DNSNAME.equals(pair.getKey())) {
                         genNames[idx] = new GeneralName(GeneralName.dNSName, pair.getValue());
                     } else {
-                        DERSequence othernameSequence = new DERSequence(new ASN1Encodable[]{
-                                new ASN1ObjectIdentifier(pair.getKey()), new DERTaggedObject(true, 0, new DERUTF8String(pair.getValue()))});
-                        genNames[idx] = new GeneralName(GeneralName.otherName, othernameSequence);
+                        OtherName otherName = new OtherName(new ASN1ObjectIdentifier(pair.getKey()), new DERUTF8String(pair.getValue()));
+                        genNames[idx] = new GeneralName(GeneralName.otherName, otherName);
                     }
                     idx++;
                 }
