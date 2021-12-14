@@ -14,7 +14,7 @@ MCP-PKI implements the *certificate attributes* described in [the developer's pa
 ## Using the lib
 The primary function of this software is to make it easy/easier to use the MCP PKI for (Java) developers. 
 
-There is javadocs available here: <https://maritimeconnectivityplatform.github.io/MCP-PKI/apidocs/>
+There is javadocs available here: <https://maritimeconnectivity.github.io/MCP-PKI/apidocs/>
 
 Use PKIConfiguration for setting up configuration about Keystore and/or Truststore, use KeystoreHandler to load them and the you most like want to use CertificateHandler to, well, handle certificates...
 
@@ -133,12 +133,12 @@ Deploy (requires a gpg key registered at sonatype):
 mvn -Dskip.signing=false clean deploy -Psonatype
 ```
 
-Build the javadocs used for the documentation available at https://maritimeconnectivityplatform.github.io/MCP-PKI/
+Build the javadocs used for the documentation available at https://maritimeconnectivity.github.io/MCP-PKI/
 ```sh
 ./javadocs.sh docs
 ```
 
-Build the javadocs used for the documentation available at https://maritimeconnectivityplatform.github.io/MCP-PKI/ and push to github:
+Build the javadocs used for the documentation available at https://maritimeconnectivity.github.io/MCP-PKI/ and push to github:
 ```sh
 ./javadocs.sh site
 ```
