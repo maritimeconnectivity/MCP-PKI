@@ -211,7 +211,7 @@ public class CAHandler {
         }
 
         // Create the sub CA certificate
-        KeyPair subCaKeyPair = CertificateBuilder.generateKeyPairPKCS11(subCaP11PKIConfiguration.getProvider());
+        KeyPair subCaKeyPair = CertificateBuilder.generateKeyPairPKCS11(subCaP11PKIConfiguration);
         X509Certificate subCaCert;
         X500Name subCaCertX500Name = new X500Name(subCaCertDN);
         String alias = CertificateHandler.getElement(subCaCertX500Name, BCStyle.UID);
@@ -221,7 +221,7 @@ public class CAHandler {
             throw new PKIRuntimeException("UID must be defined for sub CA! It will be used as the sub CA alias.");
         }
         try {
-            subCaCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(rootP11PKIConfiguration.getProvider()), rootCertEntry.getPrivateKey(), rootCertEntry.getCertificate().getPublicKey(),
+            subCaCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(rootP11PKIConfiguration), rootCertEntry.getPrivateKey(), rootCertEntry.getCertificate().getPublicKey(),
                     subCaKeyPair.getPublic(), rootCertX500Name, subCaCertX500Name, null, "INTERMEDIATE", null, crlUrl, rootP11PKIConfiguration.getProvider(), validityPeriod);
         } catch (Exception e) {
             rootP11PKIConfiguration.providerLogout();
@@ -301,13 +301,13 @@ public class CAHandler {
         }
         P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
         p11PKIConfiguration.providerLogin();
-        KeyPair caKeyPair = CertificateBuilder.generateKeyPairPKCS11(p11PKIConfiguration.getProvider());
+        KeyPair caKeyPair = CertificateBuilder.generateKeyPairPKCS11(p11PKIConfiguration);
         KeyStore rootKeyStore;
         KeyStore trustStore;
         try (FileOutputStream tsFos = new FileOutputStream(pkiConfiguration.getTruststorePath())) {
             rootKeyStore = KeyStore.getInstance(PKIConstants.PKCS11, p11PKIConfiguration.getProvider());
             rootKeyStore.load(null, p11PKIConfiguration.getPkcs11Pin());
-            X509Certificate caCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(p11PKIConfiguration.getProvider()), caKeyPair.getPrivate(), caKeyPair.getPublic(), caKeyPair.getPublic(),
+            X509Certificate caCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(p11PKIConfiguration), caKeyPair.getPrivate(), caKeyPair.getPublic(), caKeyPair.getPublic(),
                     new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl, p11PKIConfiguration.getProvider(), validityPeriod);
             Certificate[] certChain = new Certificate[1];
             certChain[0] = caCert;

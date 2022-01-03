@@ -19,6 +19,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
+import net.maritimeconnectivity.pki.pkcs11.P11PKIConfiguration;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.CRLReason;
@@ -40,7 +41,6 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import sun.security.pkcs11.SunPKCS11;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -113,7 +113,7 @@ public class Revocation {
      * @param keyEntry Private key to sign the CRL
      * @return a CRL
      */
-    public static X509CRL generateCRL(List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, AuthProvider authProvider) {
+    public static X509CRL generateCRL(List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, PKIConfiguration pkiConfiguration) {
         Date now = Date.from(Instant.now());
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTime(now);
@@ -132,8 +132,8 @@ public class Revocation {
         }
 
         JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder(SIGNER_ALGORITHM);
-        if (authProvider instanceof SunPKCS11) {
-            signBuilder.setProvider(authProvider);
+        if (pkiConfiguration instanceof P11PKIConfiguration p11PKIConfiguration) {
+            signBuilder.setProvider(p11PKIConfiguration.getProvider());
         } else {
             signBuilder.setProvider(BC_PROVIDER_NAME);
         }
@@ -247,11 +247,11 @@ public class Revocation {
      * @param signingCert PrivateKeyEntry of the signing certificate.
      * @return a OCSPResp
      */
-    public static OCSPResp generateOCSPResponse(BasicOCSPRespBuilder respBuilder, KeyStore.PrivateKeyEntry signingCert, AuthProvider authProvider) {
+    public static OCSPResp generateOCSPResponse(BasicOCSPRespBuilder respBuilder, KeyStore.PrivateKeyEntry signingCert, PKIConfiguration pkiConfiguration) {
         try {
             JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder(SIGNER_ALGORITHM);
-            if (authProvider instanceof SunPKCS11) {
-                signBuilder.setProvider(authProvider);
+            if (pkiConfiguration instanceof P11PKIConfiguration p11PKIConfiguration) {
+                signBuilder.setProvider(p11PKIConfiguration.getProvider());
             } else {
                 signBuilder.setProvider(BC_PROVIDER_NAME);
             }

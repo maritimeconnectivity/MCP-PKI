@@ -21,11 +21,11 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.maritimeconnectivity.pki.PKIConfiguration;
 import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
-import sun.security.pkcs11.SunPKCS11;
 
 import javax.security.auth.login.LoginException;
 import java.io.Console;
 import java.security.AuthProvider;
+import java.security.Provider;
 import java.security.Security;
 
 /**
@@ -47,7 +47,9 @@ public class P11PKIConfiguration extends PKIConfiguration {
 
     public P11PKIConfiguration(@NonNull String rootCAAlias, String pkcs11ConfigPath, String pkcs11Pin) {
         super(rootCAAlias);
-        AuthProvider authProvider = new SunPKCS11(pkcs11ConfigPath);
+        Provider p = Security.getProvider("SunPKCS11");
+        p = p.configure(pkcs11ConfigPath);
+        AuthProvider authProvider = (AuthProvider) p;
         Security.addProvider(authProvider);
         this.provider = authProvider;
         this.pkcs11ProviderName = authProvider.getName();
@@ -69,7 +71,9 @@ public class P11PKIConfiguration extends PKIConfiguration {
 
     public P11PKIConfiguration(@NonNull String rootCAAlias, String pkcs11ConfigPath, char[] pkcs11Pin) {
         super(rootCAAlias);
-        AuthProvider authProvider = new SunPKCS11(pkcs11ConfigPath);
+        Provider p = Security.getProvider("SunPKCS11");
+        p = p.configure(pkcs11ConfigPath);
+        AuthProvider authProvider = (AuthProvider) p;
         Security.addProvider(authProvider);
         this.provider = authProvider;
         this.pkcs11ProviderName = authProvider.getName();

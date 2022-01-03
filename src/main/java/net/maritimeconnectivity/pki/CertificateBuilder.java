@@ -18,6 +18,7 @@ package net.maritimeconnectivity.pki;
 
 import lombok.extern.slf4j.Slf4j;
 import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
+import net.maritimeconnectivity.pki.pkcs11.P11PKIConfiguration;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -42,7 +43,6 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.util.BigIntegers;
-import sun.security.pkcs11.SunPKCS11;
 
 import java.math.BigInteger;
 import java.security.AuthProvider;
@@ -231,7 +231,7 @@ public class CertificateBuilder {
      *
      * @return The generated keypair
      */
-    public static KeyPair generateKeyPair(AuthProvider provider) {
+    public static KeyPair generateKeyPair(PKIConfiguration pkiConfiguration) {
         ECGenParameterSpec ecGenSpec = new ECGenParameterSpec(PKIConstants.ELLIPTIC_CURVE);
         KeyPairGenerator g;
         try {
@@ -241,8 +241,8 @@ public class CertificateBuilder {
         }
         try {
             SecureRandom secureRandom;
-            if (provider instanceof SunPKCS11) {
-                secureRandom = SecureRandom.getInstance(PKIConstants.PKCS11, provider);
+            if (pkiConfiguration instanceof P11PKIConfiguration p11PKIConfiguration) {
+                secureRandom = SecureRandom.getInstance(PKIConstants.PKCS11, p11PKIConfiguration.getProvider());
             } else {
                 secureRandom = new SecureRandom();
             }
@@ -257,12 +257,12 @@ public class CertificateBuilder {
      * Generates a keypair (public and private) based on Elliptic curves on an HSM using PKCS#11
      * @return The generated keypair
      */
-    public static KeyPair generateKeyPairPKCS11(AuthProvider provider) {
+    public static KeyPair generateKeyPairPKCS11(P11PKIConfiguration p11PKIConfiguration) {
         ECGenParameterSpec ecGenSpec = new ECGenParameterSpec(PKIConstants.ELLIPTIC_CURVE);
         KeyPairGenerator g;
         try {
-            g = KeyPairGenerator.getInstance("EC", provider);
-            g.initialize(ecGenSpec, SecureRandom.getInstance(PKIConstants.PKCS11, provider));
+            g = KeyPairGenerator.getInstance("EC", p11PKIConfiguration.getProvider());
+            g.initialize(ecGenSpec, SecureRandom.getInstance(PKIConstants.PKCS11, p11PKIConfiguration.getProvider()));
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
         }
@@ -274,14 +274,14 @@ public class CertificateBuilder {
      *
      * @return a unique serialnumber
      */
-    public BigInteger generateSerialNumber(AuthProvider p11AuthProvider) {
+    public BigInteger generateSerialNumber(PKIConfiguration pkiConfiguration) {
         // BigInteger => NUMERICAL(50) MySQL
         // Max number supported in X509 serial number 2^159-1 = 730750818665451459101842416358141509827966271487
         BigInteger maxValue = new BigInteger("730750818665451459101842416358141509827966271487");
         BigInteger minValue = BigInteger.ZERO;
-        if (p11AuthProvider instanceof SunPKCS11) {
+        if (pkiConfiguration instanceof P11PKIConfiguration p11PKIConfiguration) {
             try {
-                return BigIntegers.createRandomInRange(minValue, maxValue, SecureRandom.getInstance("PKCS11", p11AuthProvider));
+                return BigIntegers.createRandomInRange(minValue, maxValue, SecureRandom.getInstance("PKCS11", p11PKIConfiguration.getProvider()));
             } catch (NoSuchAlgorithmException e) {
                 throw new PKIRuntimeException(e.getMessage(), e);
             }
