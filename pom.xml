@@ -13,7 +13,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <skip.signing>true</skip.signing>
-        <bouncycastle.version>1.69</bouncycastle.version>
+        <bouncycastle.version>1.70</bouncycastle.version>
         <sl4j.version>1.7.32</sl4j.version>
         <lombok.version>1.18.22</lombok.version>
         <java.version>17</java.version>
