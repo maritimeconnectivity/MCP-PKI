@@ -50,7 +50,7 @@ class RevocationTest {
     void generateCRL() {
         // Generate the RevocationInfo list for generating the CRL
         RevocationInfo info = new RevocationInfo(BigInteger.valueOf(42), CRLReason.AFFILIATION_CHANGED, new Date(), CertStatus.REVOKED);
-        List<RevocationInfo> infos = Arrays.asList(info);
+        List<RevocationInfo> infos = List.of(info);
 
         // Load a subCA key used for siging
         PKIConfiguration pkiConf = new PKIConfiguration(TestUtils.getRootCAAlias());
@@ -62,6 +62,7 @@ class RevocationTest {
         // Generate the CRL
         KeyStore.PrivateKeyEntry keyEntry = kh.getSigningCertEntry("urn:mrn:mcl:ca:maritimecloud-idreg");
         X509CRL crl = Revocation.generateCRL(infos, keyEntry, null);
+        assertNotNull(crl);
 
         // Verify that the CRL was signed
         try {

@@ -33,8 +33,7 @@ public class TestUtils {
 
     public static String getMyBoatCertPem() {
         String certFile = "src/test/resources/Certificate_Myboat.pem";
-        String contents = loadTxtFile(certFile);
-        return contents;
+        return loadTxtFile(certFile);
     }
 
     public static X509Certificate getMyBoatCert() {
@@ -43,8 +42,7 @@ public class TestUtils {
 
     public static String getEcdisCertPem() {
         String certFile = "src/test/resources/Certificate_Ecdis.pem";
-        String contents = loadTxtFile(certFile);
-        return contents;
+        return loadTxtFile(certFile);
     }
 
     public static X509Certificate getEcdisCert() {
@@ -53,8 +51,7 @@ public class TestUtils {
 
     public static String getTestUserCertPem() {
         String certFile = "src/test/resources/Certificate_TestUser.pem";
-        String contents = loadTxtFile(certFile);
-        return contents;
+        return loadTxtFile(certFile);
     }
 
     public static X509Certificate getTestUserCert() {

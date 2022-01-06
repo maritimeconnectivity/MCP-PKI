@@ -73,37 +73,18 @@ public class Revocation {
      * @return The int value associated with the revocation status
      */
     public static int getCRLReasonFromString(String certReason) {
-        int reason = CRLReason.unspecified;
-        switch (certReason) {
-            case "keycompromise":
-                reason = CRLReason.keyCompromise;
-                break;
-            case "cacompromise":
-                reason = CRLReason.cACompromise;
-                break;
-            case "affiliationchanged":
-                reason = CRLReason.affiliationChanged;
-                break;
-            case "superseded":
-                reason = CRLReason.superseded;
-                break;
-            case "cessationofoperation":
-                reason = CRLReason.cessationOfOperation;
-                break;
-            case "certificatehold":
-                reason = CRLReason.certificateHold;
-                break;
-            case "removefromcrl":
-                reason = CRLReason.removeFromCRL;
-                break;
-            case "privilegewithdrawn":
-                reason = CRLReason.privilegeWithdrawn;
-                break;
-            case "aacompromise":
-                reason = CRLReason.aACompromise;
-                break;
-        }
-        return reason;
+        return switch (certReason) {
+            case "keycompromise" -> CRLReason.keyCompromise;
+            case "cacompromise" -> CRLReason.cACompromise;
+            case "affiliationchanged" -> CRLReason.affiliationChanged;
+            case "superseded" -> CRLReason.superseded;
+            case "cessationofoperation" -> CRLReason.cessationOfOperation;
+            case "certificatehold" -> CRLReason.certificateHold;
+            case "removefromcrl" -> CRLReason.removeFromCRL;
+            case "privilegewithdrawn" -> CRLReason.privilegeWithdrawn;
+            case "aacompromise" -> CRLReason.aACompromise;
+            default -> CRLReason.unspecified;
+        };
     }
 
     /**

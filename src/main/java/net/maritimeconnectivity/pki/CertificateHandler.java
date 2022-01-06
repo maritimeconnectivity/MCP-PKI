@@ -216,7 +216,6 @@ public class CertificateHandler {
             ks.load(null);
             ks.setKeyEntry(alias, privateKey, password.toCharArray(), new java.security.cert.Certificate[]{certificate});
             ks.store(bos, password.toCharArray());
-            bos.close();
             return bos.toByteArray();
         } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | NoSuchProviderException e) {
             throw new PKIRuntimeException(e);
@@ -231,7 +230,7 @@ public class CertificateHandler {
      * @throws UnsupportedEncodingException if given certificate cannot be URL decoded
      */
     public static X509Certificate getCertFromNginxHeader(String certificateHeader) throws UnsupportedEncodingException {
-        String certificateContent = URLDecoder.decode(certificateHeader, "UTF-8");
+        String certificateContent = URLDecoder.decode(certificateHeader, StandardCharsets.UTF_8);
         // make sure that the + characters in the base64 encoded part have not been converted to spaces
         if (certificateContent.startsWith(PKIConstants.CERT_HEADER) && certificateContent.contains(PKIConstants.CERT_FOOTER)) {
             String middle = certificateContent.split(PKIConstants.CERT_HEADER)[1].split(PKIConstants.CERT_FOOTER)[0];
