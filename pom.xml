@@ -16,7 +16,6 @@
         <bouncycastle.version>1.70</bouncycastle.version>
         <sl4j.version>1.7.32</sl4j.version>
         <lombok.version>1.18.22</lombok.version>
-        <java.version>17</java.version>
         <maven.compiler.release>11</maven.compiler.release>
     </properties>
 
@@ -140,33 +139,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
-                <executions>
-                    <execution>
-                        <id>compile-java-17-specific</id>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <release>17</release>
-                            <compileSourceRoots>
-                                <compileSourceRoot>${project.basedir}/src/main/java17</compileSourceRoot>
-                            </compileSourceRoots>
-                            <multiReleaseOutput>true</multiReleaseOutput>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.1</version>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Multi-Release>true</Multi-Release>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
             </plugin>
             <plugin>
                 <!-- Can be triggered by running mvn javadoc:javadoc -->
@@ -217,9 +189,6 @@
                         <manifest>
                             <mainClass>net.maritimeconnectivity.pki.Main</mainClass>
                         </manifest>
-                        <manifestEntries>
-                            <Multi-Release>true</Multi-Release>
-                        </manifestEntries>
                     </archive>
                 </configuration>
                 <executions>
