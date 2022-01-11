@@ -331,8 +331,8 @@ public class CertificateHandler {
                         oid = asnOID.getId();
                         // For some weird reason we need to do this 2 times - otherwise we get a
                         // ClassCastException when extracting the value.
-                        encoded = ((ASN1TaggedObject) encoded).getObject();
-                        encoded = ((ASN1TaggedObject) encoded).getObject();
+                        encoded = ((ASN1TaggedObject) encoded).getBaseObject();
+                        encoded = ((ASN1TaggedObject) encoded).getBaseObject();
                         value = ((DERUTF8String) encoded).getString();
                     } catch (IOException e) {
                         log.error("Error decoding subjectAltName" + e.getLocalizedMessage(), e);
@@ -374,7 +374,7 @@ public class CertificateHandler {
                             identity.setUrl(value);
                             break;
                         case PKIConstants.MC_OID_PERMISSIONS:
-                            if (value != null && !value.trim().isEmpty()) {
+                            if (!value.trim().isEmpty()) {
                                 if (permissions.length() == 0) {
                                     permissions = new StringBuilder(value);
                                 } else {

@@ -44,7 +44,7 @@ public class OCSPVerifier {
      * @throws OCSPValidationException if the certificate cannot be verified using OCSP
      */
     public static RevocationInfo verifyCertificateOCSP(X509Certificate cert, KeyStore trustStore) throws KeyStoreException, OCSPValidationException {
-        X500Name x500name = new X500Name(cert.getIssuerDN().getName());
+        X500Name x500name = new X500Name(cert.getIssuerX500Principal().getName());
         String issuerAlias = CertificateHandler.getElement(x500name, BCStyle.UID);
         X509Certificate issuerCert =  (X509Certificate) trustStore.getCertificate(issuerAlias);
         return verifyCertificateOCSP(cert, issuerCert);
