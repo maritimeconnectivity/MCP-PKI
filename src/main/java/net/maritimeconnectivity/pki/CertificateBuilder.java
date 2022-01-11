@@ -304,7 +304,7 @@ public class CertificateBuilder {
         if (pkiConfiguration instanceof P11PKIConfiguration) {
             try {
                 P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
-                return BigIntegers.createRandomInRange(minValue, maxValue, SecureRandom.getInstance("PKCS11", p11PKIConfiguration.getProvider()));
+                return BigIntegers.createRandomInRange(minValue, maxValue, SecureRandom.getInstance(PKIConstants.PKCS11, p11PKIConfiguration.getProvider()));
             } catch (NoSuchAlgorithmException e) {
                 throw new PKIRuntimeException(e.getMessage(), e);
             }

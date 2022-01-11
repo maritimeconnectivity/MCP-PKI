@@ -281,7 +281,7 @@ public class CertificateHandler {
      */
     public static PKIIdentity getIdentityFromCert(X509Certificate userCertificate) {
         PKIIdentity identity = new PKIIdentity();
-        String certDN = userCertificate.getSubjectDN().getName();
+        String certDN = userCertificate.getSubjectX500Principal().getName();
         RDN[] rdns = rDNsFromString(certDN, BCStyle.INSTANCE);
         String name = getElement(rdns, BCStyle.CN);
         String uid = getElement(rdns, BCStyle.UID);

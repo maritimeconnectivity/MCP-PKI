@@ -27,7 +27,6 @@ import java.security.cert.X509Certificate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-
 class OCSPVerifierTest {
     //@Test
     void verifyCertificateOCSP1() {
@@ -39,11 +38,10 @@ class OCSPVerifierTest {
         RevocationInfo info = null;
         try {
             info = OCSPVerifier.verifyCertificateOCSP(cert, kh.getTrustStore());
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
-        } catch (OCSPValidationException e) {
+        } catch (KeyStoreException | OCSPValidationException e) {
             e.printStackTrace();
         }
+        assertNotNull(info);
         assertEquals(CertStatus.GOOD, info.getStatus());
     }
 
@@ -57,11 +55,10 @@ class OCSPVerifierTest {
         RevocationInfo info = null;
         try {
             info = OCSPVerifier.verifyCertificateOCSP(cert, kh.getTrustStore());
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
-        } catch (OCSPValidationException e) {
+        } catch (KeyStoreException | OCSPValidationException e) {
             e.printStackTrace();
         }
+        assertNotNull(info);
         assertEquals(CertStatus.REVOKED, info.getStatus());
     }
 

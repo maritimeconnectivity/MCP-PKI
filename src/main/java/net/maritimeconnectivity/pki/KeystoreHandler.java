@@ -57,7 +57,7 @@ public class KeystoreHandler {
         if (pkiConfiguration instanceof P11PKIConfiguration) {
             try {
                 P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
-                KeyStore keyStore = KeyStore.getInstance("PKCS11", p11PKIConfiguration.getProvider());
+                KeyStore keyStore = KeyStore.getInstance(PKIConstants.PKCS11, p11PKIConfiguration.getProvider());
                 keyStore.load(null, p11PKIConfiguration.getPkcs11Pin());
                 return (KeyStore.PrivateKeyEntry) keyStore.getEntry(alias, null);
             } catch (KeyStoreException e) {

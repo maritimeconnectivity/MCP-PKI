@@ -30,6 +30,7 @@ public class PKIConstants {
     public static final String PKCS11 = "PKCS11";
     public static final String CERT_HEADER = "-----BEGIN CERTIFICATE-----";
     public static final String CERT_FOOTER = "-----END CERTIFICATE-----";
+    public static final String X509 = "X.509";
 
     // OIDs used for the extra info stored in the SubjectAlternativeName extension
     // Generate more random OIDs at http://www.itu.int/en/ITU-T/asn1/Pages/UUID/generate_uuid.aspx

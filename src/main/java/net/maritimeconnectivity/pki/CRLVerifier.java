@@ -42,8 +42,8 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.maritimeconnectivity.pki.ocsp.CertStatus;
+import org.bouncycastle.asn1.ASN1IA5String;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.DistributionPoint;
@@ -163,7 +163,7 @@ public final class CRLVerifier {
         env.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
         env.put(Context.PROVIDER_URL, ldapURL);
 
-        DirContext ctx = new InitialDirContext((Hashtable) env);
+        DirContext ctx = new InitialDirContext(new Hashtable<>(env));
         Attributes avals = ctx.getAttributes("");
         Attribute aval = avals.get("certificateRevocationList;binary");
         byte[] val = (byte[]) aval.get();
@@ -171,7 +171,7 @@ public final class CRLVerifier {
             throw new CRLException("Can not download CRL from: " + ldapURL);
         } else {
             InputStream inStream = new ByteArrayInputStream(val);
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            CertificateFactory cf = CertificateFactory.getInstance(PKIConstants.X509);
             return (X509CRL) cf.generateCRL(inStream);
         }
     }
@@ -189,7 +189,7 @@ public final class CRLVerifier {
     public static X509CRL downloadCRLFromWeb(String crlURL) throws IOException, CRLException, CertificateException {
         URL url = new URL(crlURL);
         try (InputStream crlStream = url.openStream()) {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            CertificateFactory cf = CertificateFactory.getInstance(PKIConstants.X509);
             return (X509CRL) cf.generateCRL(crlStream);
         }
     }
@@ -205,7 +205,7 @@ public final class CRLVerifier {
      */
     public static X509CRL loadCRLFromFile(String path) throws IOException, CRLException, CertificateException {
         try (FileInputStream fis = new FileInputStream(path)) {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            CertificateFactory cf = CertificateFactory.getInstance(PKIConstants.X509);
             return (X509CRL) cf.generateCRL(fis);
         }
     }
@@ -242,7 +242,7 @@ public final class CRLVerifier {
                 // Look for an URI
                 for (GeneralName genName : genNames) {
                     if (genName.getTagNo() == GeneralName.uniformResourceIdentifier) {
-                        String url = DERIA5String.getInstance(genName.getName()).getString();
+                        String url = ASN1IA5String.getInstance(genName.getName()).getString();
                         crlUrls.add(url);
                     }
                 }

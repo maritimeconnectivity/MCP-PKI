@@ -253,7 +253,7 @@ class CertificateHandlerTest {
 
         PKIIdentity identity = CertificateHandler.getIdentityFromCert(cert);
         assertNotNull(identity);
-        assertEquals("UID=urn:mrn:mcl:vessel:dma:myboat, CN=My Boat, OU=vessel, O=urn:mrn:mcl:org:dma, C=DK", identity.getDn());
+        assertEquals("UID=urn:mrn:mcl:vessel:dma:myboat,CN=My Boat,OU=vessel,O=urn:mrn:mcl:org:dma,C=DK", identity.getDn());
         assertEquals("urn:mrn:mcl:org:dma", identity.getO());
         assertEquals("My Boat", identity.getCn());
         assertEquals("12345678", identity.getImoNumber());
@@ -265,7 +265,7 @@ class CertificateHandlerTest {
     void getIdentityFromCertWithEscapedCharacters() {
         X509Certificate cert = TestUtils.getTestUserCert();
 
-        String certDN = cert.getSubjectDN().getName();
+        String certDN = cert.getSubjectX500Principal().getName();
         X500Name x500Name = new X500Name(certDN);
         String email = CertificateHandler.getElement(x500Name, BCStyle.EmailAddress);
         assertEquals("info\\+test@maritimeconnectivity.net", email);
