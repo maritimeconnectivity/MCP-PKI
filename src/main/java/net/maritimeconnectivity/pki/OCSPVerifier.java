@@ -23,7 +23,6 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.ocsp.RevokedStatus;
 
-import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.CRLReason;
@@ -34,16 +33,15 @@ import java.util.Optional;
 public class OCSPVerifier {
 
     /**
-     * Verifies a certificate against a its issuer using OCSP. In most cases you should probably use
+     * Verifies a certificate against its issuer using OCSP. In most cases you should probably use
      * {@link CertificateHandler#verifyCertificateChain(X509Certificate, KeyStore) verifyCertificateChain}
      * instead to verify the complete chain.
      *
      * @param cert Certificate to validate
      * @param trustStore Truststore containing the issuer certificate
      * @return an OCSP result
-     * @throws IOException
-     * @throws KeyStoreException
-     * @throws OCSPValidationException
+     * @throws KeyStoreException if the issuing CA certificate cannot be found
+     * @throws OCSPValidationException if the certificate cannot be verified using OCSP
      */
     public static RevocationInfo verifyCertificateOCSP(X509Certificate cert, KeyStore trustStore) throws KeyStoreException, OCSPValidationException {
         X500Name x500name = new X500Name(cert.getIssuerDN().getName());
@@ -60,8 +58,7 @@ public class OCSPVerifier {
      * @param cert Certificate to validate
      * @param issuerCert The issuer certificate
      * @return an OCSP result
-     * @throws IOException
-     * @throws OCSPValidationException
+     * @throws OCSPValidationException if the certificate cannot be verified using OCSP
      */
     public static RevocationInfo verifyCertificateOCSP(X509Certificate cert, X509Certificate issuerCert) throws OCSPValidationException {
         OCSPClient ocspClient = new OCSPClient(issuerCert, cert);

@@ -15,7 +15,6 @@
  */
 package net.maritimeconnectivity.pki;
 
-
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +73,9 @@ import java.util.List;
 import static org.bouncycastle.asn1.x500.style.IETFUtils.rDNsFromString;
 import static org.bouncycastle.asn1.x500.style.IETFUtils.valueToString;
 
-
+/**
+ * Class that holds functions for handling certificates.
+ */
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CertificateHandler {
@@ -143,11 +144,11 @@ public class CertificateHandler {
      * @param certificate The certificate to verify
      * @param ks The truststore that contains the trust chain
      * @return true if valid.
-     * @throws KeyStoreException Thrown if keystore loading fails
-     * @throws NoSuchAlgorithmException Thrown if PKIX initialization fails
-     * @throws CertificateException Thrown if certificate cannot be loaded
-     * @throws InvalidAlgorithmParameterException Thrown if keystore loading fails
-     * @throws CertPathValidatorException Thrown if certificate is invalid.
+     * @throws KeyStoreException if keystore loading fails
+     * @throws NoSuchAlgorithmException if PKIX initialization fails
+     * @throws CertificateException if certificate cannot be loaded
+     * @throws InvalidAlgorithmParameterException if keystore loading fails
+     * @throws CertPathValidatorException if certificate is invalid.
      */
     public static boolean verifyCertificateChain(X509Certificate certificate, KeyStore ks) throws KeyStoreException,
             NoSuchAlgorithmException, CertificateException, InvalidAlgorithmParameterException, CertPathValidatorException {
@@ -171,11 +172,11 @@ public class CertificateHandler {
     }
 
     /**
-     * Convert a cert/key to pem from "encoded" format (byte[])
+     * Convert a cert/key to PEM from "encoded" format (byte[])
      *
      * @param type The type, currently "CERTIFICATE", "PUBLIC KEY", "PRIVATE KEY" or "X509 CRL" are used
      * @param encoded The encoded byte[]
-     * @return The Pem formated cert/key
+     * @return The PEM formatted cert/key
      */
     public static String getPemFromEncoded(String type, byte[] encoded) {
         String pemFormat = "";
@@ -223,7 +224,7 @@ public class CertificateHandler {
     }
 
     /**
-     * Extract a certificate from a nginx header containing a PEM formatet certificate
+     * Extract a certificate from a nginx header containing a PEM formatted certificate
      *
      * @param certificateHeader The header containing the certificate
      * @return The extracted certificate. Returns null on failure.
@@ -273,7 +274,7 @@ public class CertificateHandler {
     }
 
     /**
-     * Extracts a PKIIdentity from a certificate using the MC PKI certificate "format"
+     * Extracts a PKIIdentity from a certificate using the MCP PKI certificate "format"
      *
      * @param userCertificate The certificate
      * @return The extracted identity

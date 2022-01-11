@@ -25,11 +25,6 @@ package net.maritimeconnectivity.pki.ocsp;
  */
 //package org.poreid.verify.ocsp;
 
-/**
- *
- * @author POReID
- */
-
 import net.maritimeconnectivity.pki.PKIConstants;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -74,6 +69,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
 
+/**
+ *
+ * @author POReID
+ */
 public class OCSPClient {
 
     private byte[] sentNonce;

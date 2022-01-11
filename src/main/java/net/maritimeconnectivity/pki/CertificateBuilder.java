@@ -15,7 +15,6 @@
  */
 package net.maritimeconnectivity.pki;
 
-
 import lombok.extern.slf4j.Slf4j;
 import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
 import net.maritimeconnectivity.pki.pkcs11.P11PKIConfiguration;
@@ -70,6 +69,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+/**
+ * Class that contains functions for generating client certificates
+ */
 @Slf4j
 public class CertificateBuilder {
 
@@ -87,7 +89,7 @@ public class CertificateBuilder {
      * Builds and signs a certificate. The certificate will be build on the given subject-public-key and signed with
      * the given issuer-private-key. The issuer and subject will be identified in the strings provided.
      *
-     * @param serialNumber The serialnumber of the new certificate.
+     * @param serialNumber The serial number of the new certificate.
      * @param signerPrivateKey Private key for signing the certificate
      * @param signerPublicKey Public key of the signing certificate
      * @param subjectPublicKey Public key for the new certificate
@@ -97,8 +99,13 @@ public class CertificateBuilder {
      * @param type Type of certificate, can be "ROOT", "INTERMEDIATE" or "ENTITY".
      * @param ocspUrl OCSP endpoint
      * @param crlUrl CRL endpoint - can be null
+     * @param p11AuthProvider The provider that should be used - can be null
+     * @param validityPeriod How many months the certificate should be valid
      * @return A signed X509Certificate
-     * @throws Exception Throws exception on certificate generation errors.
+     * @throws NoSuchAlgorithmException if the needed underlying algorithms don't exist in the crypto provider
+     * @throws CertIOException if extensions cannot be added to the certificate
+     * @throws OperatorCreationException if the certificate signer cannot be instantiated
+     * @throws CertificateException if the certificate cannot be built
      */
     public X509Certificate buildAndSignCert(BigInteger serialNumber, PrivateKey signerPrivateKey, PublicKey signerPublicKey, PublicKey subjectPublicKey, X500Name issuer, X500Name subject,
                                             Map<String, String> customAttrs, String type, String ocspUrl, String crlUrl, AuthProvider p11AuthProvider, int validityPeriod) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException {
@@ -184,17 +191,27 @@ public class CertificateBuilder {
     /**
      * Generates a signed certificate for an entity.
      *
+     * @param serialNumber The serial number of the certificate
      * @param country The country of org/entity
      * @param orgName The name of the organization the entity belongs to
      * @param type The type of the  entity
      * @param callName The name of the entity
      * @param email The email of the entity
-     * @param publickey The public key of the entity
+     * @param uid The UID of the certificate
+     * @param validityPeriod How many months the certificate should be valid
+     * @param publicKey The public key of the entity
+     * @param customAttr Custom attributes that should be added to the certificate
+     * @param signingAlias The alias of the CA that should be used to sign the certificate
      * @param baseCrlOcspURI The base URI used for the CRL and OCSP endpoint. This will be prepended: (ocsp|crl)/urn:mrn:mcl:ca:...
+     * @param p11AuthProvider The provider that should be used - can be null
      * @return Returns a signed X509Certificate
+     * @throws CertificateException if the certificate cannot be built
+     * @throws OperatorCreationException if the certificate cannot be built
+     * @throws CertIOException if the certificate cannot be built
+     * @throws NoSuchAlgorithmException if the certificate cannot be built
      */
     public X509Certificate generateCertForEntity(BigInteger serialNumber, String country, String orgName, String type,
-                                                 String callName, String email, String uid, int validityPeriod, PublicKey publickey,
+                                                 String callName, String email, String uid, int validityPeriod, PublicKey publicKey,
                                                  Map<String, String> customAttr, String signingAlias, String baseCrlOcspURI,
                                                  AuthProvider p11AuthProvider) throws CertificateException, OperatorCreationException, CertIOException, NoSuchAlgorithmException {
         KeyStore.PrivateKeyEntry signingCertEntry = keystoreHandler.getSigningCertEntry(signingAlias);
@@ -222,13 +239,14 @@ public class CertificateBuilder {
         String ocspUrl  = baseCrlOcspURI + "ocsp/" + signingAlias;
         String crlUrl = baseCrlOcspURI + "crl/" + signingAlias;
         return buildAndSignCert(serialNumber, signingCertEntry.getPrivateKey(), signingX509Cert.getPublicKey(),
-                    publickey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(subjectDn),
+                    publicKey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(subjectDn),
                     customAttr, "ENTITY", ocspUrl, crlUrl, p11AuthProvider, validityPeriod);
     }
 
     /**
      * Generates a keypair (public and private) based on Elliptic curves.
      *
+     * @param pkiConfiguration a configuration for the PKI
      * @return The generated keypair
      */
     public static KeyPair generateKeyPair(PKIConfiguration pkiConfiguration) {
@@ -256,6 +274,8 @@ public class CertificateBuilder {
 
     /**
      * Generates a keypair (public and private) based on Elliptic curves on an HSM using PKCS#11
+     *
+     * @param p11PKIConfiguration a PKCS#11 configuration for the PKI
      * @return The generated keypair
      */
     public static KeyPair generateKeyPairPKCS11(P11PKIConfiguration p11PKIConfiguration) {
@@ -273,6 +293,7 @@ public class CertificateBuilder {
     /**
      * Generate a unique serial number to uniquely identify certificates.
      *
+     * @param pkiConfiguration a configuration for the PKI
      * @return a unique serialnumber
      */
     public BigInteger generateSerialNumber(PKIConfiguration pkiConfiguration) {

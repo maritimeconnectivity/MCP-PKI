@@ -45,6 +45,12 @@ public class P11PKIConfiguration extends PKIConfiguration {
 
     private boolean loggedIn;
 
+    /**
+     *
+     * @param rootCAAlias       the alias for the root CA that should be used
+     * @param pkcs11ConfigPath  the path of the PKCS#11 configuration file
+     * @param pkcs11Pin         the pin that should be used for logging in to the HSM
+     */
     public P11PKIConfiguration(@NonNull String rootCAAlias, String pkcs11ConfigPath, String pkcs11Pin) {
         super(rootCAAlias);
         Provider p = Security.getProvider("SunPKCS11");
@@ -69,6 +75,12 @@ public class P11PKIConfiguration extends PKIConfiguration {
         this.loggedIn = false;
     }
 
+    /**
+     *
+     * @param rootCAAlias       the alias for the root CA that should be used
+     * @param pkcs11ConfigPath  the path of the PKCS#11 configuration file
+     * @param pkcs11Pin         the pin that should be used for logging in to the HSM
+     */
     public P11PKIConfiguration(@NonNull String rootCAAlias, String pkcs11ConfigPath, char[] pkcs11Pin) {
         super(rootCAAlias);
         Provider p = Security.getProvider("SunPKCS11");
@@ -89,6 +101,9 @@ public class P11PKIConfiguration extends PKIConfiguration {
         this.loggedIn = false;
     }
 
+    /**
+     * Login to the HSM
+     */
     public void providerLogin() {
         if (loggedIn) {
             return;
@@ -101,6 +116,9 @@ public class P11PKIConfiguration extends PKIConfiguration {
         }
     }
 
+    /**
+     * Logout from the HSM
+     */
     public void providerLogout() {
         if (!loggedIn) {
             return;

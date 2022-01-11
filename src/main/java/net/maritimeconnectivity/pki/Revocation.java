@@ -62,6 +62,9 @@ import static net.maritimeconnectivity.pki.CertificateHandler.getPemFromEncoded;
 import static net.maritimeconnectivity.pki.PKIConstants.BC_PROVIDER_NAME;
 import static net.maritimeconnectivity.pki.PKIConstants.SIGNER_ALGORITHM;
 
+/**
+ * Class that contains functions that are relevant for providing revocation information
+ */
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Revocation {
@@ -237,6 +240,7 @@ public class Revocation {
      *
      * @param respBuilder A BasicOCSPRespBuilder
      * @param signingCert PrivateKeyEntry of the signing certificate.
+     * @param pkiConfiguration A PKIConfiguration
      * @return a OCSPResp
      */
     public static OCSPResp generateOCSPResponse(BasicOCSPRespBuilder respBuilder, KeyStore.PrivateKeyEntry signingCert, PKIConfiguration pkiConfiguration) {

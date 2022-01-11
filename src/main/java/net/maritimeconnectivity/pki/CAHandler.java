@@ -15,7 +15,6 @@
  */
 package net.maritimeconnectivity.pki;
 
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
@@ -51,6 +50,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Class that holds functions for generating root and intermediate CAs
+ */
 @Slf4j
 @AllArgsConstructor
 public class CAHandler {
@@ -62,11 +64,12 @@ public class CAHandler {
     /**
      * Creates a sub Certificate Authority for the MC PKI. The certificate and keypair is placed in a "SubCaKeystore"
      * defined in PKIConfiguration and in the truststore, also defined in PKIConfiguration. The SubCaKeystore will be
-     * created if it does not exist already, but the truststore is expected to exists already. It is also expected that
+     * created if it does not exist already, but the truststore is expected to exist already. It is also expected that
      * a RootCaKeystore is defined in PKIConfiguration and exists.
      *
      * @param subCaCertDN The DN of the new sub CA certificate.
      * @param rootCAAlias The alias of the root CA
+     * @param validityPeriod How many months the certificate should be valid
      */
     public void createSubCa(String subCaCertDN, String rootCAAlias, int validityPeriod) {
 

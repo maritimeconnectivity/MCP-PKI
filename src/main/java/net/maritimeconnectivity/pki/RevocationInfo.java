@@ -25,6 +25,9 @@ import java.math.BigInteger;
 import java.security.cert.CRLReason;
 import java.util.Date;
 
+/**
+ * Wrapper class used to contain revocation information about a certificate
+ */
 @Getter
 @Setter
 @AllArgsConstructor

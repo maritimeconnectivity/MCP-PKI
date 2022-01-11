@@ -18,6 +18,9 @@ package net.maritimeconnectivity.pki;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+/**
+ * Class that contains string constants that are used throughout the project
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PKIConstants {
     public static final String BC_PROVIDER_NAME = "BC";

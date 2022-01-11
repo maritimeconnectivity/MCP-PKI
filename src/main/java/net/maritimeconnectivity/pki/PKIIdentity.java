@@ -19,6 +19,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * A wrapper class that can contain the attributes of an MCP identity
+ */
 @Getter
 @Setter
 @ToString

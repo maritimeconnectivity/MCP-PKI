@@ -75,6 +75,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Class that contains functions for retrieving and verifying certificate revocation lists
+ */
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CRLVerifier {
@@ -127,6 +130,13 @@ public final class CRLVerifier {
 
     /**
      * Downloads CRL from given URL. Supports http, https, ftp and ldap based URLs.
+     *
+     * @param crlURL The URL for downloading the CRL
+     * @return a CRL
+     * @throws IOException if a connection cannot be opened based on the given URL
+     * @throws CertificateException if the retrieved CRL cannot be instantiated as a Java object
+     * @throws NamingException if downloading CRL from ldap fails
+     * @throws CRLException if the retrieved CRL cannot be instantiated as a Java object
      */
     public static X509CRL downloadCRL(String crlURL) throws IOException, CertificateException, NamingException, CRLException {
         if (crlURL.startsWith("http://") || crlURL.startsWith("https://") || crlURL.startsWith("ftp://")) {
@@ -134,13 +144,19 @@ public final class CRLVerifier {
         } else if (crlURL.startsWith("ldap://")) {
             return downloadCRLFromLDAP(crlURL);
         } else {
-            throw new CRLException("Can not download CRL from certificate distribution point: " + crlURL);
+            throw new CRLException("Cannot download CRL from certificate distribution point: " + crlURL);
         }
     }
 
     /**
      * Downloads a CRL from given LDAP url, e.g.
      * ldap://ldap.infonotary.com/dc=identity-ca,dc=infonotary,dc=com
+     *
+     * @param ldapURL The URL for downloading the CRL from a ldap server
+     * @return a CRL
+     * @throws NamingException if downloading CRL from ldap fails
+     * @throws CertificateException if a CertificateFactory cannot be instantiated
+     * @throws CRLException if the retrieved CRL cannot be instantiated as a Java object
      */
     public static X509CRL downloadCRLFromLDAP(String ldapURL) throws NamingException, CertificateException, CRLException {
         Map<String, String> env = new HashMap<>();
@@ -163,6 +179,12 @@ public final class CRLVerifier {
     /**
      * Downloads a CRL from given HTTP/HTTPS/FTP URL, e.g.
      * http://crl.infonotary.com/crl/identity-ca.crl
+     *
+     * @param crlURL The URL for downloading the CRL
+     * @return a CRL
+     * @throws IOException if a connection cannot be opened based on the given URL
+     * @throws CertificateException if a CertificateFactory cannot be instantiated
+     * @throws CRLException if the retrieved CRL cannot be instantiated as a Java object
      */
     public static X509CRL downloadCRLFromWeb(String crlURL) throws IOException, CRLException, CertificateException {
         URL url = new URL(crlURL);
@@ -174,6 +196,12 @@ public final class CRLVerifier {
 
     /**
      * Load a CRL from given file
+     *
+     * @param path The path of the file that contains the CRL
+     * @return a CRL
+     * @throws IOException if the file cannot be opened
+     * @throws CRLException if the loaded CRL cannot be instantiated as a Java object
+     * @throws CertificateException if a CertificateFactory cannot be instantiated
      */
     public static X509CRL loadCRLFromFile(String path) throws IOException, CRLException, CertificateException {
         try (FileInputStream fis = new FileInputStream(path)) {
@@ -186,6 +214,10 @@ public final class CRLVerifier {
      * Extracts all CRL distribution point URLs from the
      * "CRL Distribution Point" extension in a X.509 certificate. If CRL
      * distribution point extension is unavailable, returns an empty list.
+     *
+     * @param cert The certificate that should be used for extracting the distribution points
+     * @return a list CRL distribution points
+     * @throws IOException if the given certificate cannot be read
      */
     public static List<String> getCrlDistributionPoints(X509Certificate cert) throws IOException {
         byte[] crldpExt = cert.getExtensionValue(Extension.cRLDistributionPoints.getId());

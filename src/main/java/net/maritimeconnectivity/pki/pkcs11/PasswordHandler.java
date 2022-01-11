@@ -23,7 +23,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.PasswordCallback;
 
 /**
- * Class used to be able to login to an HSM
+ * Class used to be able to login to an HSM using a password/PIN
  */
 @AllArgsConstructor
 public class PasswordHandler implements CallbackHandler {

@@ -33,6 +33,9 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
+/**
+ * Class that contains functions for handling keystores
+ */
 @Slf4j
 public class KeystoreHandler {
 
@@ -83,7 +86,7 @@ public class KeystoreHandler {
     }
 
     /**
-     * Returns a MCP certificate from the truststore
+     * Returns an MCP certificate from the truststore
      *
      * @param alias Either ROOT_CERT_ALIAS or INTERMEDIATE_CERT_ALIAS
      * @return a certificate
