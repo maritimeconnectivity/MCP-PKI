@@ -105,6 +105,7 @@ public class Revocation {
      *
      * @param revokedCerts  List of the serialnumbers that should be revoked.
      * @param keyEntry Private key to sign the CRL
+     * @param pkiConfiguration A PKIConfiguration
      * @return a CRL
      */
     public static X509CRL generateCRL(List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, PKIConfiguration pkiConfiguration) {

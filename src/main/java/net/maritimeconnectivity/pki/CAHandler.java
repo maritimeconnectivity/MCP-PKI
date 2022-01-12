@@ -161,6 +161,7 @@ public class CAHandler {
      * @param subCaCertDN The DN of the new sub CA certificate.
      * @param rootCAAlias The alias of the root CA
      * @param subCaConfiguration Holds the configuration for the sub CA HSM. Must be a P11PKIConfiguration
+     * @param validityPeriod How many months the certificate should be valid
      */
     public void createSubCAPKCS11(String subCaCertDN, String rootCAAlias, PKIConfiguration subCaConfiguration, int validityPeriod) {
         if (!(pkiConfiguration instanceof P11PKIConfiguration) || !(subCaConfiguration instanceof P11PKIConfiguration)) {
@@ -259,6 +260,7 @@ public class CAHandler {
      * @param rootCertX500Name The DN of the new root CA Certificate
      * @param crlUrl CRL endpoint
      * @param rootCAAlias The alias of the root CA
+     * @param validityPeriod How many months the certificate should be valid
      */
     public void initRootCA(String rootCertX500Name, String crlUrl, String rootCAAlias, int validityPeriod) {
         KeyPair cakp = CertificateBuilder.generateKeyPair(null);
@@ -297,6 +299,7 @@ public class CAHandler {
      * @param rootCertX500Name The DN of the new root CA Certificate
      * @param crlUrl CRL endpoint
      * @param rootCAAlias The alias of the root CA
+     * @param validityPeriod How many months the certificate should be valid
      */
     public void initRootCAPKCS11(String rootCertX500Name, String crlUrl, String rootCAAlias, int validityPeriod) {
         if (!(pkiConfiguration instanceof P11PKIConfiguration)) {
@@ -336,7 +339,7 @@ public class CAHandler {
      * 345678954765889809876543;cacompromise;2017-04-31
      *
      * @param revocationFile Path to the file that should be loaded.
-     * @return List of certificates that has been/should be revoked.
+     * @return List of certificates that have been/should be revoked.
      */
     public List<RevocationInfo> loadRevocationFile(String revocationFile) {
         String csvLine;
