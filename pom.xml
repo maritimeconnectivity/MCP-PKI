@@ -105,7 +105,7 @@
     </distributionManagement>
 
     <build>
-<!--        <sourceDirectory>${project.basedir}/target/delombok</sourceDirectory>-->
+        <sourceDirectory>${project.basedir}/target/generated-sources/delombok</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
@@ -145,9 +145,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.3.1</version>
-<!--                <configuration>-->
-<!--                    <sourcepath>${project.basedir}/target/delombok</sourcepath>-->
-<!--                </configuration>-->
+                <configuration>
+                    <sourcepath>${project.basedir}/target/generated-sources/delombok</sourcepath>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -157,26 +157,24 @@
                     </execution>
                 </executions>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>org.projectlombok</groupId>-->
-<!--                <artifactId>lombok-maven-plugin</artifactId>-->
-<!--                <version>1.18.20.0</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>delombok</id>-->
-<!--                        <phase>generate-sources</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>delombok</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <verbose>true</verbose>-->
-<!--                            <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>-->
-<!--                            <addOutputDirectory>true</addOutputDirectory>-->
-<!--                            <outputDirectory>${project.basedir}/target/delombok</outputDirectory>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
+            <plugin>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok-maven-plugin</artifactId>
+                <version>1.18.20.0</version>
+                <executions>
+                    <execution>
+                        <id>delombok</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>delombok</goal>
+                        </goals>
+                        <configuration>
+                            <verbose>true</verbose>
+                            <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
