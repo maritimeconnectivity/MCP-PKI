@@ -152,7 +152,6 @@ public class CertificateHandler {
      */
     public static boolean verifyCertificateChain(X509Certificate certificate, KeyStore ks) throws KeyStoreException,
             NoSuchAlgorithmException, CertificateException, InvalidAlgorithmParameterException, CertPathValidatorException {
-
         // Create the certificate path to verify - in this case just the given certificate
         List<Certificate> certList = Collections.singletonList(certificate);
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
