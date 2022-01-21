@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
 import net.maritimeconnectivity.pki.pkcs11.P11PKIConfiguration;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
+import org.bouncycastle.asn1.ocsp.OCSPResponse;
+import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.Extension;
@@ -34,6 +36,8 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
 import org.bouncycastle.cert.ocsp.BasicOCSPRespBuilder;
 import org.bouncycastle.cert.ocsp.CertificateID;
+import org.bouncycastle.cert.ocsp.CertificateStatus;
+import org.bouncycastle.cert.ocsp.OCSPException;
 import org.bouncycastle.cert.ocsp.OCSPReq;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.cert.ocsp.OCSPRespBuilder;
@@ -56,6 +60,7 @@ import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import static net.maritimeconnectivity.pki.CertificateHandler.getPemFromEncoded;
@@ -103,8 +108,8 @@ public class Revocation {
     /**
      * Creates a Certificate RevocationInfo List (CRL) for the certificate serialnumbers given.
      *
-     * @param revokedCerts  List of the serialnumbers that should be revoked.
-     * @param keyEntry Private key to sign the CRL
+     * @param revokedCerts     List of the serialnumbers that should be revoked.
+     * @param keyEntry         Private key to sign the CRL
      * @param pkiConfiguration A PKIConfiguration
      * @return a CRL
      */
@@ -156,11 +161,11 @@ public class Revocation {
     /**
      * Creates a Certificate RevocationInfo List (CRL) for the certificate serialnumbers given.
      *
-     * @param signName DN name of the signing certificate
-     * @param revokedCerts  List of the serialnumbers that should be revoked.
-     * @param keyEntry Private key to sign the CRL
+     * @param signName        DN name of the signing certificate
+     * @param revokedCerts    List of the serialnumbers that should be revoked.
+     * @param keyEntry        Private key to sign the CRL
      * @param outputCaCrlPath Where to place the CRL
-     * @param pkcs11Provider PKCS#11 provider. If null default BC provider will be used.
+     * @param pkcs11Provider  PKCS#11 provider. If null default BC provider will be used.
      */
     public static void generateRootCACRL(String signName, List<RevocationInfo> revokedCerts, KeyStore.PrivateKeyEntry keyEntry, String outputCaCrlPath, AuthProvider pkcs11Provider) {
         Date now = Date.from(Instant.now());
@@ -169,7 +174,7 @@ public class Revocation {
         cal.add(Calendar.YEAR, 1);
         X509v2CRLBuilder crlBuilder = new X509v2CRLBuilder(new X500Name(signName), now);
         crlBuilder.setNextUpdate(cal.getTime()); // The next CRL is next year (dummy value)
-        if (revokedCerts !=  null) {
+        if (revokedCerts != null) {
             for (RevocationInfo cert : revokedCerts) {
                 crlBuilder.addCRLEntry(cert.getSerialNumber(), cert.getRevokedAt(), cert.getRevokeReason().ordinal());
             }
@@ -205,7 +210,7 @@ public class Revocation {
             log.error("unable to generate RootCACRL", e);
             return;
         }
-        try (BufferedWriter writer = new BufferedWriter( new FileWriter(outputCaCrlPath))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputCaCrlPath))) {
             writer.write(pemCrl);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -213,25 +218,68 @@ public class Revocation {
     }
 
     /**
+     * @param request              The incoming issue
+     * @param caPublicKey          The public key of the signing CA
+     * @param signingCA            The keystore entry for the signing CA
+     * @param certificateStatusMap A mapping from CertificateID to CertificateStatus
+     * @param pkiConfiguration     A PKIConfiguration
+     * @return An OCSP response
+     */
+    public static OCSPResp handleOCSP(OCSPReq request, PublicKey caPublicKey, KeyStore.PrivateKeyEntry signingCA,
+                                      Map<CertificateID, CertificateStatus> certificateStatusMap,
+                                      PKIConfiguration pkiConfiguration) {
+        if (request == null) {
+            OCSPResponse response = new OCSPResponse(new OCSPResponseStatus(OCSPResponseStatus.MALFORMED_REQUEST), null);
+            return new OCSPResp(response);
+        }
+
+        BasicOCSPRespBuilder respBuilder;
+        try {
+            respBuilder = initOCSPRespBuilder(request, caPublicKey);
+        } catch (OCSPException | OperatorCreationException e) {
+            log.error("Could not build OCSP responder", e);
+            OCSPResponse response = new OCSPResponse(new OCSPResponseStatus(OCSPResponseStatus.INTERNAL_ERROR), null);
+            return new OCSPResp(response);
+        }
+        certificateStatusMap.forEach(respBuilder::addResponse);
+
+        P11PKIConfiguration p11PKIConfiguration = null;
+        if (pkiConfiguration instanceof P11PKIConfiguration) {
+            p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
+            p11PKIConfiguration.providerLogin();
+        }
+
+        OCSPResp ocspResp;
+        try {
+            ocspResp = generateOCSPResponse(respBuilder, signingCA, p11PKIConfiguration);
+        } catch (OCSPException | IOException | OperatorCreationException | CertificateEncodingException e) {
+            log.error("Could not generate OCSP response", e);
+            OCSPResponse response = new OCSPResponse(new OCSPResponseStatus(OCSPResponseStatus.INTERNAL_ERROR), null);
+            if (p11PKIConfiguration != null)
+                p11PKIConfiguration.providerLogout();
+            return new OCSPResp(response);
+        }
+        if (p11PKIConfiguration != null)
+            p11PKIConfiguration.providerLogout();
+        return ocspResp;
+    }
+
+    /**
      * Generate a BasicOCSPRespBuilder.
      *
-     * @param request The incoming request.
+     * @param request   The incoming request.
      * @param publicKey Public key of the issuer.
      * @return a BasicOCSPRespBuilder
      */
-    public static BasicOCSPRespBuilder initOCSPRespBuilder(OCSPReq request, PublicKey publicKey) {
+    public static BasicOCSPRespBuilder initOCSPRespBuilder(OCSPReq request, PublicKey publicKey) throws OCSPException, OperatorCreationException {
         SubjectPublicKeyInfo keyinfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
         BasicOCSPRespBuilder respBuilder;
-        try {
-            respBuilder = new BasicOCSPRespBuilder(keyinfo,
-                    new JcaDigestCalculatorProviderBuilder().setProvider(BC_PROVIDER_NAME).build().get(CertificateID.HASH_SHA1)); // Create builder
-        } catch (Exception e) {
-            return null;
-        }
+        respBuilder = new BasicOCSPRespBuilder(keyinfo, new JcaDigestCalculatorProviderBuilder()
+                .setProvider(BC_PROVIDER_NAME).build().get(CertificateID.HASH_SHA1)); // Create builder
 
         Extension ext = request.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
         if (ext != null) {
-            respBuilder.setResponseExtensions(new Extensions(new Extension[] { ext })); // Put the nonce back in the response
+            respBuilder.setResponseExtensions(new Extensions(new Extension[]{ext})); // Put the nonce back in the response
         }
         return respBuilder;
     }
@@ -239,30 +287,38 @@ public class Revocation {
     /**
      * Generates a OCSPResp.
      *
-     * @param respBuilder A BasicOCSPRespBuilder
-     * @param signingCert PrivateKeyEntry of the signing certificate.
-     * @param pkiConfiguration A PKIConfiguration
+     * @param respBuilder         A BasicOCSPRespBuilder
+     * @param signingCert         PrivateKeyEntry of the signing certificate.
+     * @param p11PKIConfiguration A P11PKIConfiguration. Can be null
      * @return a OCSPResp
      */
-    public static OCSPResp generateOCSPResponse(BasicOCSPRespBuilder respBuilder, KeyStore.PrivateKeyEntry signingCert, PKIConfiguration pkiConfiguration) {
+    public static OCSPResp generateOCSPResponse(BasicOCSPRespBuilder respBuilder, KeyStore.PrivateKeyEntry signingCert, P11PKIConfiguration p11PKIConfiguration) throws OCSPException, IOException, OperatorCreationException, CertificateEncodingException {
         try {
             JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder(SIGNER_ALGORITHM);
-            if (pkiConfiguration instanceof P11PKIConfiguration) {
-                P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
+            if (p11PKIConfiguration != null) {
+                p11PKIConfiguration.providerLogin();
                 signBuilder.setProvider(p11PKIConfiguration.getProvider());
             } else {
                 signBuilder.setProvider(BC_PROVIDER_NAME);
             }
             ContentSigner contentSigner = signBuilder.build(signingCert.getPrivateKey());
             BasicOCSPResp basicResp = respBuilder.build(contentSigner,
-                    new X509CertificateHolder[] { new X509CertificateHolder(signingCert.getCertificate().getEncoded()) }, Date.from(Instant.now()));
+                    new X509CertificateHolder[]{new X509CertificateHolder(signingCert.getCertificate().getEncoded())}, Date.from(Instant.now()));
             // Set response as successful
             int response = OCSPRespBuilder.SUCCESSFUL;
             // build the response
-            return new OCSPRespBuilder().build(response, basicResp);
-        } catch (Exception e) {
-            log.error("Could not generate OCSP response", e);
-            return null;
+            OCSPResp ocspResp = new OCSPRespBuilder().build(response, basicResp);
+            if (p11PKIConfiguration != null) {
+                p11PKIConfiguration.providerLogout();
+            }
+            return ocspResp;
+        } catch (CertificateEncodingException e) {
+            // If an exception is thrown we need to first catch it, logout of the PKCS#11 provider if we use one
+            // and then throw the exception again
+            if (p11PKIConfiguration != null) {
+                p11PKIConfiguration.providerLogout();
+            }
+            throw e;
         }
     }
 

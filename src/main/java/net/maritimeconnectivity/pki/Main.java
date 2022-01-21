@@ -195,6 +195,7 @@ public class Main {
     private void createSubCAPKCS11(CommandLine cmd) {
         if (!cmd.hasOption(TRUSTSTORE) || !cmd.hasOption(TRUSTSTORE_PASSWORD) || !cmd.hasOption(X500_NAME) || !cmd.hasOption(ROOT_CA_ALIAS) || !cmd.hasOption(PKCS11_ROOT_CONFIG) || !cmd.hasOption(PKCS11_SUB_CONFIG) || !cmd.hasOption(VALIDITY_PERIOD)) {
             log.error("Creating a sub CA requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD, X500_NAME, ROOT_CA_ALIAS, PKCS11_ROOT_CONFIG, PKCS11_SUB_CONFIG, VALIDITY_PERIOD));
+            return;
         }
         char[] rootCaPin;
         char[] subCaPin;

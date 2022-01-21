@@ -49,25 +49,32 @@ public class KeystoreHandler {
     }
     /**
      * Loads the MCP certificate used for signing from the (jks) keystore
+     * Note that if this KeyStoreHandler has been instantiated with an {@link P11PKIConfiguration} object you will need to call
+     * the function P11PKIConfiguration.providerLogin() before calling this function.
+     * Likewise, when you are finished with using the private key handle returned by this function you should call
+     * P11PKIConfiguration.providerLogout().
      *
      * @param alias Alias of the signing certificate
      * @return a PrivateKeyEntry of the signing certificate
      */
     public KeyStore.PrivateKeyEntry getSigningCertEntry(String alias) {
         if (pkiConfiguration instanceof P11PKIConfiguration) {
+            P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
             try {
-                P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
                 KeyStore keyStore = KeyStore.getInstance(PKIConstants.PKCS11, p11PKIConfiguration.getProvider());
                 keyStore.load(null, p11PKIConfiguration.getPkcs11Pin());
                 return (KeyStore.PrivateKeyEntry) keyStore.getEntry(alias, null);
             } catch (KeyStoreException e) {
                 log.error("Could not create PKCS#11 keystore");
+                p11PKIConfiguration.providerLogout();
                 throw new PKIRuntimeException(e.getMessage(), e);
             } catch (NoSuchAlgorithmException | CertificateException | IOException e) {
                 log.error("Could not open PKCS#11 keystore");
+                p11PKIConfiguration.providerLogout();
                 throw new PKIRuntimeException(e.getMessage(), e);
             } catch (UnrecoverableEntryException e) {
                 log.error("Could not get CA entry from PKCS#11 keystore");
+                p11PKIConfiguration.providerLogout();
                 throw new PKIRuntimeException(e.getMessage(), e);
             }
         }
