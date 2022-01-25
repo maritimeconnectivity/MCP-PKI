@@ -233,10 +233,10 @@ public class CertificateHandler {
         String certificateContent = URLDecoder.decode(certificateHeader, StandardCharsets.UTF_8);
         // make sure that the + characters in the base64 encoded part have not been converted to spaces
         if (certificateContent.startsWith(PKIConstants.CERT_HEADER) && certificateContent.contains(PKIConstants.CERT_FOOTER)) {
-            String middle = certificateContent.split(PKIConstants.CERT_HEADER)[1].split(PKIConstants.CERT_FOOTER)[0];
-            if (middle.contains(" ")) {
-                middle = middle.replace(" ", "+");
-                certificateContent = PKIConstants.CERT_HEADER + middle + PKIConstants.CERT_FOOTER;
+            String body = certificateContent.split(PKIConstants.CERT_HEADER)[1].split(PKIConstants.CERT_FOOTER)[0];
+            if (body.contains(" ")) {
+                body = body.replace(" ", "+");
+                certificateContent = PKIConstants.CERT_HEADER + body + PKIConstants.CERT_FOOTER;
             }
         }
         if (certificateContent.trim().isEmpty() || certificateContent.length() < 10) {

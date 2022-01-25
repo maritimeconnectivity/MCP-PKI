@@ -207,7 +207,7 @@ public class Revocation {
         try {
             pemCrl = getPemFromEncoded("X509 CRL", crl.getEncoded());
         } catch (CRLException e) {
-            log.error("unable to generate RootCACRL", e);
+            log.error("unable to generate Root CA CRL", e);
             return;
         }
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputCaCrlPath))) {

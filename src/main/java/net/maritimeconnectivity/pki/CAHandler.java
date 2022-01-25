@@ -72,7 +72,6 @@ public class CAHandler {
      * @param validityPeriod How many months the certificate should be valid
      */
     public void createSubCa(String subCaCertDN, String rootCAAlias, int validityPeriod) {
-
         // Open the various keystores
         KeyStore rootKeystore;
         KeyStore subCaKeystore;
@@ -103,12 +102,12 @@ public class CAHandler {
         }
 
         // Extract the root certificate
-        KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(pkiConfiguration.getRootCaKeystorePassword().toCharArray());
+        KeyStore.ProtectionParameter protectionParameter = new KeyStore.PasswordProtection(pkiConfiguration.getRootCaKeystorePassword().toCharArray());
         KeyStore.PrivateKeyEntry rootCertEntry;
         X500Name rootCertX500Name;
         String crlUrl;
         try {
-            rootCertEntry = (KeyStore.PrivateKeyEntry) rootKeystore.getEntry(rootCAAlias, protParam);
+            rootCertEntry = (KeyStore.PrivateKeyEntry) rootKeystore.getEntry(rootCAAlias, protectionParameter);
             rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject();
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
@@ -263,30 +262,30 @@ public class CAHandler {
      * @param validityPeriod How many months the certificate should be valid
      */
     public void initRootCA(String rootCertX500Name, String crlUrl, String rootCAAlias, int validityPeriod) {
-        KeyPair cakp = CertificateBuilder.generateKeyPair(null);
-        KeyStore rootks;
-        KeyStore ts;
-        try (FileOutputStream rootfos = new FileOutputStream(pkiConfiguration.getRootCaKeystorePath());
-             FileOutputStream tsfos = new FileOutputStream(pkiConfiguration.getTruststorePath())
+        KeyPair rootCAKeyPair = CertificateBuilder.generateKeyPair(null);
+        KeyStore rootCAKeyStore;
+        KeyStore trustStore;
+        try (FileOutputStream rootFileOutputStream = new FileOutputStream(pkiConfiguration.getRootCaKeystorePath());
+             FileOutputStream trustStoreOutputStream = new FileOutputStream(pkiConfiguration.getTruststorePath())
         ) {
-            rootks = KeyStore.getInstance(PKIConstants.KEYSTORE_TYPE);
-            rootks.load(null, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
+            rootCAKeyStore = KeyStore.getInstance(PKIConstants.KEYSTORE_TYPE);
+            rootCAKeyStore.load(null, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
             // Store away the keystore.
-            X509Certificate cacert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(null), cakp.getPrivate(), cakp.getPublic(), cakp.getPublic(),
+            X509Certificate cacert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(null), rootCAKeyPair.getPrivate(), rootCAKeyPair.getPublic(), rootCAKeyPair.getPublic(),
                         new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl, null, validityPeriod);
 
             Certificate[] certChain = new Certificate[1];
             certChain[0] = cacert;
-            rootks.setKeyEntry(rootCAAlias, cakp.getPrivate(), pkiConfiguration.getRootCaKeyPassword().toCharArray(), certChain);
-            rootks.store(rootfos, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
-            rootks = KeyStore.getInstance(KeyStore.getDefaultType());
-            rootks.load(null, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
+            rootCAKeyStore.setKeyEntry(rootCAAlias, rootCAKeyPair.getPrivate(), pkiConfiguration.getRootCaKeyPassword().toCharArray(), certChain);
+            rootCAKeyStore.store(rootFileOutputStream, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
+            rootCAKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            rootCAKeyStore.load(null, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
 
             // Store away the truststore.
-            ts = KeyStore.getInstance(KeyStore.getDefaultType());
-            ts.load(null, pkiConfiguration.getTruststorePassword().toCharArray());
-            ts.setCertificateEntry(rootCAAlias, cacert);
-            ts.store(tsfos, pkiConfiguration.getTruststorePassword().toCharArray());
+            trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(null, pkiConfiguration.getTruststorePassword().toCharArray());
+            trustStore.setCertificateEntry(rootCAAlias, cacert);
+            trustStore.store(trustStoreOutputStream, pkiConfiguration.getTruststorePassword().toCharArray());
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException | OperatorCreationException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
         }
@@ -388,11 +387,11 @@ public class CAHandler {
         List<RevocationInfo> revocationInfos = loadRevocationFile(revocationFile);
 
         try (InputStream readStream = new FileInputStream(pkiConfiguration.getRootCaKeystorePath())) {
-            KeyStore rootks = KeyStore.getInstance(PKIConstants.KEYSTORE_TYPE);
-            rootks.load(readStream, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
-            KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(pkiConfiguration.getRootCaKeystorePassword().toCharArray());
+            KeyStore rootKeyStore = KeyStore.getInstance(PKIConstants.KEYSTORE_TYPE);
+            rootKeyStore.load(readStream, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
+            KeyStore.ProtectionParameter protectionParameter = new KeyStore.PasswordProtection(pkiConfiguration.getRootCaKeystorePassword().toCharArray());
             KeyStore.PrivateKeyEntry rootCertEntry;
-            rootCertEntry = (KeyStore.PrivateKeyEntry) rootks.getEntry(rootCAAlias, protParam);
+            rootCertEntry = (KeyStore.PrivateKeyEntry) rootKeyStore.getEntry(rootCAAlias, protectionParameter);
             String rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject().toString();
             Revocation.generateRootCACRL(rootCertX500Name, revocationInfos, rootCertEntry, outputCaCrlPath, null);
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {

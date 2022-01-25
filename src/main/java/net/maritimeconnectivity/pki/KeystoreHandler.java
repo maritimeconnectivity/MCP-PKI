@@ -81,8 +81,8 @@ public class KeystoreHandler {
         try (FileInputStream is = new FileInputStream(pkiConfiguration.getSubCaKeystorePath())) {
             KeyStore keyStore = KeyStore.getInstance(PKIConstants.KEYSTORE_TYPE);
             keyStore.load(is, pkiConfiguration.getSubCaKeystorePassword().toCharArray());
-            KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(pkiConfiguration.getSubCaKeyPassword().toCharArray());
-            return (KeyStore.PrivateKeyEntry) keyStore.getEntry(alias, protParam);
+            KeyStore.ProtectionParameter protectionParameter = new KeyStore.PasswordProtection(pkiConfiguration.getSubCaKeyPassword().toCharArray());
+            return (KeyStore.PrivateKeyEntry) keyStore.getEntry(alias, protectionParameter);
         } catch (FileNotFoundException e) {
             log.error("Could not open CA keystore", e);
             throw new PKIRuntimeException(e.getMessage(), e);
