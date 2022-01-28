@@ -51,7 +51,7 @@ public class OCSPVerifier {
     }
 
     /**
-     * Verifies a certificate against a its issuer using OCSP. In most cases you should probably use
+     * Verifies a certificate against an issuer using OCSP. In most cases you should probably use
      * {@link CertificateHandler#verifyCertificateChain(X509Certificate, KeyStore) verifyCertificateChain}
      * instead to verify the complete chain.
      *
