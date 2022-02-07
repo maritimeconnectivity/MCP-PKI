@@ -135,6 +135,13 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok-maven-plugin</artifactId>
                 <version>1.18.20.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <version>1.18.22</version>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
                         <id>delombok</id>
