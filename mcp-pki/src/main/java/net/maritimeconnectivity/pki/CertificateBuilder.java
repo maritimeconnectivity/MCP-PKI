@@ -313,10 +313,12 @@ public class CertificateBuilder {
     }
 
     /**
-     * Escapes characters that are reserved for DN attributes.
+     * Escapes characters that are reserved for DN attributes according to
+     * <a href="https://datatracker.ietf.org/doc/html/rfc4514">RFC 4514</a> and
+     * <a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ldap/distinguished-names">Distinguished Names (Microsoft)</a>.
      *
      * @param string The string that is going to be escaped
-     * @return A string where reserved characters are escaped
+     * @return A string where reserved characters have been escaped
      */
     public static String escapeSpecialCharacters(String string) {
         String escapedString = string;
