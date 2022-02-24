@@ -36,6 +36,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.cert.X509Certificate;
 
+/**
+ * Main class for the CLI functionality of the MCP-PKI
+ */
 @Slf4j
 public class Main {
 
@@ -238,7 +241,7 @@ public class Main {
         caHandler.createSubCAPKCS11(cmd.getOptionValue(X500_NAME), cmd.getOptionValue(ROOT_CA_ALIAS), subPkiConfiguration, Integer.parseInt(cmd.getOptionValue(VALIDITY_PERIOD)));
     }
 
-    public void verifyCertificate(CommandLine cmd) {
+    private void verifyCertificate(CommandLine cmd) {
         if (!cmd.hasOption(TRUSTSTORE) || !cmd.hasOption(TRUSTSTORE_PASSWORD)) {
             log.error("Verifying a certificate requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD));
             return;
@@ -272,11 +275,16 @@ public class Main {
         log.info(identity.toString());
     }
 
-    public X509Certificate getCertificate(String certPath) throws IOException {
+    private X509Certificate getCertificate(String certPath) throws IOException {
         String pemCert = new String(Files.readAllBytes(Paths.get(certPath)));
         return CertificateHandler.getCertFromPem(pemCert);
     }
 
+    /**
+     * The main function of the MCP-PKI CLI
+     *
+     * @param args the arguments that have been passed to the program
+     */
     public static void main(String[] args) {
         Main main = new Main();
 
@@ -328,7 +336,7 @@ public class Main {
         } else {
             // Automatically generate the help statement
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp( "mcp-pki", options );
+            formatter.printHelp( "mcp-pki-cli", options );
         }
     }
 }
