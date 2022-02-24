@@ -1,22 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.maritimeconnectivity.pki</groupId>
-    <artifactId>mcp-pki</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
-    <name>mcp-pki</name>
+    <artifactId>mcp-pki-parent</artifactId>
+    <name>${project.artifactId}</name>
+    <version>1.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
     <url>https://maritimeconnectivity.net</url>
-    <description>PKI library for the MCP</description>
+    <description>Parent project for the MCP PKI library</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <skip.signing>true</skip.signing>
-        <bouncycastle.version>1.69</bouncycastle.version>
-        <sl4j.version>1.7.32</sl4j.version>
+        <maven.compiler.release>11</maven.compiler.release>
+        <slf4j.version>1.7.36</slf4j.version>
         <lombok.version>1.18.22</lombok.version>
+        <junit-jupiter.version>5.8.2</junit-jupiter.version>
+        <skip.signing>true</skip.signing>
+        <verbose.delombok>false</verbose.delombok>
     </properties>
+
+    <modules>
+        <module>mcp-pki</module>
+        <module>mcp-pki-cli</module>
+    </modules>
 
     <licenses>
         <license>
@@ -48,47 +56,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
-            <version>${bouncycastle.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>${bouncycastle.version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${sl4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${sl4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-cli</groupId>
-            <artifactId>commons-cli</artifactId>
-            <version>1.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.7.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <version>1.7.2</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -104,7 +80,7 @@
     </distributionManagement>
 
     <build>
-        <sourceDirectory>${project.basedir}/target/delombok</sourceDirectory>
+        <sourceDirectory>${project.basedir}/target/generated-sources/delombok</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
@@ -137,19 +113,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
+                <version>3.9.0</version>
             </plugin>
             <plugin>
                 <!-- Can be triggered by running mvn javadoc:javadoc -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.3.1</version>
                 <configuration>
-                    <sourcepath>${project.basedir}/target/delombok</sourcepath>
+                    <sourcepath>${project.basedir}/target/generated-sources/delombok</sourcepath>
                 </configuration>
                 <executions>
                     <execution>
@@ -164,6 +136,13 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok-maven-plugin</artifactId>
                 <version>1.18.20.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <version>${lombok.version}</version>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
                         <id>delombok</id>
@@ -172,35 +151,9 @@
                             <goal>delombok</goal>
                         </goals>
                         <configuration>
-                            <verbose>true</verbose>
+                            <verbose>${verbose.delombok}</verbose>
                             <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
-                            <addOutputDirectory>true</addOutputDirectory>
-                            <outputDirectory>${project.basedir}/target/delombok</outputDirectory>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <mainClass>net.maritimeconnectivity.pki.Main</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
-                        <phase>package</phase> <!-- bind to the packaging phase -->
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -209,14 +162,9 @@
                 <version>2.22.2</version>
                 <dependencies>
                     <dependency>
-                        <groupId>org.junit.platform</groupId>
-                        <artifactId>junit-platform-surefire-provider</artifactId>
-                        <version>1.2.0</version>
-                    </dependency>
-                    <dependency>
                         <groupId>org.junit.jupiter</groupId>
                         <artifactId>junit-jupiter-engine</artifactId>
-                        <version>RELEASE</version>
+                        <version>${junit-jupiter.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -244,7 +192,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.3.0</version>
+                        <version>3.3.1</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -272,4 +220,5 @@
             </build>
         </profile>
     </profiles>
+
 </project>
