@@ -118,7 +118,7 @@ This project includes code from the Apache Xcf project (Apache License, Version 
 
 
 ## Building
-Building the project requires that JDK (>=11) and Maven (>=v3.3.9) are installed on the system. The project can then be built like this:
+Building the project requires that JDK (>=11) and Maven (>=v3.6.3) are installed on the system. The project can then be built like this:
 ```sh
 mvn clean install
 ```
