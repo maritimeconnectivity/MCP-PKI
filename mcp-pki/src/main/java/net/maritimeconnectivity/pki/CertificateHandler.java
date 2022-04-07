@@ -330,8 +330,13 @@ public class CertificateHandler {
                         oid = asnOID.getId();
                         // For some weird reason we need to do this 2 times - otherwise we get a
                         // ClassCastException when extracting the value.
-                        encoded = ((ASN1TaggedObject) encoded).getBaseObject();
-                        encoded = ((ASN1TaggedObject) encoded).getBaseObject();
+                        try {
+                            encoded = ((ASN1TaggedObject) encoded).getBaseObject();
+                            encoded = ((ASN1TaggedObject) encoded).getBaseObject();
+                        } catch (NoSuchMethodError e) { // If we are using an older version of Bouncy Castle
+                            encoded = ((ASN1TaggedObject) encoded).getObject();
+                            encoded = ((ASN1TaggedObject) encoded).getObject();
+                        }
                         value = ((DERUTF8String) encoded).getString();
                     } catch (IOException e) {
                         log.error("Error decoding subjectAltName" + e.getLocalizedMessage(), e);
