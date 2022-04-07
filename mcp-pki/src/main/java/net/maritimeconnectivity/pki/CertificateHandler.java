@@ -328,15 +328,7 @@ public class CertificateHandler {
                         ASN1ObjectIdentifier asnOID = (ASN1ObjectIdentifier) seq.getObjectAt(0);
                         ASN1Encodable encoded = seq.getObjectAt(1);
                         oid = asnOID.getId();
-                        // For some weird reason we need to do this 2 times - otherwise we get a
-                        // ClassCastException when extracting the value.
-                        try {
-                            encoded = ((ASN1TaggedObject) encoded).getBaseObject();
-                            encoded = ((ASN1TaggedObject) encoded).getBaseObject();
-                        } catch (NoSuchMethodError e) { // If we are using an older version of Bouncy Castle
-                            encoded = ((ASN1TaggedObject) encoded).getObject();
-                            encoded = ((ASN1TaggedObject) encoded).getObject();
-                        }
+                        encoded = getBaseObject(encoded);
                         value = ((DERUTF8String) encoded).getString();
                     } catch (IOException e) {
                         log.error("Error decoding subjectAltName" + e.getLocalizedMessage(), e);
@@ -400,6 +392,25 @@ public class CertificateHandler {
             }
         }
         return identity;
+    }
+
+    /**
+     * Get the base object of an ASN1Encodable object
+     *
+     * @param encoded The ASN1Encodable object
+     * @return the base object
+     */
+    private static ASN1Encodable getBaseObject(ASN1Encodable encoded) {
+        // For some weird reason we need to do this 2 times - otherwise we get a
+        // ClassCastException when extracting the value.
+        try {
+            encoded = ((ASN1TaggedObject) encoded).getBaseObject();
+            encoded = ((ASN1TaggedObject) encoded).getBaseObject();
+        } catch (NoSuchMethodError e) { // If we are using an older version of Bouncy Castle
+            encoded = ((ASN1TaggedObject) encoded).getObject();
+            encoded = ((ASN1TaggedObject) encoded).getObject();
+        }
+        return encoded;
     }
 
     /**
