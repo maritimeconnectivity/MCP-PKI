@@ -1,5 +1,6 @@
 [![Java CI with Maven](https://github.com/maritimeconnectivity/MCP-PKI/actions/workflows/maven.yml/badge.svg)](https://github.com/maritimeconnectivity/MCP-PKI/actions/workflows/maven.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/net.maritimeconnectivity.pki/mcp-pki?label=Maven%20Central)](https://search.maven.org/search?q=g:net.maritimeconnectivity.pki%20AND%20a:mcp-pki)
+[![javadoc](https://javadoc.io/badge2/net.maritimeconnectivity.pki/mcp-pki/javadoc.svg)](https://javadoc.io/doc/net.maritimeconnectivity.pki/mcp-pki)
 
 # Maritime Connectivity Platform (MCP) Public Key Infrastructure (PKI)
 
