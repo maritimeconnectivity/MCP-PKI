@@ -92,9 +92,13 @@ public class P11PKIConfiguration extends PKIConfiguration {
         // If pkcs11Pin is null the user will be prompted to input it in the console
         if (pkcs11Pin == null) {
             Console console = System.console();
-            log.error("Please input HSM slot pin: ");
-            this.pkcs11Pin = console.readPassword();
-            console.flush();
+            if (console != null) {
+                log.error("Please input HSM slot pin: ");
+                this.pkcs11Pin = console.readPassword();
+                console.flush();
+            } else {
+                throw new PKIRuntimeException("Could not get a system console");
+            }
         } else {
             this.pkcs11Pin = pkcs11Pin;
         }
