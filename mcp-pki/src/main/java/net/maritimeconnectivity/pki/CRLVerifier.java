@@ -34,7 +34,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-//package demo.sts.provider.cert;
 
 package net.maritimeconnectivity.pki;
 
@@ -102,7 +101,7 @@ public final class CRLVerifier {
             }
             return new RevocationInfo(cert.getSerialNumber(), null, null, CertStatus.GOOD);
         } catch (Exception ex) {
-            log.error("An Exception was thrown during OCSP verification!", ex);
+            log.error("An Exception was thrown during CRL verification!", ex);
             return new RevocationInfo(cert.getSerialNumber(), null, null, CertStatus.UNKNOWN);
         }
     }
@@ -123,7 +122,7 @@ public final class CRLVerifier {
                 return new RevocationInfo(cert.getSerialNumber(), null, null, CertStatus.GOOD);
             }
         } catch (Exception ex) {
-            log.error("An Exception was thrown during OCSP verification!", ex);
+            log.error("An Exception was thrown during CRL verification!", ex);
             return new RevocationInfo(cert.getSerialNumber(), null, null, CertStatus.UNKNOWN);
         }
     }
