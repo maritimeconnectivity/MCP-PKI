@@ -59,14 +59,14 @@ class CertificateHandlerTest {
         X509Certificate cert = TestUtils.getMyBoatCert();
         PKIConfiguration pkiConf = new PKIConfiguration(TestUtils.getRootCAAlias());
         pkiConf.setTruststorePassword("changeit");
-        pkiConf.setTruststorePath("src/test/resources/mc-truststore-password-is-changeit.jks");
+        pkiConf.setTruststorePath("src/test/resources/mcp-truststore-password-is-changeit.jks");
         KeystoreHandler kh = new KeystoreHandler(pkiConf);
 
         boolean valid = false;
         try {
             valid = CertificateHandler.verifyCertificateChain(cert, kh.getTrustStore());
         } catch (KeyStoreException | CertPathValidatorException | InvalidAlgorithmParameterException | CertificateException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            fail("Could not successfully verify certificate", e);
         }
         assertTrue(valid);
     }
@@ -76,7 +76,7 @@ class CertificateHandlerTest {
         X509Certificate cert = TestUtils.getEcdisCert();
         PKIConfiguration pkiConf = new PKIConfiguration(TestUtils.getRootCAAlias());
         pkiConf.setTruststorePassword("changeit");
-        pkiConf.setTruststorePath("src/test/resources/mc-truststore-password-is-changeit.jks");
+        pkiConf.setTruststorePath("src/test/resources/mcp-truststore-password-is-changeit.jks");
         KeystoreHandler kh = new KeystoreHandler(pkiConf);
 
         boolean valid = false;
@@ -101,7 +101,7 @@ class CertificateHandlerTest {
         X509Certificate cert = TestUtils.getMyBoatCert();
         PKIConfiguration pkiConf = new PKIConfiguration(TestUtils.getRootCAAlias());
         pkiConf.setTruststorePassword("changeit");
-        pkiConf.setTruststorePath("src/test/resources/mc-truststore-password-is-changeit.jks");
+        pkiConf.setTruststorePath("src/test/resources/mcp-truststore-password-is-changeit.jks");
         KeystoreHandler kh = new KeystoreHandler(pkiConf);
 
         boolean valid = CertificateHandler.verifyCertificate(kh.getPubKey("imcert"), cert, null);
@@ -147,7 +147,7 @@ class CertificateHandlerTest {
     void createOutputKeystore1() {
         FileInputStream is;
         try {
-            is = new FileInputStream("src/test/resources/mc-sub-ca-keystore.jks");
+            is = new FileInputStream("src/test/resources/mcp-sub-ca-keystore.jks");
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -158,20 +158,20 @@ class CertificateHandlerTest {
             keystore = KeyStore.getInstance("JKS");
             keystore.load(is, "changeit".toCharArray());
             KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection("changeit".toCharArray());
-            KeyStore.PrivateKeyEntry key = (KeyStore.PrivateKeyEntry) keystore.getEntry("urn:mrn:mcl:ca:maritimecloud-idreg", protParam);
+            KeyStore.PrivateKeyEntry key = (KeyStore.PrivateKeyEntry) keystore.getEntry("urn:mrn:mcp:ca:idp1:mcp-idreg", protParam);
             cert = (X509Certificate) key.getCertificate();
             privateKey = key.getPrivateKey();
         } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | UnrecoverableEntryException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
 
-        byte[] p12Keystore = CertificateHandler.createOutputKeystore("PKCS12","urn:mrn:mcl:ca:maritimecloud-idreg", "changeit", privateKey, cert);
+        byte[] p12Keystore = CertificateHandler.createOutputKeystore("PKCS12","urn:mrn:mcp:ca:idp1:mcp-idreg", "changeit", privateKey, cert);
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(p12Keystore);
             keystore = KeyStore.getInstance("PKCS12");
             keystore.load(inputStream, "changeit".toCharArray());
             KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection("changeit".toCharArray());
-            KeyStore.PrivateKeyEntry key = (KeyStore.PrivateKeyEntry) keystore.getEntry("urn:mrn:mcl:ca:maritimecloud-idreg", protParam);
+            KeyStore.PrivateKeyEntry key = (KeyStore.PrivateKeyEntry) keystore.getEntry("urn:mrn:mcp:ca:idp1:mcp-idreg", protParam);
             X509Certificate certP12 = (X509Certificate) key.getCertificate();
             assertEquals(certP12.getSubjectDN().toString(), cert.getSubjectDN().toString());
 
@@ -184,7 +184,7 @@ class CertificateHandlerTest {
     void createOutputKeystore2() {
         FileInputStream is;
         try {
-            is = new FileInputStream("src/test/resources/mc-sub-ca-keystore.jks");
+            is = new FileInputStream("src/test/resources/mcp-sub-ca-keystore.jks");
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -195,20 +195,20 @@ class CertificateHandlerTest {
             keystore = KeyStore.getInstance("JKS");
             keystore.load(is, "changeit".toCharArray());
             KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection("changeit".toCharArray());
-            KeyStore.PrivateKeyEntry key = (KeyStore.PrivateKeyEntry) keystore.getEntry("urn:mrn:mcl:ca:maritimecloud-idreg", protParam);
+            KeyStore.PrivateKeyEntry key = (KeyStore.PrivateKeyEntry) keystore.getEntry("urn:mrn:mcp:ca:idp1:mcp-idreg", protParam);
             cert = (X509Certificate) key.getCertificate();
             privateKey = key.getPrivateKey();
         } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | UnrecoverableEntryException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
 
-        byte[] jksKeystore = CertificateHandler.createOutputKeystore("JKS","urn:mrn:mcl:ca:maritimecloud-idreg", "changeit", privateKey, cert);
+        byte[] jksKeystore = CertificateHandler.createOutputKeystore("JKS","urn:mrn:mcp:ca:idp1:mcp-idreg", "changeit", privateKey, cert);
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(jksKeystore);
             keystore = KeyStore.getInstance("JKS");
             keystore.load(inputStream, "changeit".toCharArray());
             KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection("changeit".toCharArray());
-            KeyStore.PrivateKeyEntry key = (KeyStore.PrivateKeyEntry) keystore.getEntry("urn:mrn:mcl:ca:maritimecloud-idreg", protParam);
+            KeyStore.PrivateKeyEntry key = (KeyStore.PrivateKeyEntry) keystore.getEntry("urn:mrn:mcp:ca:idp1:mcp-idreg", protParam);
             X509Certificate certJks = (X509Certificate) key.getCertificate();
             assertEquals(certJks.getSubjectDN().toString(), cert.getSubjectDN().toString());
 

@@ -59,7 +59,7 @@ class RevocationTest {
         KeystoreHandler kh = new KeystoreHandler(pkiConf);
 
         // Generate the CRL
-        KeyStore.PrivateKeyEntry keyEntry = kh.getSigningCertEntry("urn:mrn:mcl:ca:maritimecloud-idreg");
+        KeyStore.PrivateKeyEntry keyEntry = kh.getSigningCertEntry("urn:mrn:mcp:ca:idp1:mcp-idreg");
         X509CRL crl = Revocation.generateCRL(infos, keyEntry, null);
         assertNotNull(crl);
 

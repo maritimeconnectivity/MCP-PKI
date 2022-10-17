@@ -29,7 +29,7 @@ class CertificateBuilderTest {
     void setUp() {
         pkiConf = new PKIConfiguration(TestUtils.getRootCAAlias());
         pkiConf.setTruststorePassword("changeit");
-        pkiConf.setTruststorePath("src/test/resources/ca/mc-truststore.jks");
+        pkiConf.setTruststorePath("src/test/resources/ca/mcp-truststore.jks");
         pkiConf.setSubCaKeystorePath("src/test/resources/ca/subca-keystore.jks");
         pkiConf.setSubCaKeystorePassword("changeit");
         pkiConf.setSubCaKeyPassword("changeit");
@@ -43,7 +43,7 @@ class CertificateBuilderTest {
         String userMrn = "urn:mrn:mcl:user:dma:thc";
         String permissions = "NONE";
         String baseCrlOcspPath = "https://localhost/x509/api/certificates/";
-        String signingAlias = "urn:mrn:mcl:ca:maritimecloud-idreg";
+        String signingAlias = "urn:mrn:mcp:ca:idp1:mcp-idreg";
         int validityPeriod = 12;
         Map<String, String> attrs= new HashMap<>();
         attrs.put(PKIConstants.MC_OID_MRN, userMrn);
@@ -79,7 +79,7 @@ class CertificateBuilderTest {
         String userMrn = "urn:mrn:mcl:user:dma:thc";
         String permissions = "NONE";
         String baseCrlOcspPath = "https://localhost/x509/api/certificates/";
-        String signingAlias = "urn:mrn:mcl:ca:maritimecloud-idreg";
+        String signingAlias = "urn:mrn:mcp:ca:idp1:mcp-idreg";
         int validityPeriod = 12;
         Map<String, String> attrs= new HashMap<>();
         attrs.put(PKIConstants.MC_OID_MRN, userMrn);
