@@ -312,7 +312,7 @@ public class Revocation {
                 p11PKIConfiguration.providerLogout();
             }
             return ocspResp;
-        } catch (CertificateEncodingException e) {
+        } catch (CertificateEncodingException | OCSPException | IOException | OperatorCreationException e) {
             // If an exception is thrown we need to first catch it, logout of the PKCS#11 provider if we use one
             // and then throw the exception again
             if (p11PKIConfiguration != null) {
