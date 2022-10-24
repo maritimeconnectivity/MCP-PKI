@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
  * Class that contains string constants that are used throughout the project
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class PKIConstants {
+public final class PKIConstants {
     public static final String BC_PROVIDER_NAME = "BC";
     public static final String KEYSTORE_TYPE = "jks";
     public static final String SIGNER_ALGORITHM = "SHA384withECDSA";
