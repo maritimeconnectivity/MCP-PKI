@@ -25,7 +25,6 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.operator.OperatorCreationException;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -33,6 +32,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -85,7 +86,7 @@ public class CAHandler {
 
             // Open or create the sub CA keystore
             subCaKeystore = KeyStore.getInstance(PKIConstants.KEYSTORE_TYPE);
-            if (new File(pkiConfiguration.getSubCaKeystorePath()).exists()) {
+            if (Files.exists(Path.of(pkiConfiguration.getSubCaKeystorePath()))) {
                 try (FileInputStream subCaFis = new FileInputStream(pkiConfiguration.getSubCaKeystorePath())) {
                     subCaKeystore.load(subCaFis, pkiConfiguration.getSubCaKeystorePassword().toCharArray());
                 }
