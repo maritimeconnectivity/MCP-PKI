@@ -47,6 +47,7 @@ public class KeystoreHandler {
         Security.addProvider(new BouncyCastleProvider());
 
     }
+
     /**
      * Loads the MCP certificate used for signing from the (jks) keystore
      * Note that if this KeyStoreHandler has been instantiated with an {@link P11PKIConfiguration} object you will need to call
@@ -86,7 +87,8 @@ public class KeystoreHandler {
         } catch (FileNotFoundException e) {
             log.error("Could not open CA keystore", e);
             throw new PKIRuntimeException(e.getMessage(), e);
-        } catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException | UnrecoverableEntryException e) {
+        } catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException |
+                 UnrecoverableEntryException e) {
             log.error("Could not get CA entry", e);
             throw new PKIRuntimeException(e.getMessage(), e);
         }

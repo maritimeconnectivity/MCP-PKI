@@ -25,12 +25,11 @@ package net.maritimeconnectivity.pki.ocsp;
  */
 
 /**
- *
  * @author POReID
  */
-public class OCSPValidationException extends Exception{
+public class OCSPValidationException extends Exception {
 
-    public OCSPValidationException(String msg, Throwable cause){
+    public OCSPValidationException(String msg, Throwable cause) {
         super(msg, cause);
     }
 

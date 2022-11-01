@@ -12,10 +12,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class CertificateBuilderTest {
 
@@ -45,7 +45,7 @@ class CertificateBuilderTest {
         String baseCrlOcspPath = "https://localhost/x509/api/certificates/";
         String signingAlias = "urn:mrn:mcp:ca:idp1:mcp-idreg";
         int validityPeriod = 12;
-        Map<String, String> attrs= new HashMap<>();
+        Map<String, String> attrs = new HashMap<>();
         attrs.put(PKIConstants.MC_OID_MRN, userMrn);
         attrs.put(PKIConstants.MC_OID_PERMISSIONS, permissions);
         attrs.put(PKIConstants.MC_OID_MRN_SUBSIDIARY, "urn:mrn:stm:user:dmc:thc");
@@ -81,7 +81,7 @@ class CertificateBuilderTest {
         String baseCrlOcspPath = "https://localhost/x509/api/certificates/";
         String signingAlias = "urn:mrn:mcp:ca:idp1:mcp-idreg";
         int validityPeriod = 12;
-        Map<String, String> attrs= new HashMap<>();
+        Map<String, String> attrs = new HashMap<>();
         attrs.put(PKIConstants.MC_OID_MRN, userMrn);
         attrs.put(PKIConstants.MC_OID_PERMISSIONS, permissions);
         attrs.put(PKIConstants.MC_OID_MRN_SUBSIDIARY, "urn:mrn:stm:user:dmc:thc");

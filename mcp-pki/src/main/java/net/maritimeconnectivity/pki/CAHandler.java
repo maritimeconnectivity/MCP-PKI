@@ -68,8 +68,8 @@ public class CAHandler {
      * created if it does not exist already, but the truststore is expected to exist already. It is also expected that
      * a RootCaKeystore is defined in PKIConfiguration and exists.
      *
-     * @param subCaCertDN The DN of the new sub CA certificate.
-     * @param rootCAAlias The alias of the root CA
+     * @param subCaCertDN    The DN of the new sub CA certificate.
+     * @param rootCAAlias    The alias of the root CA
      * @param validityPeriod How many months the certificate should be valid
      */
     public void createSubCa(String subCaCertDN, String rootCAAlias, int validityPeriod) {
@@ -110,7 +110,8 @@ public class CAHandler {
         try {
             rootCertEntry = (KeyStore.PrivateKeyEntry) rootKeystore.getEntry(rootCAAlias, protectionParameter);
             rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject();
-        } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
+        } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException |
+                 CertificateEncodingException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
         }
         try {
@@ -158,10 +159,10 @@ public class CAHandler {
      * HSM using the given configuration. It is also expected that
      * a RootCaKeystore is defined in PKIConfiguration and exists.
      *
-     * @param subCaCertDN The DN of the new sub CA certificate.
-     * @param rootCAAlias The alias of the root CA
+     * @param subCaCertDN        The DN of the new sub CA certificate.
+     * @param rootCAAlias        The alias of the root CA
      * @param subCaConfiguration Holds the configuration for the sub CA HSM. Must be a P11PKIConfiguration
-     * @param validityPeriod How many months the certificate should be valid
+     * @param validityPeriod     How many months the certificate should be valid
      */
     public void createSubCAPKCS11(String subCaCertDN, String rootCAAlias, PKIConfiguration subCaConfiguration, int validityPeriod) {
         if (!(pkiConfiguration instanceof P11PKIConfiguration) || !(subCaConfiguration instanceof P11PKIConfiguration)) {
@@ -200,7 +201,8 @@ public class CAHandler {
         try {
             rootCertEntry = (KeyStore.PrivateKeyEntry) rootStore.getEntry(rootCAAlias, null);
             rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject();
-        } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
+        } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException |
+                 CertificateEncodingException e) {
             rootP11PKIConfiguration.providerLogout();
             subCaP11PKIConfiguration.providerLogout();
             throw new PKIRuntimeException(e.getMessage(), e);
@@ -258,9 +260,9 @@ public class CAHandler {
      * is available in PKIConfiguration. If they already exists they will be overwritten!
      *
      * @param rootCertX500Name The DN of the new root CA Certificate
-     * @param crlUrl CRL endpoint
-     * @param rootCAAlias The alias of the root CA
-     * @param validityPeriod How many months the certificate should be valid
+     * @param crlUrl           CRL endpoint
+     * @param rootCAAlias      The alias of the root CA
+     * @param validityPeriod   How many months the certificate should be valid
      */
     public void initRootCA(String rootCertX500Name, String crlUrl, String rootCAAlias, int validityPeriod) {
         KeyPair rootCAKeyPair = CertificateBuilder.generateKeyPair(null);
@@ -273,7 +275,7 @@ public class CAHandler {
             rootCAKeyStore.load(null, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
             // Store away the keystore.
             X509Certificate cacert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(null), rootCAKeyPair.getPrivate(), rootCAKeyPair.getPublic(), rootCAKeyPair.getPublic(),
-                        new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl, null, validityPeriod);
+                    new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl, null, validityPeriod);
 
             Certificate[] certChain = new Certificate[1];
             certChain[0] = cacert;
@@ -287,7 +289,8 @@ public class CAHandler {
             trustStore.load(null, pkiConfiguration.getTruststorePassword().toCharArray());
             trustStore.setCertificateEntry(rootCAAlias, cacert);
             trustStore.store(trustStoreOutputStream, pkiConfiguration.getTruststorePassword().toCharArray());
-        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException | OperatorCreationException e) {
+        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException |
+                 OperatorCreationException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
         }
     }
@@ -297,9 +300,9 @@ public class CAHandler {
      * If an entry already exists in the specified HSM slot it will be overwritten.
      *
      * @param rootCertX500Name The DN of the new root CA Certificate
-     * @param crlUrl CRL endpoint
-     * @param rootCAAlias The alias of the root CA
-     * @param validityPeriod How many months the certificate should be valid
+     * @param crlUrl           CRL endpoint
+     * @param rootCAAlias      The alias of the root CA
+     * @param validityPeriod   How many months the certificate should be valid
      */
     public void initRootCAPKCS11(String rootCertX500Name, String crlUrl, String rootCAAlias, int validityPeriod) {
         if (!(pkiConfiguration instanceof P11PKIConfiguration)) {
@@ -325,7 +328,8 @@ public class CAHandler {
             trustStore.setCertificateEntry(rootCAAlias, caCert);
             trustStore.store(tsFos, pkiConfiguration.getTruststorePassword().toCharArray());
             p11PKIConfiguration.providerLogout();
-        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | OperatorCreationException e) {
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException |
+                 OperatorCreationException e) {
             p11PKIConfiguration.providerLogout();
             throw new PKIRuntimeException(e.getMessage(), e);
         }
@@ -381,8 +385,8 @@ public class CAHandler {
      * a RootCaKeystore is defined in PKIConfiguration and exists.
      *
      * @param outputCaCrlPath Output path where to place the CRL.
-     * @param revocationFile Path to the CSV file which contains revocation info.
-     * @param rootCAAlias The alias of the root CA.
+     * @param revocationFile  Path to the CSV file which contains revocation info.
+     * @param rootCAAlias     The alias of the root CA.
      */
     public void generateRootCRL(String outputCaCrlPath, String revocationFile, String rootCAAlias) {
         List<RevocationInfo> revocationInfos = loadRevocationFile(revocationFile);
@@ -410,8 +414,8 @@ public class CAHandler {
      * Generates a root CA CRL using a private key stored in an HSM.
      *
      * @param outputCaCrlPath Output path where to place the CRL.
-     * @param revocationFile Path to the CSV file which contains revocation info.
-     * @param rootCAAlias The alias of the root CA.
+     * @param revocationFile  Path to the CSV file which contains revocation info.
+     * @param rootCAAlias     The alias of the root CA.
      */
     public void generateRootCRLP11(String outputCaCrlPath, String revocationFile, String rootCAAlias) {
         if (!(pkiConfiguration instanceof P11PKIConfiguration)) {
@@ -429,7 +433,8 @@ public class CAHandler {
             String rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject().toString();
             Revocation.generateRootCACRL(rootCertX500Name, revocationInfos, rootCertEntry, outputCaCrlPath, p11PKIConfiguration.getProvider());
             p11PKIConfiguration.providerLogout();
-        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | UnrecoverableEntryException e) {
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException |
+                 UnrecoverableEntryException e) {
             p11PKIConfiguration.providerLogout();
             throw new PKIRuntimeException("Could not generate CRL", e);
         }

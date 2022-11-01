@@ -37,16 +37,16 @@ public class OCSPVerifier {
      * {@link CertificateHandler#verifyCertificateChain(X509Certificate, KeyStore) verifyCertificateChain}
      * instead to verify the complete chain.
      *
-     * @param cert Certificate to validate
+     * @param cert       Certificate to validate
      * @param trustStore Truststore containing the issuer certificate
      * @return an OCSP result
-     * @throws KeyStoreException if the issuing CA certificate cannot be found
+     * @throws KeyStoreException       if the issuing CA certificate cannot be found
      * @throws OCSPValidationException if the certificate cannot be verified using OCSP
      */
     public static RevocationInfo verifyCertificateOCSP(X509Certificate cert, KeyStore trustStore) throws KeyStoreException, OCSPValidationException {
         X500Name x500name = new X500Name(cert.getIssuerX500Principal().getName());
         String issuerAlias = CertificateHandler.getElement(x500name, BCStyle.UID);
-        X509Certificate issuerCert =  (X509Certificate) trustStore.getCertificate(issuerAlias);
+        X509Certificate issuerCert = (X509Certificate) trustStore.getCertificate(issuerAlias);
         return verifyCertificateOCSP(cert, issuerCert);
     }
 
@@ -55,7 +55,7 @@ public class OCSPVerifier {
      * {@link CertificateHandler#verifyCertificateChain(X509Certificate, KeyStore) verifyCertificateChain}
      * instead to verify the complete chain.
      *
-     * @param cert Certificate to validate
+     * @param cert       Certificate to validate
      * @param issuerCert The issuer certificate
      * @return an OCSP result
      * @throws OCSPValidationException if the certificate cannot be verified using OCSP

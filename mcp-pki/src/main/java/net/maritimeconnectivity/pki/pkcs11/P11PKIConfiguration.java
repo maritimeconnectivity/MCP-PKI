@@ -46,10 +46,9 @@ public class P11PKIConfiguration extends PKIConfiguration {
     private boolean loggedIn;
 
     /**
-     *
-     * @param rootCAAlias       the alias for the root CA that should be used
-     * @param pkcs11ConfigPath  the path of the PKCS#11 configuration file
-     * @param pkcs11Pin         the pin that should be used for logging in to the HSM
+     * @param rootCAAlias      the alias for the root CA that should be used
+     * @param pkcs11ConfigPath the path of the PKCS#11 configuration file
+     * @param pkcs11Pin        the pin that should be used for logging in to the HSM
      */
     public P11PKIConfiguration(@NonNull String rootCAAlias, String pkcs11ConfigPath, String pkcs11Pin) {
         super(rootCAAlias);
@@ -76,10 +75,9 @@ public class P11PKIConfiguration extends PKIConfiguration {
     }
 
     /**
-     *
-     * @param rootCAAlias       the alias for the root CA that should be used
-     * @param pkcs11ConfigPath  the path of the PKCS#11 configuration file
-     * @param pkcs11Pin         the pin that should be used for logging in to the HSM
+     * @param rootCAAlias      the alias for the root CA that should be used
+     * @param pkcs11ConfigPath the path of the PKCS#11 configuration file
+     * @param pkcs11Pin        the pin that should be used for logging in to the HSM
      */
     public P11PKIConfiguration(@NonNull String rootCAAlias, String pkcs11ConfigPath, char[] pkcs11Pin) {
         super(rootCAAlias);
