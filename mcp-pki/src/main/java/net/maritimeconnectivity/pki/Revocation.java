@@ -270,6 +270,8 @@ public class Revocation {
      * @param request   The incoming request.
      * @param publicKey Public key of the issuer.
      * @return a BasicOCSPRespBuilder
+     * @throws OCSPException             if an OCSP response builder could not be built
+     * @throws OperatorCreationException if a hash digest builder could not be built
      */
     public static BasicOCSPRespBuilder initOCSPRespBuilder(OCSPReq request, PublicKey publicKey) throws OCSPException, OperatorCreationException {
         SubjectPublicKeyInfo keyinfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
@@ -291,6 +293,10 @@ public class Revocation {
      * @param signingCert         PrivateKeyEntry of the signing certificate.
      * @param p11PKIConfiguration A P11PKIConfiguration. Can be null
      * @return a OCSPResp
+     * @throws OCSPException                if an OCSP response builder could not be built
+     * @throws IOException                  if the received certificate is corrupted or incorrect
+     * @throws OperatorCreationException    if a signature builder could not be built
+     * @throws CertificateEncodingException if an encoding error occurs
      */
     public static OCSPResp generateOCSPResponse(BasicOCSPRespBuilder respBuilder, KeyStore.PrivateKeyEntry signingCert, P11PKIConfiguration p11PKIConfiguration) throws OCSPException, IOException, OperatorCreationException, CertificateEncodingException {
         try {
@@ -312,7 +318,7 @@ public class Revocation {
                 p11PKIConfiguration.providerLogout();
             }
             return ocspResp;
-        } catch (CertificateEncodingException | OCSPException | IOException | OperatorCreationException e) {
+        } catch (CertificateEncodingException | OCSPException | OperatorCreationException e) {
             // If an exception is thrown we need to first catch it, logout of the PKCS#11 provider if we use one
             // and then throw the exception again
             if (p11PKIConfiguration != null) {
