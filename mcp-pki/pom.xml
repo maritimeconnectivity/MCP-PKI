@@ -18,6 +18,13 @@
         <bouncycastle.version>1.72</bouncycastle.version>
     </properties>
 
+    <licenses>
+        <license>
+            <name>Apache-2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
     <dependencies>
         <dependency>
             <groupId>org.bouncycastle</groupId>
