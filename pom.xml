@@ -17,6 +17,7 @@
         <slf4j.version>1.7.36</slf4j.version>
         <lombok.version>1.18.24</lombok.version>
         <junit-jupiter.version>5.9.1</junit-jupiter.version>
+        <maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
         <skip.signing>true</skip.signing>
         <verbose.delombok>false</verbose.delombok>
     </properties>
@@ -119,7 +120,7 @@
                 <!-- Can be triggered by running mvn javadoc:javadoc -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>${maven-javadoc-plugin.version}</version>
                 <configuration>
                     <sourcepath>${project.basedir}/target/generated-sources/delombok</sourcepath>
                 </configuration>
@@ -193,7 +194,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.3.1</version>
+                        <version>${maven-javadoc-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
