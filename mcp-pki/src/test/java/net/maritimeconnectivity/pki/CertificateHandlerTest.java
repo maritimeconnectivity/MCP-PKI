@@ -119,30 +119,30 @@ class CertificateHandlerTest {
             String newlineChar = System.lineSeparator();
             String pemCertificate = CertificateHandler.getPemFromEncoded("CERTIFICATE", cert.getEncoded());
             assertEquals(pemCertificate, String.format("-----BEGIN CERTIFICATE-----%1$s" +
-                    "MIIEVDCCA9qgAwIBAgIUCyyYKfQz/XJCDcjuXITjmOQkogAwCgYIKoZIzj0EAwMw%1$s" +
+                    "MIIEVDCCA9qgAwIBAgIUPODB2FDaIf1ouacE4+uUuYbhL7wwCgYIKoZIzj0EAwMw%1$s" +
                     "gdwxLTArBgoJkiaJk/IsZAEBDB11cm46bXJuOm1jcDpjYTppZHAxOm1jcC1pZHJl%1$s" +
                     "ZzELMAkGA1UEBhMCREsxEDAOBgNVBAgMB0Rlbm1hcmsxEzARBgNVBAcMCkNvcGVu%1$s" +
                     "aGFnZW4xETAPBgNVBAoMCE1DUCBUZXN0MREwDwYDVQQLDAhNQ1AgVGVzdDEjMCEG%1$s" +
                     "A1UEAwwaTUNQIFRlc3QgSWRlbnRpdHkgUmVnaXN0cnkxLDAqBgkqhkiG9w0BCQEW%1$s" +
-                    "HWluZm9AbWFyaXRpbWVjb25uZWN0aXZpdHkubmV0MB4XDTIyMTAxODE0MDYxNFoX%1$s" +
-                    "DTIyMTIxODE0MDYxNFowgZMxCzAJBgNVBAYTAkRLMScwJQYDVQQKDB51cm46bXJu%1$s" +
+                    "HWluZm9AbWFyaXRpbWVjb25uZWN0aXZpdHkubmV0MB4XDTIzMDEyNzEwMDE0OFoX%1$s" +
+                    "DTI1MDEyNzEwMDE0OFowgZMxCzAJBgNVBAYTAkRLMScwJQYDVQQKDB51cm46bXJu%1$s" +
                     "Om1jcDpvcmc6aWRwMTpib290c3RyYXAxDzANBgNVBAsMBnZlc3NlbDEQMA4GA1UE%1$s" +
                     "AwwHTXkgQm9hdDE4MDYGCgmSJomT8ixkAQEMKHVybjptcm46bWNwOnZlc3NlbDpp%1$s" +
-                    "ZHAxOmJvb3RzdHJhcDpteWJvYXQwdjAQBgcqhkjOPQIBBgUrgQQAIgNiAAQjbHqv%1$s" +
-                    "cLCjOkj8Y8DErPcMUsWcFg7VtUFEK7nzffOrB7U/8SFajYo/WGqX/h0AHj4Wk8X4%1$s" +
-                    "AAb2uND9TcOQNLIGq2TdWj6uGlDpr15WtvGFQZ+0JB8+YvaBbUH3WaKv4tujggGi%1$s" +
+                    "ZHAxOmJvb3RzdHJhcDpteWJvYXQwdjAQBgcqhkjOPQIBBgUrgQQAIgNiAATWAVCN%1$s" +
+                    "nFOBoYeOKTMb52LROritMi3R84sL8AwKKQIEgN3jglux4+dPiBDYft7yp98gKVjj%1$s" +
+                    "Pgkb/cGUYZxcVNYoaXyS4wSOlZSkOgtw7jQj4w5x0wT5M08t3O/KzVoP8XSjggGi%1$s" +
                     "MIIBnjCBjwYDVR0RBIGHMIGEoCIGFGmDtqOX2Juv+MfLmeyAgKqu14oboAoMCDEy%1$s" +
                     "MzQ1Njc4oBoGFGmChru7yJuwqMfLntmAgKqu14oboAIMAKBCBhRpg5i818Ce8PDH%1$s" +
                     "y6qdgICqrteKG6AqDCh1cm46bXJuOm1jcDp2ZXNzZWw6aWRwMTpib290c3RyYXA6%1$s" +
                     "bXlib2F0MB8GA1UdIwQYMBaAFNDmgGDMsQd7eNwgru9Pj42j8CJAMB0GA1UdDgQW%1$s" +
-                    "BBSuLJtLOqF+x0hQkbisCAXRl7Z1kTBeBgNVHR8EVzBVMFOgUaBPhk1odHRwOi8v%1$s" +
+                    "BBQvaH2TGZ+XAE48ANQ4xTmdPC9xtjBeBgNVHR8EVzBVMFOgUaBPhk1odHRwOi8v%1$s" +
                     "bG9jYWxob3N0Ojg4ODgveDUwOS9hcGkvY2VydGlmaWNhdGVzL2NybC91cm46bXJu%1$s" +
                     "Om1jcDpjYTppZHAxOm1jcC1pZHJlZzBqBggrBgEFBQcBAQReMFwwWgYIKwYBBQUH%1$s" +
                     "MAGGTmh0dHA6Ly9sb2NhbGhvc3Q6ODg4OC94NTA5L2FwaS9jZXJ0aWZpY2F0ZXMv%1$s" +
                     "b2NzcC91cm46bXJuOm1jcDpjYTppZHAxOm1jcC1pZHJlZzAKBggqhkjOPQQDAwNo%1$s" +
-                    "ADBlAjBhoTf8Kw5l3siiSS7ZXiA2pCDoWTnVhYy2qZVBhqNdvkPULG5GU8a/vhci%1$s" +
-                    "9HVRrXsCMQCanvviGQQywvnNCxad0Vvfg/+ZqRjkRkiSTj+rkvupK5a2wyRrMelg%1$s" +
-                    "3YTirrupnYQ=%1$s" +
+                    "ADBlAjEA9LrVige8aCWVbcV6lLSBzuLp1FYFzAWfUFM6Tk2cTEil0VdkMb/wvNPZ%1$s" +
+                    "N0mBQ+5zAjAFCNKwNXEY905/AWghBeRvIIHLowE0OzbBNgkccPZ8qhjYFQp3UT+c%1$s" +
+                    "MLrgvm+tp5M=%1$s" +
                     "-----END CERTIFICATE-----%1$s", newlineChar));
         } catch (CertificateEncodingException e) {
             fail("Unexpected Exception", e);
@@ -247,7 +247,7 @@ class CertificateHandlerTest {
         String certPem = TestUtils.getMyBoatCertPem();
         X509Certificate cert = CertificateHandler.getCertFromPem(certPem);
         assertNotNull(cert);
-        assertEquals(new BigInteger("63793386611437832114147118341345457695264907776"), cert.getSerialNumber());
+        assertEquals(new BigInteger("347551699453548165462610319955258467284009693116"), cert.getSerialNumber());
     }
 
     @Test
@@ -255,7 +255,7 @@ class CertificateHandlerTest {
         String certPem = TestUtils.getEcdisCertPem();
         X509Certificate cert = CertificateHandler.getCertFromPem(certPem);
         assertNotNull(cert);
-        assertEquals(new BigInteger("247125697494810758010619089255453560510776717949"), cert.getSerialNumber());
+        assertEquals(new BigInteger("682123668671150200528178418440390652882987258659"), cert.getSerialNumber());
     }
 
     @Test

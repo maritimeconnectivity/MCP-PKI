@@ -63,7 +63,7 @@ class CRLVerifierTest {
     @Test
     void verifyCertificateCRL3() {
         X509Certificate cert = getMyBoatCert();
-        String crlFile = "src/test/resources/mcp-2022-10-18.crl";
+        String crlFile = "src/test/resources/mcp-2023-01-27.crl";
         X509CRL crl = null;
         try {
             crl = CRLVerifier.loadCRLFromFile(crlFile);
@@ -78,7 +78,7 @@ class CRLVerifierTest {
     @Test
     void verifyCertificateCRL4() {
         X509Certificate cert = getEcdisCert();
-        String crlFile = "src/test/resources/mcp-2022-10-18.crl";
+        String crlFile = "src/test/resources/mcp-2023-01-27.crl";
         X509CRL crl = null;
         try {
             crl = CRLVerifier.loadCRLFromFile(crlFile);
@@ -92,7 +92,7 @@ class CRLVerifierTest {
 
     @Test
     void loadCRLFromFile() {
-        String crlFile = "src/test/resources/mcp-2022-10-18.crl";
+        String crlFile = "src/test/resources/mcp-2023-01-27.crl";
         X509CRL crl = null;
         try {
             crl = CRLVerifier.loadCRLFromFile(crlFile);
@@ -101,7 +101,7 @@ class CRLVerifierTest {
         }
         assertNotNull(crl);
         assertEquals("EMAILADDRESS=info@maritimeconnectivity.net, CN=MCP Test Identity Registry, OU=MCP Test, O=MCP Test, L=Copenhagen, ST=Denmark, C=DK, UID=urn:mrn:mcp:ca:idp1:mcp-idreg", crl.getIssuerDN().getName());
-        assertEquals(1, crl.getRevokedCertificates().size());
+        assertEquals(4, crl.getRevokedCertificates().size());
     }
 
     @Test
