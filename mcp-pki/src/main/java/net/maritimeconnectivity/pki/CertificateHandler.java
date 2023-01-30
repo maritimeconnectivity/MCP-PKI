@@ -421,12 +421,13 @@ public class CertificateHandler {
      * @return the value of the identifier, or null if not found.
      */
     public static String getElement(X500Name x500name, ASN1ObjectIdentifier objectId) {
-        try {
-            RDN cn = x500name.getRDNs(objectId)[0];
-            return valueToString(cn.getFirst().getValue());
-        } catch (ArrayIndexOutOfBoundsException e) {
-            return null;
+        if (x500name != null && objectId != null) {
+            RDN[] rdns = x500name.getRDNs(objectId);
+            if (rdns != null && rdns.length > 0) {
+                return valueToString(rdns[0].getFirst().getValue());
+            }
         }
+        return null;
     }
 
     /**
