@@ -175,6 +175,7 @@ public class CertificateHandler {
      * @param type    The type, currently "CERTIFICATE", "PUBLIC KEY", "PRIVATE KEY" or "X509 CRL" are used
      * @param encoded The encoded byte[]
      * @return The PEM formatted cert/key
+     * @throws IOException if the given byte array could not be formatted as PEM
      */
     public static String getPemFromEncoded(String type, byte[] encoded) throws IOException {
         String pemFormat = "";
