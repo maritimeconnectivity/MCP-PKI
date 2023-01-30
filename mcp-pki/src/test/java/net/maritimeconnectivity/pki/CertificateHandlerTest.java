@@ -144,7 +144,7 @@ class CertificateHandlerTest {
                     "N0mBQ+5zAjAFCNKwNXEY905/AWghBeRvIIHLowE0OzbBNgkccPZ8qhjYFQp3UT+c%1$s" +
                     "MLrgvm+tp5M=%1$s" +
                     "-----END CERTIFICATE-----%1$s", newlineChar));
-        } catch (CertificateEncodingException e) {
+        } catch (CertificateEncodingException | IOException e) {
             fail("Unexpected Exception", e);
         }
 

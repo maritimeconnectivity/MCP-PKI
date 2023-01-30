@@ -176,18 +176,14 @@ public class CertificateHandler {
      * @param encoded The encoded byte[]
      * @return The PEM formatted cert/key
      */
-    public static String getPemFromEncoded(String type, byte[] encoded) {
+    public static String getPemFromEncoded(String type, byte[] encoded) throws IOException {
         String pemFormat = "";
         // Write certificate to PEM
-        StringWriter perStrWriter = new StringWriter();
-        PemWriter pemWrite = new PemWriter(perStrWriter);
-        try {
-            pemWrite.writeObject(new PemObject(type, encoded));
-            pemWrite.flush();
-            pemFormat = perStrWriter.toString();
-            pemWrite.close();
-        } catch (IOException e) {
-            throw new PKIRuntimeException(e);
+        StringWriter stringWriter = new StringWriter();
+        try (PemWriter pemWriter = new PemWriter(stringWriter)) {
+            pemWriter.writeObject(new PemObject(type, encoded));
+            pemWriter.flush();
+            pemFormat = stringWriter.toString();
         }
         return pemFormat;
     }

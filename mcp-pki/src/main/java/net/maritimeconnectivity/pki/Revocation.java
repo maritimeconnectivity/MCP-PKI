@@ -206,7 +206,7 @@ public class Revocation {
         String pemCrl;
         try {
             pemCrl = getPemFromEncoded("X509 CRL", crl.getEncoded());
-        } catch (CRLException e) {
+        } catch (CRLException | IOException e) {
             log.error("unable to generate Root CA CRL", e);
             return;
         }
