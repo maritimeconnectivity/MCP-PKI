@@ -15,6 +15,7 @@
  */
 package net.maritimeconnectivity.pki;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
 import net.maritimeconnectivity.pki.pkcs11.P11PKIConfiguration;
@@ -80,7 +81,7 @@ public class CertificateBuilder {
 
     private static final Set<Character> RESERVED_CHARACTERS = new HashSet<>(Arrays.asList(',', '+', '"', '\\', '<', '>', ';', '=', '/'));
 
-    public CertificateBuilder(KeystoreHandler keystoreHandler) {
+    public CertificateBuilder(@NonNull KeystoreHandler keystoreHandler) {
         this.keystoreHandler = keystoreHandler;
         this.random = new SecureRandom();
     }
