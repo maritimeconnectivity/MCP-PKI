@@ -59,8 +59,7 @@ public class KeystoreHandler {
      * @return a PrivateKeyEntry of the signing certificate
      */
     public KeyStore.PrivateKeyEntry getSigningCertEntry(String alias) {
-        if (pkiConfiguration instanceof P11PKIConfiguration) {
-            P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
+        if (pkiConfiguration instanceof P11PKIConfiguration p11PKIConfiguration) {
             try {
                 KeyStore keyStore = KeyStore.getInstance(PKIConstants.PKCS11, p11PKIConfiguration.getProvider());
                 keyStore.load(null, p11PKIConfiguration.getPkcs11Pin());

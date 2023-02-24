@@ -333,40 +333,18 @@ public class CertificateHandler {
                     }
                     log.debug("oid: " + oid + ", value: " + value);
                     switch (oid) {
-                        case PKIConstants.MC_OID_FLAGSTATE:
-                            identity.setFlagState(value);
-                            break;
-                        case PKIConstants.MC_OID_CALLSIGN:
-                            identity.setCallSign(value);
-                            break;
-                        case PKIConstants.MC_OID_IMO_NUMBER:
-                            identity.setImoNumber(value);
-                            break;
-                        case PKIConstants.MC_OID_MMSI_NUMBER:
-                            identity.setMmsiNumber(value);
-                            break;
-                        case PKIConstants.MC_OID_AIS_SHIPTYPE:
-                            identity.setAisShipType(value);
-                            break;
-                        case PKIConstants.MC_OID_PORT_OF_REGISTER:
-                            identity.setPortOfRegister(value);
-                            break;
-                        case PKIConstants.MC_OID_MRN: // primary MRN
-                            identity.setMrn(value);
-                            break;
-                        case PKIConstants.MC_OID_MRN_SUBSIDIARY:
-                            identity.setMrnSubsidiary(value);
-                            break;
-                        case PKIConstants.MC_OID_HOME_MMS_URL:
-                            identity.setHomeMmsUrl(value);
-                            break;
-                        case PKIConstants.MC_OID_SHIP_MRN:
-                            identity.setShipMrn(value);
-                            break;
-                        case PKIConstants.MC_OID_URL:
-                            identity.setUrl(value);
-                            break;
-                        case PKIConstants.MC_OID_PERMISSIONS:
+                        case PKIConstants.MC_OID_FLAGSTATE -> identity.setFlagState(value);
+                        case PKIConstants.MC_OID_CALLSIGN -> identity.setCallSign(value);
+                        case PKIConstants.MC_OID_IMO_NUMBER -> identity.setImoNumber(value);
+                        case PKIConstants.MC_OID_MMSI_NUMBER -> identity.setMmsiNumber(value);
+                        case PKIConstants.MC_OID_AIS_SHIPTYPE -> identity.setAisShipType(value);
+                        case PKIConstants.MC_OID_PORT_OF_REGISTER -> identity.setPortOfRegister(value);
+                        case PKIConstants.MC_OID_MRN -> identity.setMrn(value); // primary MRN
+                        case PKIConstants.MC_OID_MRN_SUBSIDIARY -> identity.setMrnSubsidiary(value);
+                        case PKIConstants.MC_OID_HOME_MMS_URL -> identity.setHomeMmsUrl(value);
+                        case PKIConstants.MC_OID_SHIP_MRN -> identity.setShipMrn(value);
+                        case PKIConstants.MC_OID_URL -> identity.setUrl(value);
+                        case PKIConstants.MC_OID_PERMISSIONS -> {
                             if (!value.trim().isEmpty()) {
                                 if (permissions.length() == 0) {
                                     permissions = new StringBuilder(value);
@@ -374,10 +352,8 @@ public class CertificateHandler {
                                     permissions.append(',').append(value);
                                 }
                             }
-                            break;
-                        default:
-                            log.error("Unknown OID!");
-                            break;
+                        }
+                        default -> log.error("Unknown OID!");
                     }
                 } else {
                     // Other types are not supported so ignore them

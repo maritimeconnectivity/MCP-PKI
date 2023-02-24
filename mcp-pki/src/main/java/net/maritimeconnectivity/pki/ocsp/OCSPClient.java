@@ -190,8 +190,8 @@ public class OCSPClient {
                     return CertStatus.GOOD;
                 } else {
 
-                    if (status instanceof RevokedStatus) {
-                        revokedStatus = (RevokedStatus) status;
+                    if (status instanceof RevokedStatus revStatus) {
+                        revokedStatus = revStatus;
                         return CertStatus.REVOKED;
                     } else {
                         return CertStatus.UNKNOWN;

@@ -260,8 +260,7 @@ public class CertificateBuilder {
         }
         try {
             SecureRandom secureRandom;
-            if (pkiConfiguration instanceof P11PKIConfiguration) {
-                P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
+            if (pkiConfiguration instanceof P11PKIConfiguration p11PKIConfiguration) {
                 secureRandom = SecureRandom.getInstance(PKIConstants.PKCS11, p11PKIConfiguration.getProvider());
             } else {
                 secureRandom = new SecureRandom();
@@ -302,9 +301,8 @@ public class CertificateBuilder {
         // Max number supported in X509 serial number 2^159-1 = 730750818665451459101842416358141509827966271487
         BigInteger maxValue = new BigInteger("730750818665451459101842416358141509827966271487");
         BigInteger minValue = BigInteger.ZERO;
-        if (pkiConfiguration instanceof P11PKIConfiguration) {
+        if (pkiConfiguration instanceof P11PKIConfiguration p11PKIConfiguration) {
             try {
-                P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
                 return BigIntegers.createRandomInRange(minValue, maxValue, SecureRandom.getInstance(PKIConstants.PKCS11, p11PKIConfiguration.getProvider()));
             } catch (NoSuchAlgorithmException e) {
                 throw new PKIRuntimeException(e.getMessage(), e);

@@ -165,13 +165,11 @@ public class CAHandler {
      * @param validityPeriod     How many months the certificate should be valid
      */
     public void createSubCAPKCS11(String subCaCertDN, String rootCAAlias, PKIConfiguration subCaConfiguration, int validityPeriod) {
-        if (!(pkiConfiguration instanceof P11PKIConfiguration) || !(subCaConfiguration instanceof P11PKIConfiguration)) {
+        if (!(pkiConfiguration instanceof P11PKIConfiguration rootP11PKIConfiguration) || !(subCaConfiguration instanceof P11PKIConfiguration subCaP11PKIConfiguration)) {
             throw new PKIRuntimeException(HSM_EXCEPTION_MESSAGE);
         }
         // Prepare PKCS#11 crypto providers
-        P11PKIConfiguration rootP11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
         rootP11PKIConfiguration.providerLogin();
-        P11PKIConfiguration subCaP11PKIConfiguration = (P11PKIConfiguration) subCaConfiguration;
         subCaP11PKIConfiguration.providerLogin();
         KeyStore rootStore;
         KeyStore subCaStore;
@@ -305,10 +303,9 @@ public class CAHandler {
      * @param validityPeriod   How many months the certificate should be valid
      */
     public void initRootCAPKCS11(String rootCertX500Name, String crlUrl, String rootCAAlias, int validityPeriod) {
-        if (!(pkiConfiguration instanceof P11PKIConfiguration)) {
+        if (!(pkiConfiguration instanceof P11PKIConfiguration p11PKIConfiguration)) {
             throw new PKIRuntimeException(HSM_EXCEPTION_MESSAGE);
         }
-        P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
         p11PKIConfiguration.providerLogin();
         KeyPair caKeyPair = CertificateBuilder.generateKeyPairPKCS11(p11PKIConfiguration);
         KeyStore rootKeyStore;
@@ -418,11 +415,10 @@ public class CAHandler {
      * @param rootCAAlias     The alias of the root CA.
      */
     public void generateRootCRLP11(String outputCaCrlPath, String revocationFile, String rootCAAlias) {
-        if (!(pkiConfiguration instanceof P11PKIConfiguration)) {
+        if (!(pkiConfiguration instanceof P11PKIConfiguration p11PKIConfiguration)) {
             throw new PKIRuntimeException(HSM_EXCEPTION_MESSAGE);
         }
         List<RevocationInfo> revocationInfos = loadRevocationFile(revocationFile);
-        P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
 
         p11PKIConfiguration.providerLogin();
         KeyStore rootKeyStore;

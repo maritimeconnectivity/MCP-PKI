@@ -81,28 +81,18 @@ public class Revocation {
      * @return The int value associated with the revocation status
      */
     public static int getCRLReasonFromString(String certReason) {
-        switch (certReason) {
-            case "keycompromise":
-                return CRLReason.keyCompromise;
-            case "cacompromise":
-                return CRLReason.cACompromise;
-            case "affiliationchanged":
-                return CRLReason.affiliationChanged;
-            case "superseded":
-                return CRLReason.superseded;
-            case "cessationofoperation":
-                return CRLReason.cessationOfOperation;
-            case "certificatehold":
-                return CRLReason.certificateHold;
-            case "removefromcrl":
-                return CRLReason.removeFromCRL;
-            case "privilegewithdrawn":
-                return CRLReason.privilegeWithdrawn;
-            case "aacompromise":
-                return CRLReason.aACompromise;
-            default:
-                return CRLReason.unspecified;
-        }
+        return switch (certReason) {
+            case "keycompromise" -> CRLReason.keyCompromise;
+            case "cacompromise" -> CRLReason.cACompromise;
+            case "affiliationchanged" -> CRLReason.affiliationChanged;
+            case "superseded" -> CRLReason.superseded;
+            case "cessationofoperation" -> CRLReason.cessationOfOperation;
+            case "certificatehold" -> CRLReason.certificateHold;
+            case "removefromcrl" -> CRLReason.removeFromCRL;
+            case "privilegewithdrawn" -> CRLReason.privilegeWithdrawn;
+            case "aacompromise" -> CRLReason.aACompromise;
+            default -> CRLReason.unspecified;
+        };
     }
 
     /**
@@ -132,8 +122,7 @@ public class Revocation {
         }
 
         JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder(SIGNER_ALGORITHM);
-        if (pkiConfiguration instanceof P11PKIConfiguration) {
-            P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
+        if (pkiConfiguration instanceof P11PKIConfiguration p11PKIConfiguration) {
             signBuilder.setProvider(p11PKIConfiguration.getProvider());
         } else {
             signBuilder.setProvider(BC_PROVIDER_NAME);
