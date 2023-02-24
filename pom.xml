@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>17</maven.compiler.release>
         <slf4j.version>1.7.36</slf4j.version>
-        <lombok.version>1.18.24</lombok.version>
+        <lombok.version>1.18.26</lombok.version>
         <junit-jupiter.version>5.9.1</junit-jupiter.version>
         <maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
         <skip.signing>true</skip.signing>
