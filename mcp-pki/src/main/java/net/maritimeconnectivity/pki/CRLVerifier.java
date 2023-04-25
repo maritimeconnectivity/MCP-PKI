@@ -34,7 +34,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-//package demo.sts.provider.cert;
 
 package net.maritimeconnectivity.pki;
 
@@ -102,7 +101,7 @@ public final class CRLVerifier {
             }
             return new RevocationInfo(cert.getSerialNumber(), null, null, CertStatus.GOOD);
         } catch (Exception ex) {
-            log.error("An Exception was thrown during OCSP verification!", ex);
+            log.error("An Exception was thrown during CRL verification!", ex);
             return new RevocationInfo(cert.getSerialNumber(), null, null, CertStatus.UNKNOWN);
         }
     }
@@ -111,7 +110,7 @@ public final class CRLVerifier {
      * Verifies the revocation status of a certificate against a CRL
      *
      * @param cert The certificate to verify
-     * @param crl The CRL to use for verifying
+     * @param crl  The CRL to use for verifying
      * @return a RevocationInfo object with the validation result
      */
     public static RevocationInfo verifyCertificateCRL(X509Certificate cert, X509CRL crl) {
@@ -123,7 +122,7 @@ public final class CRLVerifier {
                 return new RevocationInfo(cert.getSerialNumber(), null, null, CertStatus.GOOD);
             }
         } catch (Exception ex) {
-            log.error("An Exception was thrown during OCSP verification!", ex);
+            log.error("An Exception was thrown during CRL verification!", ex);
             return new RevocationInfo(cert.getSerialNumber(), null, null, CertStatus.UNKNOWN);
         }
     }
@@ -133,10 +132,10 @@ public final class CRLVerifier {
      *
      * @param crlURL The URL for downloading the CRL
      * @return a CRL
-     * @throws IOException if a connection cannot be opened based on the given URL
+     * @throws IOException          if a connection cannot be opened based on the given URL
      * @throws CertificateException if the retrieved CRL cannot be instantiated as a Java object
-     * @throws NamingException if downloading CRL from ldap fails
-     * @throws CRLException if the retrieved CRL cannot be instantiated as a Java object
+     * @throws NamingException      if downloading CRL from ldap fails
+     * @throws CRLException         if the retrieved CRL cannot be instantiated as a Java object
      */
     public static X509CRL downloadCRL(String crlURL) throws IOException, CertificateException, NamingException, CRLException {
         if (crlURL.startsWith("http://") || crlURL.startsWith("https://") || crlURL.startsWith("ftp://")) {
@@ -154,13 +153,13 @@ public final class CRLVerifier {
      *
      * @param ldapURL The URL for downloading the CRL from a ldap server
      * @return a CRL
-     * @throws NamingException if downloading CRL from ldap fails
+     * @throws NamingException      if downloading CRL from ldap fails
      * @throws CertificateException if a CertificateFactory cannot be instantiated
-     * @throws CRLException if the retrieved CRL cannot be instantiated as a Java object
+     * @throws CRLException         if the retrieved CRL cannot be instantiated as a Java object
      */
     public static X509CRL downloadCRLFromLDAP(String ldapURL) throws NamingException, CertificateException, CRLException {
         Map<String, String> env = new HashMap<>();
-        env.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
+        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         env.put(Context.PROVIDER_URL, ldapURL);
 
         DirContext ctx = new InitialDirContext(new Hashtable<>(env));
@@ -182,9 +181,9 @@ public final class CRLVerifier {
      *
      * @param crlURL The URL for downloading the CRL
      * @return a CRL
-     * @throws IOException if a connection cannot be opened based on the given URL
+     * @throws IOException          if a connection cannot be opened based on the given URL
      * @throws CertificateException if a CertificateFactory cannot be instantiated
-     * @throws CRLException if the retrieved CRL cannot be instantiated as a Java object
+     * @throws CRLException         if the retrieved CRL cannot be instantiated as a Java object
      */
     public static X509CRL downloadCRLFromWeb(String crlURL) throws IOException, CRLException, CertificateException {
         URL url = new URL(crlURL);
@@ -199,8 +198,8 @@ public final class CRLVerifier {
      *
      * @param path The path of the file that contains the CRL
      * @return a CRL
-     * @throws IOException if the file cannot be opened
-     * @throws CRLException if the loaded CRL cannot be instantiated as a Java object
+     * @throws IOException          if the file cannot be opened
+     * @throws CRLException         if the loaded CRL cannot be instantiated as a Java object
      * @throws CertificateException if a CertificateFactory cannot be instantiated
      */
     public static X509CRL loadCRLFromFile(String path) throws IOException, CRLException, CertificateException {

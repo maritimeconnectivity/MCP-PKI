@@ -79,8 +79,8 @@ public class Main {
 
         // CA root init
         options.addOption("i", INIT, false, "Initialize PKI - creates root CA. Requires the parameters: " + String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD, ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD, X500_NAME, CRL_ENDPOINT, ROOT_CA_ALIAS));
-        options.addOption("t",TRUSTSTORE, true, "Output truststore path.");
-        options.addOption("tp",TRUSTSTORE_PASSWORD, true, "Truststore password");
+        options.addOption("t", TRUSTSTORE, true, "Output truststore path.");
+        options.addOption("tp", TRUSTSTORE_PASSWORD, true, "Truststore password");
         options.addOption("rk", ROOT_KEYSTORE, true, "Output keystore path.");
         options.addOption("rkp", ROOT_KEYSTORE_PASSWORD, true, "Keystore password.");
         options.addOption("kp", ROOT_KEY_PASSWORD, true, "Key password.");
@@ -304,7 +304,7 @@ public class Main {
                 main.initCA(cmd);
             }
 
-        // Generate root CRL
+            // Generate root CRL
         } else if (cmd.hasOption(GENERATE_ROOT_CRL)) {
             if (cmd.hasOption(PKCS11)) {
                 main.genRootCRLPKCS11(cmd);
@@ -312,7 +312,7 @@ public class Main {
                 main.genRootCRL(cmd);
             }
 
-        // Create sub ca
+            // Create sub ca
         } else if (cmd.hasOption(CREATE_SUBCA)) {
             if (cmd.hasOption(PKCS11)) {
                 main.createSubCAPKCS11(cmd);
@@ -320,7 +320,7 @@ public class Main {
                 main.createSubCA(cmd);
             }
 
-        // Verify certificate
+            // Verify certificate
         } else if (cmd.hasOption(VERIFY_CERTIFICATE)) {
             main.verifyCertificate(cmd);
         } else if (cmd.hasOption(PRINT_OUT_CERTIFICATE)) {
@@ -336,7 +336,7 @@ public class Main {
         } else {
             // Automatically generate the help statement
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp( "mcp-pki-cli", options );
+            formatter.printHelp("mcp-pki-cli", options);
         }
     }
 }

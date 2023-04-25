@@ -15,6 +15,7 @@
  */
 package net.maritimeconnectivity.pki;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.maritimeconnectivity.pki.exception.PKIRuntimeException;
 import net.maritimeconnectivity.pki.pkcs11.P11PKIConfiguration;
@@ -80,7 +81,7 @@ public class CertificateBuilder {
 
     private static final Set<Character> RESERVED_CHARACTERS = new HashSet<>(Arrays.asList(',', '+', '"', '\\', '<', '>', ';', '=', '/'));
 
-    public CertificateBuilder(KeystoreHandler keystoreHandler) {
+    public CertificateBuilder(@NonNull KeystoreHandler keystoreHandler) {
         this.keystoreHandler = keystoreHandler;
         this.random = new SecureRandom();
     }
@@ -89,23 +90,23 @@ public class CertificateBuilder {
      * Builds and signs a certificate. The certificate will be build on the given subject-public-key and signed with
      * the given issuer-private-key. The issuer and subject will be identified in the strings provided.
      *
-     * @param serialNumber The serial number of the new certificate.
+     * @param serialNumber     The serial number of the new certificate.
      * @param signerPrivateKey Private key for signing the certificate
-     * @param signerPublicKey Public key of the signing certificate
+     * @param signerPublicKey  Public key of the signing certificate
      * @param subjectPublicKey Public key for the new certificate
-     * @param issuer DN of the signing certificate
-     * @param subject DN of the new certificate
-     * @param customAttrs The custom MC attributes to include in the certificate
-     * @param type Type of certificate, can be "ROOT", "INTERMEDIATE" or "ENTITY".
-     * @param ocspUrl OCSP endpoint
-     * @param crlUrl CRL endpoint - can be null
-     * @param p11AuthProvider The provider that should be used - can be null
-     * @param validityPeriod How many months the certificate should be valid
+     * @param issuer           DN of the signing certificate
+     * @param subject          DN of the new certificate
+     * @param customAttrs      The custom MC attributes to include in the certificate
+     * @param type             Type of certificate, can be "ROOT", "INTERMEDIATE" or "ENTITY".
+     * @param ocspUrl          OCSP endpoint
+     * @param crlUrl           CRL endpoint - can be null
+     * @param p11AuthProvider  The provider that should be used - can be null
+     * @param validityPeriod   How many months the certificate should be valid
      * @return A signed X509Certificate
-     * @throws NoSuchAlgorithmException if the needed underlying algorithms don't exist in the crypto provider
-     * @throws CertIOException if extensions cannot be added to the certificate
+     * @throws NoSuchAlgorithmException  if the needed underlying algorithms don't exist in the crypto provider
+     * @throws CertIOException           if extensions cannot be added to the certificate
      * @throws OperatorCreationException if the certificate signer cannot be instantiated
-     * @throws CertificateException if the certificate cannot be built
+     * @throws CertificateException      if the certificate cannot be built
      */
     public X509Certificate buildAndSignCert(BigInteger serialNumber, PrivateKey signerPrivateKey, PublicKey signerPublicKey, PublicKey subjectPublicKey, X500Name issuer, X500Name subject,
                                             Map<String, String> customAttrs, String type, String ocspUrl, String crlUrl, AuthProvider p11AuthProvider, int validityPeriod) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException {
@@ -130,26 +131,26 @@ public class CertificateBuilder {
         if ("ROOTCA".equals(type)) {
             certV3Bldr = certV3Bldr.addExtension(Extension.basicConstraints, true, new BasicConstraints(true))
                     .addExtension(Extension.keyUsage, true, new X509KeyUsage(X509KeyUsage.digitalSignature |
-                            X509KeyUsage.nonRepudiation   |
-                            X509KeyUsage.keyEncipherment  |
-                            X509KeyUsage.keyCertSign      |
+                            X509KeyUsage.nonRepudiation |
+                            X509KeyUsage.keyEncipherment |
+                            X509KeyUsage.keyCertSign |
                             X509KeyUsage.cRLSign));
         } else if ("INTERMEDIATE".equals(type)) {
             certV3Bldr = certV3Bldr.addExtension(Extension.basicConstraints, true, new BasicConstraints(true))
                     .addExtension(Extension.keyUsage, true, new X509KeyUsage(X509KeyUsage.digitalSignature |
-                            X509KeyUsage.nonRepudiation   |
-                            X509KeyUsage.keyEncipherment  |
-                            X509KeyUsage.keyCertSign      |
+                            X509KeyUsage.nonRepudiation |
+                            X509KeyUsage.keyEncipherment |
+                            X509KeyUsage.keyCertSign |
                             X509KeyUsage.cRLSign));
         } else {
             // Subject Alternative Name
             GeneralName[] genNames = null;
             if (customAttrs != null && !customAttrs.isEmpty()) {
                 genNames = new GeneralName[customAttrs.size()];
-                Iterator<Map.Entry<String,String>> it = customAttrs.entrySet().iterator();
+                Iterator<Map.Entry<String, String>> it = customAttrs.entrySet().iterator();
                 int idx = 0;
                 while (it.hasNext()) {
-                    Map.Entry<String,String> pair = it.next();
+                    Map.Entry<String, String> pair = it.next();
                     if (PKIConstants.X509_SAN_DNSNAME.equals(pair.getKey())) {
                         genNames[idx] = new GeneralName(GeneralName.dNSName, pair.getValue());
                     } else {
@@ -191,24 +192,24 @@ public class CertificateBuilder {
     /**
      * Generates a signed certificate for an entity.
      *
-     * @param serialNumber The serial number of the certificate
-     * @param country The country of org/entity
-     * @param orgName The name of the organization the entity belongs to
-     * @param type The type of the  entity
-     * @param callName The name of the entity
-     * @param email The email of the entity
-     * @param uid The UID of the certificate
-     * @param validityPeriod How many months the certificate should be valid
-     * @param publicKey The public key of the entity
-     * @param customAttr Custom attributes that should be added to the certificate
-     * @param signingAlias The alias of the CA that should be used to sign the certificate
-     * @param baseCrlOcspURI The base URI used for the CRL and OCSP endpoint. This will be prepended: (ocsp|crl)/urn:mrn:mcl:ca:...
+     * @param serialNumber    The serial number of the certificate
+     * @param country         The country of org/entity
+     * @param orgName         The name of the organization the entity belongs to
+     * @param type            The type of the  entity
+     * @param callName        The name of the entity
+     * @param email           The email of the entity
+     * @param uid             The UID of the certificate
+     * @param validityPeriod  How many months the certificate should be valid
+     * @param publicKey       The public key of the entity
+     * @param customAttr      Custom attributes that should be added to the certificate
+     * @param signingAlias    The alias of the CA that should be used to sign the certificate
+     * @param baseCrlOcspURI  The base URI used for the CRL and OCSP endpoint. This will be prepended: (ocsp|crl)/urn:mrn:mcl:ca:...
      * @param p11AuthProvider The provider that should be used - can be null
      * @return Returns a signed X509Certificate
-     * @throws CertificateException if the certificate cannot be built
+     * @throws CertificateException      if the certificate cannot be built
      * @throws OperatorCreationException if the certificate cannot be built
-     * @throws CertIOException if the certificate cannot be built
-     * @throws NoSuchAlgorithmException if the certificate cannot be built
+     * @throws CertIOException           if the certificate cannot be built
+     * @throws NoSuchAlgorithmException  if the certificate cannot be built
      */
     public X509Certificate generateCertForEntity(BigInteger serialNumber, String country, String orgName, String type,
                                                  String callName, String email, String uid, int validityPeriod, PublicKey publicKey,
@@ -236,11 +237,11 @@ public class CertificateBuilder {
         if (email != null && !email.isEmpty()) {
             subjectDn += ", E=" + escapeSpecialCharacters(email);
         }
-        String ocspUrl  = baseCrlOcspURI + "ocsp/" + signingAlias;
+        String ocspUrl = baseCrlOcspURI + "ocsp/" + signingAlias;
         String crlUrl = baseCrlOcspURI + "crl/" + signingAlias;
         return buildAndSignCert(serialNumber, signingCertEntry.getPrivateKey(), signingX509Cert.getPublicKey(),
-                    publicKey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(subjectDn),
-                    customAttr, "ENTITY", ocspUrl, crlUrl, p11AuthProvider, validityPeriod);
+                publicKey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(subjectDn),
+                customAttr, "ENTITY", ocspUrl, crlUrl, p11AuthProvider, validityPeriod);
     }
 
     /**
@@ -259,8 +260,7 @@ public class CertificateBuilder {
         }
         try {
             SecureRandom secureRandom;
-            if (pkiConfiguration instanceof P11PKIConfiguration) {
-                P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
+            if (pkiConfiguration instanceof P11PKIConfiguration p11PKIConfiguration) {
                 secureRandom = SecureRandom.getInstance(PKIConstants.PKCS11, p11PKIConfiguration.getProvider());
             } else {
                 secureRandom = new SecureRandom();
@@ -301,9 +301,8 @@ public class CertificateBuilder {
         // Max number supported in X509 serial number 2^159-1 = 730750818665451459101842416358141509827966271487
         BigInteger maxValue = new BigInteger("730750818665451459101842416358141509827966271487");
         BigInteger minValue = BigInteger.ZERO;
-        if (pkiConfiguration instanceof P11PKIConfiguration) {
+        if (pkiConfiguration instanceof P11PKIConfiguration p11PKIConfiguration) {
             try {
-                P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
                 return BigIntegers.createRandomInRange(minValue, maxValue, SecureRandom.getInstance(PKIConstants.PKCS11, p11PKIConfiguration.getProvider()));
             } catch (NoSuchAlgorithmException e) {
                 throw new PKIRuntimeException(e.getMessage(), e);

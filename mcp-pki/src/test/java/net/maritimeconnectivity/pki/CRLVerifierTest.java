@@ -63,7 +63,7 @@ class CRLVerifierTest {
     @Test
     void verifyCertificateCRL3() {
         X509Certificate cert = getMyBoatCert();
-        String crlFile = "src/test/resources/mc-2017-03-23.crl";
+        String crlFile = "src/test/resources/mcp-2023-01-27.crl";
         X509CRL crl = null;
         try {
             crl = CRLVerifier.loadCRLFromFile(crlFile);
@@ -78,7 +78,7 @@ class CRLVerifierTest {
     @Test
     void verifyCertificateCRL4() {
         X509Certificate cert = getEcdisCert();
-        String crlFile = "src/test/resources/mc-2017-03-23.crl";
+        String crlFile = "src/test/resources/mcp-2023-01-27.crl";
         X509CRL crl = null;
         try {
             crl = CRLVerifier.loadCRLFromFile(crlFile);
@@ -92,7 +92,7 @@ class CRLVerifierTest {
 
     @Test
     void loadCRLFromFile() {
-        String crlFile = "src/test/resources/mc-2017-03-23.crl";
+        String crlFile = "src/test/resources/mcp-2023-01-27.crl";
         X509CRL crl = null;
         try {
             crl = CRLVerifier.loadCRLFromFile(crlFile);
@@ -100,8 +100,8 @@ class CRLVerifierTest {
             e.printStackTrace();
         }
         assertNotNull(crl);
-        assertEquals("EMAILADDRESS=info@maritimecloud.net, CN=MaritimeCloud Identity Registry Certificate, OU=MaritimeCloud Identity Registry, O=MaritimeCloud, L=Copenhagen, ST=Denmark, C=DK", crl.getIssuerDN().getName());
-        assertEquals(176, crl.getRevokedCertificates().size());
+        assertEquals("EMAILADDRESS=info@maritimeconnectivity.net, CN=MCP Test Identity Registry, OU=MCP Test, O=MCP Test, L=Copenhagen, ST=Denmark, C=DK, UID=urn:mrn:mcp:ca:idp1:mcp-idreg", crl.getIssuerDN().getName());
+        assertEquals(4, crl.getRevokedCertificates().size());
     }
 
     @Test
@@ -116,7 +116,7 @@ class CRLVerifierTest {
         }
         assertNotNull(crlDistPoints);
         assertEquals(1, crlDistPoints.size());
-        assertEquals("https://api.maritimecloud.net/x509/api/certificates/crl", crlDistPoints.get(0));
+        assertEquals("http://localhost:8888/x509/api/certificates/crl/urn:mrn:mcp:ca:idp1:mcp-idreg", crlDistPoints.get(0));
     }
 
 }

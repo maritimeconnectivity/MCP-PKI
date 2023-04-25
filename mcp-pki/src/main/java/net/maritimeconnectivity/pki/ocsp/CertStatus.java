@@ -26,7 +26,6 @@ package net.maritimeconnectivity.pki.ocsp;
 //package org.poreid.verify.ocsp;
 
 /**
- *
  * @author POReID
  */
 public enum CertStatus {

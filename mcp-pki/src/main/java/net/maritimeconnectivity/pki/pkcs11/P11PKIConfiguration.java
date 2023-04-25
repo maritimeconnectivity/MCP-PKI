@@ -43,13 +43,14 @@ public class P11PKIConfiguration extends PKIConfiguration {
     @Getter
     private final char[] pkcs11Pin;
 
-    private boolean loggedIn;
+    private boolean loggedIn = false;
+
+    private final PasswordHandler passwordHandler;
 
     /**
-     *
-     * @param rootCAAlias       the alias for the root CA that should be used
-     * @param pkcs11ConfigPath  the path of the PKCS#11 configuration file
-     * @param pkcs11Pin         the pin that should be used for logging in to the HSM
+     * @param rootCAAlias      the alias for the root CA that should be used
+     * @param pkcs11ConfigPath the path of the PKCS#11 configuration file
+     * @param pkcs11Pin        the pin that should be used for logging in to the HSM
      */
     public P11PKIConfiguration(@NonNull String rootCAAlias, String pkcs11ConfigPath, String pkcs11Pin) {
         super(rootCAAlias);
@@ -72,14 +73,13 @@ public class P11PKIConfiguration extends PKIConfiguration {
         } else {
             this.pkcs11Pin = pkcs11Pin.toCharArray();
         }
-        this.loggedIn = false;
+        this.passwordHandler = new PasswordHandler(this.pkcs11Pin);
     }
 
     /**
-     *
-     * @param rootCAAlias       the alias for the root CA that should be used
-     * @param pkcs11ConfigPath  the path of the PKCS#11 configuration file
-     * @param pkcs11Pin         the pin that should be used for logging in to the HSM
+     * @param rootCAAlias      the alias for the root CA that should be used
+     * @param pkcs11ConfigPath the path of the PKCS#11 configuration file
+     * @param pkcs11Pin        the pin that should be used for logging in to the HSM
      */
     public P11PKIConfiguration(@NonNull String rootCAAlias, String pkcs11ConfigPath, char[] pkcs11Pin) {
         super(rootCAAlias);
@@ -92,13 +92,17 @@ public class P11PKIConfiguration extends PKIConfiguration {
         // If pkcs11Pin is null the user will be prompted to input it in the console
         if (pkcs11Pin == null) {
             Console console = System.console();
-            log.error("Please input HSM slot pin: ");
-            this.pkcs11Pin = console.readPassword();
-            console.flush();
+            if (console != null) {
+                log.error("Please input HSM slot pin: ");
+                this.pkcs11Pin = console.readPassword();
+                console.flush();
+            } else {
+                throw new PKIRuntimeException("Could not get a system console");
+            }
         } else {
             this.pkcs11Pin = pkcs11Pin;
         }
-        this.loggedIn = false;
+        this.passwordHandler = new PasswordHandler(this.pkcs11Pin);
     }
 
     /**
@@ -109,7 +113,7 @@ public class P11PKIConfiguration extends PKIConfiguration {
             return;
         }
         try {
-            provider.login(null, new PasswordHandler(pkcs11Pin));
+            provider.login(null, passwordHandler);
             loggedIn = true;
         } catch (LoginException e) {
             throw new PKIRuntimeException(e.getMessage(), e);

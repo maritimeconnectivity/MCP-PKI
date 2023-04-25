@@ -81,28 +81,18 @@ public class Revocation {
      * @return The int value associated with the revocation status
      */
     public static int getCRLReasonFromString(String certReason) {
-        switch (certReason) {
-            case "keycompromise":
-                return CRLReason.keyCompromise;
-            case "cacompromise":
-                return CRLReason.cACompromise;
-            case "affiliationchanged":
-                return CRLReason.affiliationChanged;
-            case "superseded":
-                return CRLReason.superseded;
-            case "cessationofoperation":
-                return CRLReason.cessationOfOperation;
-            case "certificatehold":
-                return CRLReason.certificateHold;
-            case "removefromcrl":
-                return CRLReason.removeFromCRL;
-            case "privilegewithdrawn":
-                return CRLReason.privilegeWithdrawn;
-            case "aacompromise":
-                return CRLReason.aACompromise;
-            default:
-                return CRLReason.unspecified;
-        }
+        return switch (certReason) {
+            case "keycompromise" -> CRLReason.keyCompromise;
+            case "cacompromise" -> CRLReason.cACompromise;
+            case "affiliationchanged" -> CRLReason.affiliationChanged;
+            case "superseded" -> CRLReason.superseded;
+            case "cessationofoperation" -> CRLReason.cessationOfOperation;
+            case "certificatehold" -> CRLReason.certificateHold;
+            case "removefromcrl" -> CRLReason.removeFromCRL;
+            case "privilegewithdrawn" -> CRLReason.privilegeWithdrawn;
+            case "aacompromise" -> CRLReason.aACompromise;
+            default -> CRLReason.unspecified;
+        };
     }
 
     /**
@@ -132,8 +122,7 @@ public class Revocation {
         }
 
         JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder(SIGNER_ALGORITHM);
-        if (pkiConfiguration instanceof P11PKIConfiguration) {
-            P11PKIConfiguration p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
+        if (pkiConfiguration instanceof P11PKIConfiguration p11PKIConfiguration) {
             signBuilder.setProvider(p11PKIConfiguration.getProvider());
         } else {
             signBuilder.setProvider(BC_PROVIDER_NAME);
@@ -206,7 +195,7 @@ public class Revocation {
         String pemCrl;
         try {
             pemCrl = getPemFromEncoded("X509 CRL", crl.getEncoded());
-        } catch (CRLException e) {
+        } catch (CRLException | IOException e) {
             log.error("unable to generate Root CA CRL", e);
             return;
         }
@@ -270,6 +259,8 @@ public class Revocation {
      * @param request   The incoming request.
      * @param publicKey Public key of the issuer.
      * @return a BasicOCSPRespBuilder
+     * @throws OCSPException             if an OCSP response builder could not be built
+     * @throws OperatorCreationException if a hash digest builder could not be built
      */
     public static BasicOCSPRespBuilder initOCSPRespBuilder(OCSPReq request, PublicKey publicKey) throws OCSPException, OperatorCreationException {
         SubjectPublicKeyInfo keyinfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
@@ -291,6 +282,10 @@ public class Revocation {
      * @param signingCert         PrivateKeyEntry of the signing certificate.
      * @param p11PKIConfiguration A P11PKIConfiguration. Can be null
      * @return a OCSPResp
+     * @throws OCSPException                if an OCSP response builder could not be built
+     * @throws IOException                  if the received certificate is corrupted or incorrect
+     * @throws OperatorCreationException    if a signature builder could not be built
+     * @throws CertificateEncodingException if an encoding error occurs
      */
     public static OCSPResp generateOCSPResponse(BasicOCSPRespBuilder respBuilder, KeyStore.PrivateKeyEntry signingCert, P11PKIConfiguration p11PKIConfiguration) throws OCSPException, IOException, OperatorCreationException, CertificateEncodingException {
         try {
@@ -312,7 +307,7 @@ public class Revocation {
                 p11PKIConfiguration.providerLogout();
             }
             return ocspResp;
-        } catch (CertificateEncodingException e) {
+        } catch (CertificateEncodingException | OCSPException | OperatorCreationException e) {
             // If an exception is thrown we need to first catch it, logout of the PKCS#11 provider if we use one
             // and then throw the exception again
             if (p11PKIConfiguration != null) {

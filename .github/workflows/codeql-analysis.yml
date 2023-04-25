@@ -26,17 +26,17 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'java' ]
-        java: [11, 17]
+        java: [17]
         # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python' ]
         # Learn more:
         # https://docs.github.com/en/free-pro-team@latest/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#changing-the-languages-that-are-analyzed
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
         
     - name: Setup Java JDK ${{ matrix.java }}
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v3
       with:
         java-version: ${{ matrix.java }}
         distribution: 'temurin'

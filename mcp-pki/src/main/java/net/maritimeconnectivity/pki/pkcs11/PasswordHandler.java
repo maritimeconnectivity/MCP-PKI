@@ -33,8 +33,7 @@ public class PasswordHandler implements CallbackHandler {
     @Override
     public void handle(Callback[] callbacks) {
         for (Callback callback : callbacks) {
-            if (callback instanceof PasswordCallback) {
-                PasswordCallback passwordCallback = (PasswordCallback) callback;
+            if (callback instanceof PasswordCallback passwordCallback) {
                 passwordCallback.setPassword(password);
             }
         }

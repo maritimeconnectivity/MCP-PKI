@@ -70,7 +70,6 @@ import java.util.Date;
 import java.util.Optional;
 
 /**
- *
  * @author POReID
  */
 public class OCSPClient {
@@ -110,8 +109,8 @@ public class OCSPClient {
                 byte[] encoded = JcaX509ExtensionUtils.parseExtensionValue(octetBytes).getEncoded();
                 ASN1Sequence seq = ASN1Sequence.getInstance(ASN1Primitive.fromByteArray(encoded));
                 AuthorityInformationAccess access = AuthorityInformationAccess.getInstance(seq);
-                for (AccessDescription accessDescription : access.getAccessDescriptions()){
-                    if (accessDescription.getAccessMethod().equals(AccessDescription.id_ad_ocsp)){
+                for (AccessDescription accessDescription : access.getAccessDescriptions()) {
+                    if (accessDescription.getAccessMethod().equals(AccessDescription.id_ad_ocsp)) {
                         url = new URL(accessDescription.getAccessLocation().getName().toString());
                         break;
                     }
@@ -123,7 +122,7 @@ public class OCSPClient {
     }
 
 
-    public Optional<RevokedStatus> getRevokedStatus(){
+    public Optional<RevokedStatus> getRevokedStatus() {
         return Optional.ofNullable(revokedStatus);
     }
 
@@ -150,7 +149,7 @@ public class OCSPClient {
             InputStream in = (InputStream) httpConnection.getContent();
 
             if (httpConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                throw new OCSPValidationException("Received HTTP code != 200 ["+httpConnection.getResponseCode()+"]");
+                throw new OCSPValidationException("Received HTTP code != 200 [" + httpConnection.getResponseCode() + "]");
             }
 
             OCSPResp ocspResponse = new OCSPResp(in);
@@ -162,24 +161,24 @@ public class OCSPClient {
             }
 
             X509CertificateHolder certHolder = basicResponse.getCerts()[0];
-            if (!basicResponse.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(issuer))){
-                if (!certHolder.isValidOn(Date.from(Instant.now()))){
+            if (!basicResponse.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(issuer))) {
+                if (!certHolder.isValidOn(Date.from(Instant.now()))) {
                     throw new OCSPValidationException("Certificate is not valid today!");
                 }
                 // Certificate must have a Key Purpose ID for authorized responders
-                if (!ExtendedKeyUsage.fromExtensions(certHolder.getExtensions()).hasKeyPurposeId(KeyPurposeId.id_kp_OCSPSigning)){
+                if (!ExtendedKeyUsage.fromExtensions(certHolder.getExtensions()).hasKeyPurposeId(KeyPurposeId.id_kp_OCSPSigning)) {
                     throw new OCSPValidationException("Certificate does not contain required extension (id_kp_OCSPSigning)");
                 }
                 // Certificate must be issued by the same CA of the certificate that we are verifying
-                if (!certHolder.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(issuer))){
+                if (!certHolder.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(issuer))) {
                     throw new OCSPValidationException("Certificate is not signed by the same issuer");
                 }
                 // Validate signature in OCSP response
-                if (!basicResponse.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(certHolder))){
+                if (!basicResponse.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(certHolder))) {
                     throw new OCSPValidationException("Could not validate OCSP response!");
                 }
             } else {
-                if (!certHolder.isValidOn(Date.from(Instant.now()))){
+                if (!certHolder.isValidOn(Date.from(Instant.now()))) {
                     throw new OCSPValidationException("Certificate is not valid today!");
                 }
             }
@@ -191,8 +190,8 @@ public class OCSPClient {
                     return CertStatus.GOOD;
                 } else {
 
-                    if (status instanceof RevokedStatus) {
-                        revokedStatus = (RevokedStatus) status;
+                    if (status instanceof RevokedStatus revStatus) {
+                        revokedStatus = revStatus;
                         return CertStatus.REVOKED;
                     } else {
                         return CertStatus.UNKNOWN;

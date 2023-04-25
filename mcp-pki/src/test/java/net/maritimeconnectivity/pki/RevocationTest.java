@@ -29,7 +29,6 @@ import java.security.SignatureException;
 import java.security.cert.CRLException;
 import java.security.cert.CRLReason;
 import java.security.cert.X509CRL;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -59,14 +58,15 @@ class RevocationTest {
         KeystoreHandler kh = new KeystoreHandler(pkiConf);
 
         // Generate the CRL
-        KeyStore.PrivateKeyEntry keyEntry = kh.getSigningCertEntry("urn:mrn:mcl:ca:maritimecloud-idreg");
+        KeyStore.PrivateKeyEntry keyEntry = kh.getSigningCertEntry("urn:mrn:mcp:ca:idp1:mcp-idreg");
         X509CRL crl = Revocation.generateCRL(infos, keyEntry, null);
         assertNotNull(crl);
 
         // Verify that the CRL was signed
         try {
             crl.verify(keyEntry.getCertificate().getPublicKey());
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | SignatureException | InvalidKeyException | CRLException e) {
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | SignatureException | InvalidKeyException |
+                 CRLException e) {
             e.printStackTrace();
             fail(e);
         }

@@ -47,7 +47,7 @@ public class PKIConfiguration {
     @NonNull
     private String rootCAAlias;
 
-    public PKIConfiguration(@NonNull String rootCAAlias){
+    public PKIConfiguration(@NonNull String rootCAAlias) {
         this.rootCAAlias = rootCAAlias;
     }
 

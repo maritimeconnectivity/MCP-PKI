@@ -88,8 +88,8 @@ public class CertificateHandler {
      * complete chain.
      *
      * @param verificationPubKey Public key of the issuing certificate
-     * @param certToVerify The certificate to verify
-     * @param verificationDate Date the certificate must be valid. If null the present day is used.
+     * @param certToVerify       The certificate to verify
+     * @param verificationDate   Date the certificate must be valid. If null the present day is used.
      * @return true if valid else false
      */
     public static boolean verifyCertificate(PublicKey verificationPubKey, X509Certificate certToVerify, Date verificationDate) {
@@ -126,8 +126,7 @@ public class CertificateHandler {
             }
             if (verificationDate.after(certToVerify.getNotBefore()) && verificationDate.before(certToVerify.getNotAfter())) {
                 return true;
-            }
-            else {
+            } else {
                 log.debug("Out of certificate validity period.");
                 return false;
             }
@@ -142,13 +141,13 @@ public class CertificateHandler {
      * CertPathValidatorException is thrown. Checks certificate validity and revocation status.
      *
      * @param certificate The certificate to verify
-     * @param ks The truststore that contains the trust chain
+     * @param ks          The truststore that contains the trust chain
      * @return true if valid.
-     * @throws KeyStoreException if keystore loading fails
-     * @throws NoSuchAlgorithmException if PKIX initialization fails
-     * @throws CertificateException if certificate cannot be loaded
+     * @throws KeyStoreException                  if keystore loading fails
+     * @throws NoSuchAlgorithmException           if PKIX initialization fails
+     * @throws CertificateException               if certificate cannot be loaded
      * @throws InvalidAlgorithmParameterException if keystore loading fails
-     * @throws CertPathValidatorException if certificate is invalid.
+     * @throws CertPathValidatorException         if certificate is invalid.
      */
     public static boolean verifyCertificateChain(X509Certificate certificate, KeyStore ks) throws KeyStoreException,
             NoSuchAlgorithmException, CertificateException, InvalidAlgorithmParameterException, CertPathValidatorException {
@@ -159,36 +158,33 @@ public class CertificateHandler {
 
         // Create validator and revocation checker
         CertPathValidator validator = CertPathValidator.getInstance("PKIX");
-        PKIXRevocationChecker rc = (PKIXRevocationChecker)validator.getRevocationChecker();
+        PKIXRevocationChecker rc = (PKIXRevocationChecker) validator.getRevocationChecker();
         rc.setOptions(EnumSet.of(PKIXRevocationChecker.Option.SOFT_FAIL));
         PKIXParameters pkixp = new PKIXParameters(ks);
         pkixp.addCertPathChecker(rc);
         pkixp.setRevocationEnabled(true);
 
         // Do the actual validation!
-        PKIXCertPathValidatorResult pcpvr = (PKIXCertPathValidatorResult)validator.validate(certPath, pkixp);
+        PKIXCertPathValidatorResult pcpvr = (PKIXCertPathValidatorResult) validator.validate(certPath, pkixp);
         return (pcpvr != null);
     }
 
     /**
      * Convert a cert/key to PEM from "encoded" format (byte[])
      *
-     * @param type The type, currently "CERTIFICATE", "PUBLIC KEY", "PRIVATE KEY" or "X509 CRL" are used
+     * @param type    The type, currently "CERTIFICATE", "PUBLIC KEY", "PRIVATE KEY" or "X509 CRL" are used
      * @param encoded The encoded byte[]
      * @return The PEM formatted cert/key
+     * @throws IOException if the given byte array could not be formatted as PEM
      */
-    public static String getPemFromEncoded(String type, byte[] encoded) {
+    public static String getPemFromEncoded(String type, byte[] encoded) throws IOException {
         String pemFormat = "";
         // Write certificate to PEM
-        StringWriter perStrWriter = new StringWriter();
-        PemWriter pemWrite = new PemWriter(perStrWriter);
-        try {
-            pemWrite.writeObject(new PemObject(type, encoded));
-            pemWrite.flush();
-            pemFormat = perStrWriter.toString();
-            pemWrite.close();
-        } catch (IOException e) {
-            throw new PKIRuntimeException(e);
+        StringWriter stringWriter = new StringWriter();
+        try (PemWriter pemWriter = new PemWriter(stringWriter)) {
+            pemWriter.writeObject(new PemObject(type, encoded));
+            pemWriter.flush();
+            pemFormat = stringWriter.toString();
         }
         return pemFormat;
     }
@@ -196,10 +192,10 @@ public class CertificateHandler {
     /**
      * Place a cert/key in a PKCS12 or JKS keystore
      *
-     * @param type The keystore type to use (PKCS12 or JKS)
-     * @param alias The alias of the certificate in the keystore
-     * @param password The password used to protect the key
-     * @param privateKey Private key of the certificate
+     * @param type        The keystore type to use (PKCS12 or JKS)
+     * @param alias       The alias of the certificate in the keystore
+     * @param password    The password used to protect the key
+     * @param privateKey  Private key of the certificate
      * @param certificate The certificate
      * @return Byte array of the p12 keystore.
      */
@@ -217,7 +213,8 @@ public class CertificateHandler {
             ks.setKeyEntry(alias, privateKey, password.toCharArray(), new java.security.cert.Certificate[]{certificate});
             ks.store(bos, password.toCharArray());
             return bos.toByteArray();
-        } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | NoSuchProviderException e) {
+        } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException |
+                 NoSuchProviderException e) {
             throw new PKIRuntimeException(e);
         }
     }
@@ -296,7 +293,7 @@ public class CertificateHandler {
         String lastName = "";
         String firstName = "";
         if (name != null && name.split("\\w +\\w").length > 1) {
-            lastName = name.substring(name.lastIndexOf(' ')+1);
+            lastName = name.substring(name.lastIndexOf(' ') + 1);
             firstName = name.substring(0, name.lastIndexOf(' '));
         } else {
             firstName = name;
@@ -336,40 +333,18 @@ public class CertificateHandler {
                     }
                     log.debug("oid: " + oid + ", value: " + value);
                     switch (oid) {
-                        case PKIConstants.MC_OID_FLAGSTATE:
-                            identity.setFlagState(value);
-                            break;
-                        case PKIConstants.MC_OID_CALLSIGN:
-                            identity.setCallSign(value);
-                            break;
-                        case PKIConstants.MC_OID_IMO_NUMBER:
-                            identity.setImoNumber(value);
-                            break;
-                        case PKIConstants.MC_OID_MMSI_NUMBER:
-                            identity.setMmsiNumber(value);
-                            break;
-                        case PKIConstants.MC_OID_AIS_SHIPTYPE:
-                            identity.setAisShipType(value);
-                            break;
-                        case PKIConstants.MC_OID_PORT_OF_REGISTER:
-                            identity.setPortOfRegister(value);
-                            break;
-                        case PKIConstants.MC_OID_MRN: // primary MRN
-                            identity.setMrn(value);
-                            break;
-                        case PKIConstants.MC_OID_MRN_SUBSIDIARY:
-                            identity.setMrnSubsidiary(value);
-                            break;
-                        case PKIConstants.MC_OID_HOME_MMS_URL:
-                            identity.setHomeMmsUrl(value);
-                            break;
-                        case PKIConstants.MC_OID_SHIP_MRN:
-                            identity.setShipMrn(value);
-                            break;
-                        case PKIConstants.MC_OID_URL:
-                            identity.setUrl(value);
-                            break;
-                        case PKIConstants.MC_OID_PERMISSIONS:
+                        case PKIConstants.MC_OID_FLAGSTATE -> identity.setFlagState(value);
+                        case PKIConstants.MC_OID_CALLSIGN -> identity.setCallSign(value);
+                        case PKIConstants.MC_OID_IMO_NUMBER -> identity.setImoNumber(value);
+                        case PKIConstants.MC_OID_MMSI_NUMBER -> identity.setMmsiNumber(value);
+                        case PKIConstants.MC_OID_AIS_SHIPTYPE -> identity.setAisShipType(value);
+                        case PKIConstants.MC_OID_PORT_OF_REGISTER -> identity.setPortOfRegister(value);
+                        case PKIConstants.MC_OID_MRN -> identity.setMrn(value); // primary MRN
+                        case PKIConstants.MC_OID_MRN_SUBSIDIARY -> identity.setMrnSubsidiary(value);
+                        case PKIConstants.MC_OID_HOME_MMS_URL -> identity.setHomeMmsUrl(value);
+                        case PKIConstants.MC_OID_SHIP_MRN -> identity.setShipMrn(value);
+                        case PKIConstants.MC_OID_URL -> identity.setUrl(value);
+                        case PKIConstants.MC_OID_PERMISSIONS -> {
                             if (!value.trim().isEmpty()) {
                                 if (permissions.length() == 0) {
                                     permissions = new StringBuilder(value);
@@ -377,10 +352,8 @@ public class CertificateHandler {
                                     permissions.append(',').append(value);
                                 }
                             }
-                            break;
-                        default:
-                            log.error("Unknown OID!");
-                            break;
+                        }
+                        default -> log.error("Unknown OID!");
                     }
                 } else {
                     // Other types are not supported so ignore them
@@ -421,18 +394,19 @@ public class CertificateHandler {
      * @return the value of the identifier, or null if not found.
      */
     public static String getElement(X500Name x500name, ASN1ObjectIdentifier objectId) {
-        try {
-            RDN cn = x500name.getRDNs(objectId)[0];
-            return valueToString(cn.getFirst().getValue());
-        } catch (ArrayIndexOutOfBoundsException e) {
-            return null;
+        if (x500name != null && objectId != null) {
+            RDN[] rdns = x500name.getRDNs(objectId);
+            if (rdns != null && rdns.length > 0) {
+                return valueToString(rdns[0].getFirst().getValue());
+            }
         }
+        return null;
     }
 
     /**
      * Extract a value from the DN extracted from a certificate
      *
-     * @param rdns The full DN from certificate
+     * @param rdns     The full DN from certificate
      * @param objectId The Identifier to find
      * @return the value of the identifier, or null if not found.
      */
