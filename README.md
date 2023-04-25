@@ -38,12 +38,12 @@ Here the parameter "urn:mrn:mcp:ca:idp1:maritimeconnectivity" states the *root-c
 ## Commandline interface
 The secondary function of this software is to provide a (relatively) easy to use interface for the PKI manager. How to use is will be described below.
 
-If you have build using maven you should now have a `mcp-pki-cli-2.0.0-SNAPSHOT.jar` and a `mcp-pki-cli-2.0.0-SNAPSHOT-jar-with-dependencies.jar` (or similar) in the `target` folders. It is the latter we will be using since it can easily be run from the commandline.
+If you have build using maven you should now have a `mcp-pki-cli-1.2.0-SNAPSHOT.jar` and a `mcp-pki-cli-1.2.0-SNAPSHOT-jar-with-dependencies.jar` (or similar) in the `target` folders. It is the latter we will be using since it can easily be run from the commandline.
 
 ### Initializing the PKI
 To use the PKI we must first initialize it, which means create a root Certificate Authority (CA). This can be done with this command:
 ```sh
-java -jar mcp-pki-cli-2.0.0-SNAPSHOT-jar-with-dependencies.jar \
+java -jar mcp-pki-cli-1.2.0-SNAPSHOT-jar-with-dependencies.jar \
     --init \
     --truststore-path mcp-truststore.jks \
     --truststore-password changeit \
@@ -62,7 +62,7 @@ Change the passwords as you see fit.
 ### Create root Certificate Revocation List
 We must also create a root Certificate Revocation List to be able to tell if any sub CA has been revoked. This can be done with this command: 
 ```sh
-java -jar mcp-pki-cli-2.0.0-SNAPSHOT-jar-with-dependencies.jar \
+java -jar mcp-pki-cli-1.2.0-SNAPSHOT-jar-with-dependencies.jar \
     --generate-root-crl \
     --root-keystore-path root-ca-keystore.jks \
     --root-keystore-password changeit \
@@ -86,7 +86,7 @@ Remember to keep the list of revoked sub ca. Each time a new sub CA is revoked y
 ### Create sub CA
 Create a sub CA like this:
 ```sh
-java -jar mcp-pki-cli-2.0.0-SNAPSHOT-jar-with-dependencies.jar \
+java -jar mcp-pki-cli-1.2.0-SNAPSHOT-jar-with-dependencies.jar \
     --create-subca \
     --root-keystore-path root-ca-keystore.jks \
     --root-keystore-password changeit \
@@ -107,7 +107,7 @@ The UID will be used as alias when stored in the truststore and subca-keystore. 
 ### Checking client certificate
 You can check the attributes of an MCP client certificate like this:
 ```sh
-java -jar mcp-pki-cli-2.0.0-SNAPSHOT-jar-with-dependencies.jar --print-certificate <certificate-name>.pem
+java -jar mcp-pki-cli-1.2.0-SNAPSHOT-jar-with-dependencies.jar --print-certificate <certificate-name>.pem
 ```
 
 Alternatively the [Identity Extractor Service](https://github.com/maritimeconnectivity/IdentityExtractorService) which is an implementation of a web service visualizing the MCP certificate is available.
