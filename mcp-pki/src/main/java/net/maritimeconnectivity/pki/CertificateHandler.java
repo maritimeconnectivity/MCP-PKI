@@ -289,6 +289,18 @@ public class CertificateHandler {
         identity.setOu(getElement(rdns, BCStyle.OU));
         identity.setCountry(getElement(rdns, BCStyle.C));
         identity.setEmail(getElement(rdns, BCStyle.EmailAddress));
+
+        if (certDN.contains("1.2.840.113549.1.9.1")) {
+            String[] parts = certDN.split(",");
+            for (int i = 0; i < parts.length; i++) {
+                if (parts[i].startsWith("1.2.840.113549.1.9.1")) {
+                    parts[i] = String.format("E=%s", identity.getEmail());
+                    break;
+                }
+            }
+            identity.setDn(String.join(",", parts));
+        }
+
         // Extract first and last name from full name
         String lastName = "";
         String firstName = "";

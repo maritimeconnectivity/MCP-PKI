@@ -284,6 +284,8 @@ class CertificateHandlerTest {
         PKIIdentity identity = CertificateHandler.getIdentityFromCert(cert);
         assertNotNull(identity);
         assertEquals("info+test@maritimeconnectivity.net", identity.getEmail());
+
+        assertEquals("E=info+test@maritimeconnectivity.net,UID=urn:mrn:mcp:user:mcc-test:core:test,CN=Test Test,OU=user,O=urn:mrn:mcp:org:mcc-test:core,C=DK", identity.getDn());
     }
 
 }
