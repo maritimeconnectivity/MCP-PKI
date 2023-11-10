@@ -6,7 +6,7 @@
 
 This is a library / cmdline tool used to manage and check certificates in the MCP Public Key Infrastructure (PKI).
 
-Building using maven should be as simple as running `mvn install`.
+Building using maven should be as simple as running `mvn install` under the assumption you have Java 17 installed already.
 
 Maritime Connectivity Platform is formerly known as the Maritime Cloud and therefore there might still be references to that in this project.  
 
