@@ -43,8 +43,6 @@ public class P11PKIConfiguration extends PKIConfiguration {
     @Getter
     private final char[] pkcs11Pin;
 
-    private boolean loggedIn = false;
-
     private final PasswordHandler passwordHandler;
 
     /**
@@ -109,12 +107,8 @@ public class P11PKIConfiguration extends PKIConfiguration {
      * Login to the HSM
      */
     public void providerLogin() {
-        if (loggedIn) {
-            return;
-        }
         try {
             provider.login(null, passwordHandler);
-            loggedIn = true;
         } catch (LoginException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
         }
@@ -124,12 +118,8 @@ public class P11PKIConfiguration extends PKIConfiguration {
      * Logout from the HSM
      */
     public void providerLogout() {
-        if (!loggedIn) {
-            return;
-        }
         try {
             provider.logout();
-            loggedIn = false;
         } catch (LoginException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
         }
