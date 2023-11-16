@@ -358,7 +358,7 @@ public class CertificateHandler {
                         case PKIConstants.MC_OID_URL -> identity.setUrl(value);
                         case PKIConstants.MC_OID_PERMISSIONS -> {
                             if (!value.trim().isEmpty()) {
-                                if (permissions.length() == 0) {
+                                if (permissions.isEmpty()) {
                                     permissions = new StringBuilder(value);
                                 } else {
                                     permissions.append(',').append(value);
@@ -372,7 +372,7 @@ public class CertificateHandler {
                     log.warn("SubjectAltName of invalid type found: " + type);
                 }
             }
-            if (permissions.length() > 0) {
+            if (!permissions.isEmpty()) {
                 identity.setPermissions(permissions.toString());
             }
         }
