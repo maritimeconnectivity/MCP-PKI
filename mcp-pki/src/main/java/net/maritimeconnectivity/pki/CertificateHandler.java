@@ -388,13 +388,8 @@ public class CertificateHandler {
     private static ASN1Encodable getBaseObject(ASN1Encodable encoded) {
         // For some weird reason we need to do this 2 times - otherwise we get a
         // ClassCastException when extracting the value.
-        try {
-            encoded = ((ASN1TaggedObject) encoded).getBaseObject();
-            encoded = ((ASN1TaggedObject) encoded).getBaseObject();
-        } catch (NoSuchMethodError e) { // If we are using an older version of Bouncy Castle
-            encoded = ((ASN1TaggedObject) encoded).getObject();
-            encoded = ((ASN1TaggedObject) encoded).getObject();
-        }
+        encoded = ((ASN1TaggedObject) encoded).getBaseObject();
+        encoded = ((ASN1TaggedObject) encoded).getBaseObject();
         return encoded;
     }
 
