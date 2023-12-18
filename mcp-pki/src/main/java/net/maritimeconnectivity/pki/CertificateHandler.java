@@ -386,10 +386,11 @@ public class CertificateHandler {
      * @return the base object
      */
     private static ASN1Encodable getBaseObject(ASN1Encodable encoded) {
-        // For some weird reason we need to do this 2 times - otherwise we get a
+        // For some weird reason we need to do this several times - otherwise we get a
         // ClassCastException when extracting the value.
         encoded = ((ASN1TaggedObject) encoded).getBaseObject();
-        encoded = ((ASN1TaggedObject) encoded).getBaseObject();
+        while (encoded instanceof ASN1TaggedObject asn1TaggedObject && asn1TaggedObject.getBaseObject() != null)
+            encoded = asn1TaggedObject.getBaseObject();
         return encoded;
     }
 
