@@ -300,7 +300,7 @@ public class CertificateBuilder {
         // BigInteger => NUMERICAL(50) MySQL
         // Max number supported in X509 serial number 2^159-1 = 730750818665451459101842416358141509827966271487
         BigInteger maxValue = new BigInteger("730750818665451459101842416358141509827966271487");
-        BigInteger minValue = BigInteger.ZERO;
+        BigInteger minValue = BigInteger.ONE;
         if (pkiConfiguration instanceof P11PKIConfiguration p11PKIConfiguration) {
             try {
                 return BigIntegers.createRandomInRange(minValue, maxValue, SecureRandom.getInstance(PKIConstants.PKCS11, p11PKIConfiguration.getProvider()));
