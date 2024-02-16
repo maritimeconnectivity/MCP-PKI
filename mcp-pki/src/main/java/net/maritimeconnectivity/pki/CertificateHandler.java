@@ -358,7 +358,7 @@ public class CertificateHandler {
                         case PKIConstants.MC_OID_URL -> identity.setUrl(value);
                         case PKIConstants.MC_OID_PERMISSIONS -> {
                             if (!value.trim().isEmpty()) {
-                                if (permissions.length() == 0) {
+                                if (permissions.isEmpty()) {
                                     permissions = new StringBuilder(value);
                                 } else {
                                     permissions.append(',').append(value);
@@ -372,7 +372,7 @@ public class CertificateHandler {
                     log.warn("SubjectAltName of invalid type found: " + type);
                 }
             }
-            if (permissions.length() > 0) {
+            if (!permissions.isEmpty()) {
                 identity.setPermissions(permissions.toString());
             }
         }
@@ -386,15 +386,11 @@ public class CertificateHandler {
      * @return the base object
      */
     private static ASN1Encodable getBaseObject(ASN1Encodable encoded) {
-        // For some weird reason we need to do this 2 times - otherwise we get a
+        // For some weird reason we sometimes need to do this several times - otherwise we get a
         // ClassCastException when extracting the value.
-        try {
-            encoded = ((ASN1TaggedObject) encoded).getBaseObject();
-            encoded = ((ASN1TaggedObject) encoded).getBaseObject();
-        } catch (NoSuchMethodError e) { // If we are using an older version of Bouncy Castle
-            encoded = ((ASN1TaggedObject) encoded).getObject();
-            encoded = ((ASN1TaggedObject) encoded).getObject();
-        }
+        encoded = ((ASN1TaggedObject) encoded).getBaseObject();
+        while (encoded instanceof ASN1TaggedObject asn1TaggedObject && asn1TaggedObject.getBaseObject() != null)
+            encoded = asn1TaggedObject.getBaseObject();
         return encoded;
     }
 
