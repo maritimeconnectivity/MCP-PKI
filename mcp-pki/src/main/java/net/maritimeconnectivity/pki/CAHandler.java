@@ -116,7 +116,7 @@ public class CAHandler {
         }
         try {
             List<String> crlPoints = CRLVerifier.getCrlDistributionPoints((X509Certificate) rootCertEntry.getCertificate());
-            crlUrl = crlPoints.get(0);
+            crlUrl = crlPoints.getFirst();
         } catch (IOException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
         }
@@ -207,7 +207,7 @@ public class CAHandler {
         }
         try {
             List<String> crlPoints = CRLVerifier.getCrlDistributionPoints((X509Certificate) rootCertEntry.getCertificate());
-            crlUrl = crlPoints.get(0);
+            crlUrl = crlPoints.getFirst();
         } catch (IOException e) {
             rootP11PKIConfiguration.providerLogout();
             subCaP11PKIConfiguration.providerLogout();

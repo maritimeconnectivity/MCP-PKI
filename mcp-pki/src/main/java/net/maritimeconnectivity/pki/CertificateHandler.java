@@ -326,7 +326,7 @@ public class CertificateHandler {
             // Use the type OtherName to search for the certified server name
             StringBuilder permissions = new StringBuilder();
             for (List<?> item : san) {
-                Integer type = (Integer) item.get(0);
+                Integer type = (Integer) item.getFirst();
                 if (type == 0) {
                     // Type OtherName found so return the associated value
                     String oid;
