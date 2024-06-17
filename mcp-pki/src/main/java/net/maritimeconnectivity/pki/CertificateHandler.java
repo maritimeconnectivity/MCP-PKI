@@ -312,7 +312,7 @@ public class CertificateHandler {
         }
         identity.setFirstName(firstName);
         identity.setLastName(lastName);
-        log.debug("Parsed certificate, name: " + name);
+        log.debug("Parsed certificate, name: {}", name);
 
         // Extract info from Subject Alternative Name extension
         Collection<List<?>> san = null;
@@ -340,10 +340,10 @@ public class CertificateHandler {
                         encoded = getBaseObject(encoded);
                         value = ((DERUTF8String) encoded).getString();
                     } catch (IOException e) {
-                        log.error("Error decoding subjectAltName" + e.getLocalizedMessage(), e);
+                        log.error("Error decoding subjectAltName{}", e.getLocalizedMessage(), e);
                         continue;
                     }
-                    log.debug("oid: " + oid + ", value: " + value);
+                    log.debug("oid: {}, value: {}", oid, value);
                     switch (oid) {
                         case PKIConstants.MC_OID_FLAGSTATE -> identity.setFlagState(value);
                         case PKIConstants.MC_OID_CALLSIGN -> identity.setCallSign(value);
@@ -369,7 +369,7 @@ public class CertificateHandler {
                     }
                 } else {
                     // Other types are not supported so ignore them
-                    log.warn("SubjectAltName of invalid type found: " + type);
+                    log.warn("SubjectAltName of invalid type found: {}", type);
                 }
             }
             if (!permissions.isEmpty()) {
