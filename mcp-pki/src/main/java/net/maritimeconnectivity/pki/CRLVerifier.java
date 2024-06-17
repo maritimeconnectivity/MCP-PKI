@@ -61,6 +61,8 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.cert.CRLException;
 import java.security.cert.CertificateException;
@@ -137,7 +139,7 @@ public final class CRLVerifier {
      * @throws NamingException      if downloading CRL from ldap fails
      * @throws CRLException         if the retrieved CRL cannot be instantiated as a Java object
      */
-    public static X509CRL downloadCRL(String crlURL) throws IOException, CertificateException, NamingException, CRLException {
+    public static X509CRL downloadCRL(String crlURL) throws IOException, CertificateException, NamingException, CRLException, URISyntaxException {
         if (crlURL.startsWith("http://") || crlURL.startsWith("https://") || crlURL.startsWith("ftp://")) {
             return downloadCRLFromWeb(crlURL);
         } else if (crlURL.startsWith("ldap://")) {
@@ -185,8 +187,8 @@ public final class CRLVerifier {
      * @throws CertificateException if a CertificateFactory cannot be instantiated
      * @throws CRLException         if the retrieved CRL cannot be instantiated as a Java object
      */
-    public static X509CRL downloadCRLFromWeb(String crlURL) throws IOException, CRLException, CertificateException {
-        URL url = new URL(crlURL);
+    public static X509CRL downloadCRLFromWeb(String crlURL) throws IOException, CRLException, CertificateException, URISyntaxException {
+        URL url = URI.create(crlURL).toURL();
         try (InputStream crlStream = url.openStream()) {
             CertificateFactory cf = CertificateFactory.getInstance(PKIConstants.X509);
             return (X509CRL) cf.generateCRL(crlStream);

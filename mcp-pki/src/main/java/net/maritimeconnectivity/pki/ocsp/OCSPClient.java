@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.security.Security;
 import java.security.cert.CertificateEncodingException;
@@ -111,11 +112,12 @@ public class OCSPClient {
                 AuthorityInformationAccess access = AuthorityInformationAccess.getInstance(seq);
                 for (AccessDescription accessDescription : access.getAccessDescriptions()) {
                     if (accessDescription.getAccessMethod().equals(AccessDescription.id_ad_ocsp)) {
-                        url = new URL(accessDescription.getAccessLocation().getName().toString());
+                        url = URI.create(accessDescription.getAccessLocation().getName().toString()).toURL();
                         break;
                     }
                 }
             } catch (IOException ignore) {
+                // ignore exception
             }
         }
         return url;
