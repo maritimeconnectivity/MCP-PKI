@@ -222,7 +222,7 @@ public class CertificateBuilder {
         String orgCountryCode = country;
         String[] locales = Locale.getISOCountries();
         for (String countryCode : locales) {
-            Locale loc = new Locale("", countryCode);
+            Locale loc = Locale.of("", countryCode);
             if (loc.getDisplayCountry(Locale.ENGLISH).equals(orgCountryCode)) {
                 orgCountryCode = loc.getCountry();
                 break;
