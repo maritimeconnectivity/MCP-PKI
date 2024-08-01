@@ -340,7 +340,7 @@ public class CertificateHandler {
                         encoded = getBaseObject(encoded);
                         value = ((DERUTF8String) encoded).getString();
                     } catch (IOException e) {
-                        log.error("Error decoding subjectAltName{}", e.getLocalizedMessage(), e);
+                        log.error("Error decoding subjectAltName: {}", e.getMessage());
                         continue;
                     }
                     log.debug("oid: {}, value: {}", oid, value);
