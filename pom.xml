@@ -18,6 +18,7 @@
         <lombok.version>1.18.34</lombok.version>
         <junit-jupiter.version>5.10.1</junit-jupiter.version>
         <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+        <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
         <skip.signing>true</skip.signing>
         <verbose.delombok>false</verbose.delombok>
     </properties>
@@ -97,7 +98,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>${maven-gpg-plugin.version}</version>
                 <configuration>
                     <skip>${skip.signing}</skip>
                 </configuration>
@@ -207,7 +208,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.1.0</version>
+                        <version>${maven-gpg-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
