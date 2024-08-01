@@ -16,7 +16,7 @@
         <maven.compiler.release>21</maven.compiler.release>
         <slf4j.version>2.0.9</slf4j.version>
         <lombok.version>1.18.34</lombok.version>
-        <junit-jupiter.version>5.10.1</junit-jupiter.version>
+        <junit-jupiter.version>5.10.3</junit-jupiter.version>
         <maven-javadoc-plugin.version>3.8.0</maven-javadoc-plugin.version>
         <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
         <skip.signing>true</skip.signing>
