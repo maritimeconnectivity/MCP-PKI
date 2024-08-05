@@ -187,7 +187,7 @@ public final class CRLVerifier {
      * @throws CertificateException if a CertificateFactory cannot be instantiated
      * @throws CRLException         if the retrieved CRL cannot be instantiated as a Java object
      */
-    public static X509CRL downloadCRLFromWeb(String crlURL) throws IOException, CRLException, CertificateException, URISyntaxException {
+    public static X509CRL downloadCRLFromWeb(String crlURL) throws IOException, CRLException, CertificateException {
         URL url = URI.create(crlURL).toURL();
         try (InputStream crlStream = url.openStream()) {
             CertificateFactory cf = CertificateFactory.getInstance(PKIConstants.X509);

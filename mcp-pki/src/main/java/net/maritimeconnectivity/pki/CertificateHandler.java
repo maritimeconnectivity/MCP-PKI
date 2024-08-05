@@ -224,9 +224,8 @@ public class CertificateHandler {
      *
      * @param certificateHeader The header containing the certificate
      * @return The extracted certificate. Returns null on failure.
-     * @throws UnsupportedEncodingException if given certificate cannot be URL decoded
      */
-    public static X509Certificate getCertFromNginxHeader(String certificateHeader) throws UnsupportedEncodingException {
+    public static X509Certificate getCertFromNginxHeader(String certificateHeader) {
         String certificateContent = URLDecoder.decode(certificateHeader, StandardCharsets.UTF_8);
         // make sure that the + characters in the base64 encoded part have not been converted to spaces
         if (certificateContent.startsWith(PKIConstants.CERT_HEADER) && certificateContent.contains(PKIConstants.CERT_FOOTER)) {
