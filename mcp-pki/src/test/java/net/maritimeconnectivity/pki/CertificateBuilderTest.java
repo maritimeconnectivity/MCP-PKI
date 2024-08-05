@@ -19,15 +19,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class CertificateBuilderTest {
 
-    private PKIConfiguration pkiConf;
-
     private KeystoreHandler kh;
 
     private CertificateBuilder cb;
 
     @BeforeEach
     void setUp() {
-        pkiConf = new PKIConfiguration(TestUtils.getRootCAAlias());
+        PKIConfiguration pkiConf = new PKIConfiguration(TestUtils.getRootCAAlias());
         pkiConf.setTruststorePassword("changeit");
         pkiConf.setTruststorePath("src/test/resources/ca/mcp-truststore.jks");
         pkiConf.setSubCaKeystorePath("src/test/resources/ca/subca-keystore.jks");
@@ -54,8 +52,7 @@ class CertificateBuilderTest {
         try {
             userCert = cb.generateCertForEntity(BigInteger.ONE, "DK", "urn:mrn:mcl:org:dma", "user", "Thomas Christensen", "thc@dma.dk", userMrn, validityPeriod, certKeyPair.getPublic(), attrs, signingAlias, baseCrlOcspPath, null);
         } catch (Exception e) {
-            e.printStackTrace();
-            fail("An exception was thrown!");
+            fail("An exception was thrown!", e);
             return;
         }
         assertNotNull(userCert);
@@ -91,8 +88,7 @@ class CertificateBuilderTest {
             // include reserved characters in some of the attributes
             userCert = cb.generateCertForEntity(BigInteger.ONE, "DK", "urn:mrn:mcl:org:dma", "user", "#Thomas Christensen, extra content ", "thc+bla@dma.dk", userMrn, validityPeriod, certKeyPair.getPublic(), attrs, signingAlias, baseCrlOcspPath, null);
         } catch (Exception e) {
-            e.printStackTrace();
-            fail("An exception was thrown!");
+            fail("An exception was thrown!", e);
             return;
         }
         assertNotNull(userCert);
