@@ -51,27 +51,7 @@ public class P11PKIConfiguration extends PKIConfiguration {
      * @param pkcs11Pin        the pin that should be used for logging in to the HSM
      */
     public P11PKIConfiguration(@NonNull String rootCAAlias, String pkcs11ConfigPath, String pkcs11Pin) {
-        super(rootCAAlias);
-        Provider p = Security.getProvider("SunPKCS11");
-        p = p.configure(pkcs11ConfigPath);
-        AuthProvider authProvider = (AuthProvider) p;
-        Security.addProvider(authProvider);
-        this.provider = authProvider;
-        this.pkcs11ProviderName = authProvider.getName();
-        // If pkcs11Pin is null the user will be prompted to input it in the console
-        if (pkcs11Pin == null) {
-            Console console = System.console();
-            if (console != null) {
-                log.error("Please input HSM slot pin: ");
-                this.pkcs11Pin = console.readPassword();
-                console.flush();
-            } else {
-                throw new PKIRuntimeException("Could not get a system console");
-            }
-        } else {
-            this.pkcs11Pin = pkcs11Pin.toCharArray();
-        }
-        this.passwordHandler = new PasswordHandler(this.pkcs11Pin);
+        this(rootCAAlias, pkcs11ConfigPath, pkcs11Pin == null ? null : pkcs11Pin.toCharArray());
     }
 
     /**
