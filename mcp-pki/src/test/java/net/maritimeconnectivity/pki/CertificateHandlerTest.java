@@ -25,7 +25,6 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
@@ -232,12 +231,7 @@ class CertificateHandlerTest {
     @Test
     void getCertFromNginxHeader() {
         String nginxFormatedPemCert = TestUtils.loadTxtFile("src/test/resources/thc-cert-nginx-format.pem");
-        X509Certificate cert = null;
-        try {
-            cert = CertificateHandler.getCertFromNginxHeader(nginxFormatedPemCert);
-        } catch (UnsupportedEncodingException e) {
-            fail("Could not decode certificate", e);
-        }
+        X509Certificate cert = CertificateHandler.getCertFromNginxHeader(nginxFormatedPemCert);
         assertNotNull(cert);
         assertEquals("EMAILADDRESS=thc@dma.dk, UID=urn:mrn:mcl:user:dma:thc, CN=Thomas Christensen, OU=user, O=urn:mrn:mcl:org:dma, C=DK", cert.getSubjectDN().getName());
     }
