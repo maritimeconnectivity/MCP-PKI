@@ -233,8 +233,8 @@ public class Revocation {
         certificateStatusMap.forEach(respBuilder::addResponse);
 
         P11PKIConfiguration p11PKIConfiguration = null;
-        if (pkiConfiguration instanceof P11PKIConfiguration) {
-            p11PKIConfiguration = (P11PKIConfiguration) pkiConfiguration;
+        if (pkiConfiguration instanceof P11PKIConfiguration tmp) {
+            p11PKIConfiguration = tmp;
             p11PKIConfiguration.providerLogin();
         }
 
