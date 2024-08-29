@@ -6,7 +6,7 @@
 
 This is a library / cmdline tool used to manage and check certificates in the MCP Public Key Infrastructure (PKI).
 
-Building using maven should be as simple as running `mvn install` under the assumption you have Java 17 installed already.
+Building using maven should be as simple as running `mvn install` under the assumption you have Java 21 installed already.
 
 Maritime Connectivity Platform is formerly known as the Maritime Cloud and therefore there might still be references to that in this project.  
 
@@ -17,7 +17,7 @@ The primary function of this software is to make it easy/easier to use the MCP P
 
 There is javadocs available here: <https://maritimeconnectivity.github.io/MCP-PKI/apidocs/>
 
-Use PKIConfiguration for setting up configuration about Keystore and/or Truststore, use KeystoreHandler to load them and the you most like want to use CertificateHandler to, well, handle certificates...
+Use PKIConfiguration for setting up configuration about Keystore and/or Truststore, use KeystoreHandler to load them and then you most like want to use CertificateHandler to, well, handle certificates...
 
 A short example of use can be seen below:
 ```java
@@ -119,7 +119,7 @@ This project includes code from the Apache Xcf project (Apache License, Version 
 
 
 ## Building
-Building the project requires that JDK (>=11) and Maven (>=v3.6.3) are installed on the system. The project can then be built like this:
+Building the project requires that JDK (>=21) and Maven (>=v3.6.3) are installed on the system. The project can then be built like this:
 ```sh
 mvn clean install
 ```
