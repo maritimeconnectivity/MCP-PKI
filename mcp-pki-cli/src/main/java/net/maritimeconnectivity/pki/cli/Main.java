@@ -269,7 +269,7 @@ public class Main {
             CertificateHandler.verifyCertificateChain(cert, keystoreHandler.getTrustStore());
             log.info("Certificate is valid!");
         } catch (Exception e) {
-            log.error("Certificate is not valid!\n" + e);
+            log.error("Certificate is not valid!", e);
             return;
         }
         PKIIdentity identity = CertificateHandler.getIdentityFromCert(cert);
