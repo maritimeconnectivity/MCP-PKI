@@ -15,7 +15,7 @@ MCP-PKI implements the *certificate attributes* described in [the developer's pa
 ## Using the lib
 The primary function of this software is to make it easy/easier to use the MCP PKI for (Java) developers. 
 
-There is javadocs available here: <https://maritimeconnectivity.github.io/MCP-PKI/apidocs/>
+There is javadocs available [here](https://javadoc.io/doc/net.maritimeconnectivity.pki/mcp-pki/latest/index.html).
 
 Use PKIConfiguration for setting up configuration about Keystore and/or Truststore, use KeystoreHandler to load them and then you most like want to use CertificateHandler to, well, handle certificates...
 
