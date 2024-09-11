@@ -321,11 +321,9 @@ public class CertificateBuilder {
      * @return A string where reserved characters have been escaped
      */
     public static String escapeSpecialCharacters(String string) {
-        String escapedString = string;
-        char[] stringChars = escapedString.toCharArray();
         StringBuilder stringBuilder = new StringBuilder();
-        for (char c : stringChars) {
-            String escaped = "";
+        for (char c : string.toCharArray()) {
+            String escaped;
             if (RESERVED_CHARACTERS.contains(c)) {
                 escaped = "\\" + c;
             } else if (c == '\u0000') {
@@ -335,11 +333,11 @@ public class CertificateBuilder {
             } else if (c == '\r') {
                 escaped = "\\0D";
             } else {
-                escaped += c;
+                escaped = String.valueOf(c);
             }
             stringBuilder.append(escaped);
         }
-        escapedString = stringBuilder.toString();
+        String escapedString = stringBuilder.toString();
         if (escapedString.startsWith("#") || escapedString.startsWith(" ")) {
             escapedString = "\\" + escapedString;
         }
