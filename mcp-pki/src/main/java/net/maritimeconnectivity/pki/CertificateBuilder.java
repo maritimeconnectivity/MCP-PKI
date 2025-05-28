@@ -121,7 +121,8 @@ public class CertificateBuilder {
         }
         cal.add(Calendar.MONTH, validityPeriod);
         Date expire = cal.getTime();
-        X509v3CertificateBuilder certV3Bldr = new JcaX509v3CertificateBuilder(issuer,
+        X509v3CertificateBuilder certV3Bldr = new JcaX509v3CertificateBuilder(
+                issuer,
                 serialNumber,
                 now, // Valid from now...
                 expire, // until CERT_EXPIRE_YEAR
