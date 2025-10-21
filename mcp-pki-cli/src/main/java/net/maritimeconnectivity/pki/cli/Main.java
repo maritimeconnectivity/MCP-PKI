@@ -85,7 +85,7 @@ public class Main {
         options.addOption("rk", ROOT_KEYSTORE, true, "Output keystore path.");
         options.addOption("rkp", ROOT_KEYSTORE_PASSWORD, true, "Keystore password.");
         options.addOption("kp", ROOT_KEY_PASSWORD, true, "Key password.");
-        options.addOption("xn", X500_NAME, true, "Key password.");
+        options.addOption("xn", X500_NAME, true, "X500 distinguished name.");
         options.addOption("crl", CRL_ENDPOINT, true, "CRL endpoint");
         options.addOption("rt", ROOT_CA_ALIAS, true, "Root CA alias");
         options.addOption("vp", VALIDITY_PERIOD, true, "Validity period in year");
