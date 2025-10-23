@@ -27,9 +27,9 @@ import net.maritimeconnectivity.pki.pkcs11.P11PKIConfiguration;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.help.HelpFormatter;
 
 import java.io.Console;
 import java.io.IOException;
@@ -336,8 +336,14 @@ public class Main {
             // Default to show the help message
         } else {
             // Automatically generate the help statement
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("mcp-pki-cli", options);
+            HelpFormatter formatter = HelpFormatter.builder()
+                    .setShowSince(false)
+                    .get();
+            try {
+                formatter.printHelp("mcp-pki-cli", "CLI for interacting with the MCP-PKI library", options, "Please report bugs at https://github.com/maritimeconnectivity/MCP-PKI/issues", true);
+            } catch (IOException e) {
+                log.error("Was not able to print help", e);
+            }
         }
     }
 }
