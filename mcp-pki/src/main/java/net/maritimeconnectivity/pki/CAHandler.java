@@ -107,10 +107,13 @@ public class CAHandler {
         KeyStore.ProtectionParameter protectionParameter = new KeyStore.PasswordProtection(pkiConfiguration.getRootCaKeystorePassword().toCharArray());
         KeyStore.PrivateKeyEntry rootCertEntry;
         X500Name rootCertX500Name;
+        Date rootCertNotAfter;
         String crlUrl;
         try {
             rootCertEntry = (KeyStore.PrivateKeyEntry) rootKeystore.getEntry(rootCAAlias, protectionParameter);
-            rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject();
+            X509Certificate rootCert = (X509Certificate) rootCertEntry.getCertificate();
+            rootCertX500Name = new JcaX509CertificateHolder(rootCert).getSubject();
+            rootCertNotAfter = rootCert.getNotAfter();
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException |
                  CertificateEncodingException e) {
             throw new PKIRuntimeException(e.getMessage(), e);
@@ -132,7 +135,7 @@ public class CAHandler {
         }
         try {
             subCaCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(null), rootCertEntry.getPrivateKey(), rootCertEntry.getCertificate().getPublicKey(),
-                    subCaKeyPair.getPublic(), rootCertX500Name, subCaCertX500Name, null, "INTERMEDIATE", null, crlUrl, null, validityPeriod);
+                    subCaKeyPair.getPublic(), rootCertX500Name, subCaCertX500Name, null, "INTERMEDIATE", null, crlUrl, null, validityPeriod, rootCertNotAfter);
         } catch (Exception e) {
             throw new PKIRuntimeException("Could not create sub CA certificate!", e);
         }
@@ -196,10 +199,13 @@ public class CAHandler {
         // Extract the root certificate
         KeyStore.PrivateKeyEntry rootCertEntry;
         X500Name rootCertX500Name;
+        Date rootCertNotAfter;
         String crlUrl;
         try {
             rootCertEntry = (KeyStore.PrivateKeyEntry) rootStore.getEntry(rootCAAlias, null);
-            rootCertX500Name = new JcaX509CertificateHolder((X509Certificate) rootCertEntry.getCertificate()).getSubject();
+            X509Certificate rootCert = (X509Certificate) rootCertEntry.getCertificate();
+            rootCertX500Name = new JcaX509CertificateHolder(rootCert).getSubject();
+            rootCertNotAfter = rootCert.getNotAfter();
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException |
                  CertificateEncodingException e) {
             rootP11PKIConfiguration.providerLogout();
@@ -227,7 +233,7 @@ public class CAHandler {
         }
         try {
             subCaCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(rootP11PKIConfiguration), rootCertEntry.getPrivateKey(), rootCertEntry.getCertificate().getPublicKey(),
-                    subCaKeyPair.getPublic(), rootCertX500Name, subCaCertX500Name, null, "INTERMEDIATE", null, crlUrl, rootP11PKIConfiguration.getProvider(), validityPeriod);
+                    subCaKeyPair.getPublic(), rootCertX500Name, subCaCertX500Name, null, "INTERMEDIATE", null, crlUrl, rootP11PKIConfiguration.getProvider(), validityPeriod, rootCertNotAfter);
         } catch (Exception e) {
             rootP11PKIConfiguration.providerLogout();
             subCaP11PKIConfiguration.providerLogout();
@@ -274,7 +280,7 @@ public class CAHandler {
             rootCAKeyStore.load(null, pkiConfiguration.getRootCaKeystorePassword().toCharArray());
             // Store away the keystore.
             X509Certificate cacert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(null), rootCAKeyPair.getPrivate(), rootCAKeyPair.getPublic(), rootCAKeyPair.getPublic(),
-                    new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl, null, validityPeriod);
+                    new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl, null, validityPeriod, null);
 
             Certificate[] certChain = new Certificate[1];
             certChain[0] = cacert;
@@ -315,7 +321,7 @@ public class CAHandler {
             rootKeyStore = KeyStore.getInstance(PKIConstants.PKCS11, p11PKIConfiguration.getProvider());
             rootKeyStore.load(null, p11PKIConfiguration.getPkcs11Pin());
             X509Certificate caCert = certificateBuilder.buildAndSignCert(certificateBuilder.generateSerialNumber(p11PKIConfiguration), caKeyPair.getPrivate(), caKeyPair.getPublic(), caKeyPair.getPublic(),
-                    new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl, p11PKIConfiguration.getProvider(), validityPeriod);
+                    new X500Name(rootCertX500Name), new X500Name(rootCertX500Name), null, "ROOTCA", null, crlUrl, p11PKIConfiguration.getProvider(), validityPeriod, null);
             Certificate[] certChain = new Certificate[1];
             certChain[0] = caCert;
             rootKeyStore.setKeyEntry(rootCAAlias, caKeyPair.getPrivate(), null, certChain);

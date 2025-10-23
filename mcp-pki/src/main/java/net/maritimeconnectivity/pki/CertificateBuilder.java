@@ -91,18 +91,19 @@ public class CertificateBuilder {
      * Builds and signs a certificate. The certificate will be build on the given subject-public-key and signed with
      * the given issuer-private-key. The issuer and subject will be identified in the strings provided.
      *
-     * @param serialNumber     The serial number of the new certificate.
-     * @param signerPrivateKey Private key for signing the certificate
-     * @param signerPublicKey  Public key of the signing certificate
-     * @param subjectPublicKey Public key for the new certificate
-     * @param issuer           DN of the signing certificate
-     * @param subject          DN of the new certificate
-     * @param customAttrs      The custom MC attributes to include in the certificate
-     * @param type             Type of certificate, can be "ROOT", "INTERMEDIATE" or "ENTITY".
-     * @param ocspUrl          OCSP endpoint
-     * @param crlUrl           CRL endpoint - can be null
-     * @param p11AuthProvider  The provider that should be used - can be null
-     * @param validityPeriod   How many months the certificate should be valid
+     * @param serialNumber        The serial number of the new certificate.
+     * @param signerPrivateKey    Private key for signing the certificate
+     * @param signerPublicKey     Public key of the signing certificate
+     * @param subjectPublicKey    Public key for the new certificate
+     * @param issuer              DN of the signing certificate
+     * @param subject             DN of the new certificate
+     * @param customAttrs         The custom MC attributes to include in the certificate
+     * @param type                Type of certificate, can be "ROOT", "INTERMEDIATE" or "ENTITY".
+     * @param ocspUrl             OCSP endpoint
+     * @param crlUrl              CRL endpoint - can be null
+     * @param p11AuthProvider     The provider that should be used - can be null
+     * @param validityPeriod      How many months the certificate should be valid
+     * @param issuerNotValidAfter The Date that the issuer certificate expires
      * @return A signed X509Certificate
      * @throws NoSuchAlgorithmException  if the needed underlying algorithms don't exist in the crypto provider
      * @throws CertIOException           if extensions cannot be added to the certificate
@@ -110,7 +111,7 @@ public class CertificateBuilder {
      * @throws CertificateException      if the certificate cannot be built
      */
     public X509Certificate buildAndSignCert(BigInteger serialNumber, PrivateKey signerPrivateKey, PublicKey signerPublicKey, PublicKey subjectPublicKey, X500Name issuer, X500Name subject,
-                                            Map<String, String> customAttrs, String type, String ocspUrl, String crlUrl, AuthProvider p11AuthProvider, int validityPeriod) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException {
+                                            Map<String, String> customAttrs, String type, String ocspUrl, String crlUrl, AuthProvider p11AuthProvider, int validityPeriod, Date issuerNotValidAfter) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException {
         // Dates are converted to GMT/UTC inside the cert builder
         Date now = Date.from(Instant.now());
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -121,6 +122,13 @@ public class CertificateBuilder {
         }
         cal.add(Calendar.MONTH, validityPeriod);
         Date expire = cal.getTime();
+
+        // If the computed expiry date is after the expiry date of the issuing certificate
+        // we just clamp it to the one of the issuing certificate
+        if (issuerNotValidAfter != null && expire.after(issuerNotValidAfter)) {
+            expire = issuerNotValidAfter;
+        }
+
         X509v3CertificateBuilder certV3Bldr = new JcaX509v3CertificateBuilder(
                 issuer,
                 serialNumber,
@@ -243,7 +251,7 @@ public class CertificateBuilder {
         String crlUrl = baseCrlOcspURI + "crl/" + signingAlias;
         return buildAndSignCert(serialNumber, signingCertEntry.getPrivateKey(), signingX509Cert.getPublicKey(),
                 publicKey, new JcaX509CertificateHolder(signingX509Cert).getSubject(), new X500Name(subjectDn),
-                customAttr, "ENTITY", ocspUrl, crlUrl, p11AuthProvider, validityPeriod);
+                customAttr, "ENTITY", ocspUrl, crlUrl, p11AuthProvider, validityPeriod, signingX509Cert.getNotAfter());
     }
 
     /**
