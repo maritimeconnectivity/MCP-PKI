@@ -184,7 +184,7 @@ public class CAHandler {
             rootStore.load(null, rootP11PKIConfiguration.getPkcs11Pin());
 
             // Create sub CA keystore
-            subCaStore = KeyStore.getInstance(PKIConstants.PKCS11, ((P11PKIConfiguration) subCaConfiguration).getProvider());
+            subCaStore = KeyStore.getInstance(PKIConstants.PKCS11, subCaP11PKIConfiguration.getProvider());
             subCaStore.load(null, subCaP11PKIConfiguration.getPkcs11Pin());
 
             // Open the truststore
