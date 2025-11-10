@@ -207,8 +207,11 @@ public class Main {
                 || cmd.hasOption(PKCS11_ROOT_CONFIG) == (cmd.hasOption(ROOT_KEYSTORE) && cmd.hasOption(ROOT_KEYSTORE_PASSWORD) && cmd.hasOption(ROOT_KEY_PASSWORD)) // use either PKCS#11 or JKS for root CA
                 || cmd.hasOption(PKCS11_SUB_CONFIG) == (cmd.hasOption(SUBCA_KEYSTORE) && cmd.hasOption(SUBCA_KEYSTORE_PASSWORD) && cmd.hasOption(SUBCA_KEY_PASSWORD)) // use either PKCS#11 or JKS for the sub CA we are about to create
                 || !cmd.hasOption(VALIDITY_PERIOD)) {
-            // TODO figure out how to format this for the different combinations of options
-            log.error("Creating a sub CA requires the parameters: {}", String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD, X500_NAME, ROOT_CA_ALIAS, PKCS11_ROOT_CONFIG, PKCS11_SUB_CONFIG, VALIDITY_PERIOD));
+            String mandatoryArgs = String.join(", ", ROOT_CA_ALIAS, TRUSTSTORE, TRUSTSTORE_PASSWORD, X500_NAME, VALIDITY_PERIOD);
+            String option1 = String.join(", ", PKCS11_ROOT_CONFIG, PKCS11_SUB_CONFIG);
+            String option2 = String.join(", ", PKCS11_ROOT_CONFIG, SUBCA_KEYSTORE, SUBCA_KEYSTORE_PASSWORD, SUBCA_KEY_PASSWORD);
+            String option3 = String.join(", ", PKCS11_SUB_CONFIG, ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD);
+            log.error("Creating a sub CA using PKCS#11 requires the parameters: {}, [{}] [{}] [{}]", mandatoryArgs, option1, option2, option3);
             return;
         }
 
