@@ -203,37 +203,64 @@ public class Main {
     }
 
     private void createSubCAPKCS11(CommandLine cmd) {
-        if (!cmd.hasOption(TRUSTSTORE) || !cmd.hasOption(TRUSTSTORE_PASSWORD) || !cmd.hasOption(X500_NAME) || !cmd.hasOption(ROOT_CA_ALIAS) || !cmd.hasOption(PKCS11_ROOT_CONFIG) || !cmd.hasOption(PKCS11_SUB_CONFIG) || !cmd.hasOption(VALIDITY_PERIOD)) {
-            log.error("Creating a sub CA requires the parameters: {}", String.join(", ", TRUSTSTORE, TRUSTSTORE_PASSWORD, X500_NAME, ROOT_CA_ALIAS, PKCS11_ROOT_CONFIG, PKCS11_SUB_CONFIG, VALIDITY_PERIOD));
+        if (!cmd.hasOption(TRUSTSTORE) || !cmd.hasOption(TRUSTSTORE_PASSWORD) || !cmd.hasOption(X500_NAME) || !cmd.hasOption(ROOT_CA_ALIAS)
+                || cmd.hasOption(PKCS11_ROOT_CONFIG) == (cmd.hasOption(ROOT_KEYSTORE) && cmd.hasOption(ROOT_KEYSTORE_PASSWORD) && cmd.hasOption(ROOT_KEY_PASSWORD)) // use either PKCS#11 or JKS for root CA
+                || cmd.hasOption(PKCS11_SUB_CONFIG) == (cmd.hasOption(SUBCA_KEYSTORE) && cmd.hasOption(SUBCA_KEYSTORE_PASSWORD) && cmd.hasOption(SUBCA_KEY_PASSWORD)) // use either PKCS#11 or JKS for the sub CA we are about to create
+                || !cmd.hasOption(VALIDITY_PERIOD)) {
+            String mandatoryArgs = String.join(", ", ROOT_CA_ALIAS, TRUSTSTORE, TRUSTSTORE_PASSWORD, X500_NAME, VALIDITY_PERIOD);
+            String option1 = String.join(", ", PKCS11_ROOT_CONFIG, PKCS11_SUB_CONFIG);
+            String option2 = String.join(", ", PKCS11_ROOT_CONFIG, SUBCA_KEYSTORE, SUBCA_KEYSTORE_PASSWORD, SUBCA_KEY_PASSWORD);
+            String option3 = String.join(", ", PKCS11_SUB_CONFIG, ROOT_KEYSTORE, ROOT_KEYSTORE_PASSWORD, ROOT_KEY_PASSWORD);
+            log.error("Creating a sub CA using PKCS#11 requires the parameters: {}, [{}] [{}] [{}]", mandatoryArgs, option1, option2, option3);
             return;
         }
-        char[] rootCaPin;
-        char[] subCaPin;
-        Console console = System.console();
-        // Check if root CA PIN has been given
-        if (!cmd.hasOption(PKCS11_ROOT_PIN)) {
-            log.error("Please input root CA HSM slot PIN: ");
-            rootCaPin = console.readPassword();
-        } else {
-            rootCaPin = cmd.getOptionValue(PKCS11_ROOT_PIN).toCharArray();
-        }
-        // Check if sub CA PIN has been given
-        if (!cmd.hasOption(PKCS11_SUB_PIN)) {
-            log.error("Please input sub CA HSM slot PIN: ");
-            subCaPin = console.readPassword();
-        } else {
-            subCaPin = cmd.getOptionValue(PKCS11_SUB_PIN).toCharArray();
-        }
-        if (console != null)
-            console.flush();
 
-        PKIConfiguration rootPkiConfiguration = new P11PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS), cmd.getOptionValue(PKCS11_ROOT_CONFIG), rootCaPin);
-        rootPkiConfiguration.setTruststorePath(cmd.getOptionValue(TRUSTSTORE));
-        rootPkiConfiguration.setTruststorePassword(cmd.getOptionValue(TRUSTSTORE_PASSWORD));
+        // Determine if we are going to use PKCS#11 or JKS for the root CA
+        PKIConfiguration rootPkiConfiguration;
+        if (cmd.hasOption(PKCS11_ROOT_CONFIG)) {
+            char[] rootCaPin;
+            // Check if root CA PIN has been given
+            if (!cmd.hasOption(PKCS11_ROOT_PIN)) {
+                log.error("Please input root CA HSM slot PIN: ");
+                Console console = System.console();
+                rootCaPin = console.readPassword();
+            } else {
+                rootCaPin = cmd.getOptionValue(PKCS11_ROOT_PIN).toCharArray();
+            }
 
-        PKIConfiguration subPkiConfiguration = new P11PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS), cmd.getOptionValue(PKCS11_SUB_CONFIG), subCaPin);
-        subPkiConfiguration.setTruststorePath(cmd.getOptionValue(TRUSTSTORE));
-        subPkiConfiguration.setTruststorePassword(cmd.getOptionValue(TRUSTSTORE_PASSWORD));
+            rootPkiConfiguration = new P11PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS), cmd.getOptionValue(PKCS11_ROOT_CONFIG), rootCaPin);
+            rootPkiConfiguration.setTruststorePath(cmd.getOptionValue(TRUSTSTORE));
+            rootPkiConfiguration.setTruststorePassword(cmd.getOptionValue(TRUSTSTORE_PASSWORD));
+        } else {
+            rootPkiConfiguration = new PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS));
+            rootPkiConfiguration.setTruststorePath(cmd.getOptionValue(TRUSTSTORE));
+            rootPkiConfiguration.setTruststorePassword(cmd.getOptionValue(TRUSTSTORE_PASSWORD));
+            rootPkiConfiguration.setRootCaKeystorePath(cmd.getOptionValue(ROOT_KEYSTORE));
+            rootPkiConfiguration.setRootCaKeystorePassword(cmd.getOptionValue(ROOT_KEYSTORE_PASSWORD));
+            rootPkiConfiguration.setRootCaKeyPassword(cmd.getOptionValue(ROOT_KEY_PASSWORD));
+        }
+
+        // Determine if we are going to use PKCS#11 or JKS for the sub CA
+        PKIConfiguration subPkiConfiguration = null;
+        if (cmd.hasOption(PKCS11_SUB_CONFIG)) {
+            char[] subCaPin;
+            // Check if sub CA PIN has been given
+            if (!cmd.hasOption(PKCS11_SUB_PIN)) {
+                log.error("Please input sub CA HSM slot PIN: ");
+                Console console = System.console();
+                subCaPin = console.readPassword();
+            } else {
+                subCaPin = cmd.getOptionValue(PKCS11_SUB_PIN).toCharArray();
+            }
+
+            subPkiConfiguration = new P11PKIConfiguration(cmd.getOptionValue(ROOT_CA_ALIAS), cmd.getOptionValue(PKCS11_SUB_CONFIG), subCaPin);
+            subPkiConfiguration.setTruststorePath(cmd.getOptionValue(TRUSTSTORE));
+            subPkiConfiguration.setTruststorePassword(cmd.getOptionValue(TRUSTSTORE_PASSWORD));
+        } else {
+            rootPkiConfiguration.setSubCaKeystorePath(cmd.getOptionValue(SUBCA_KEYSTORE));
+            rootPkiConfiguration.setSubCaKeystorePassword(cmd.getOptionValue(SUBCA_KEYSTORE_PASSWORD));
+            rootPkiConfiguration.setSubCaKeyPassword(cmd.getOptionValue(SUBCA_KEY_PASSWORD));
+        }
 
         KeystoreHandler keystoreHandler = new KeystoreHandler(rootPkiConfiguration);
         CertificateBuilder certificateBuilder = new CertificateBuilder(keystoreHandler);
