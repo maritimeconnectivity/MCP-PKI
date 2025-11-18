@@ -215,6 +215,7 @@ public class Main {
             return;
         }
 
+        // Determine if we are going to use PKCS#11 or JKS for the root CA
         PKIConfiguration rootPkiConfiguration;
         if (cmd.hasOption(PKCS11_ROOT_CONFIG)) {
             char[] rootCaPin;
@@ -239,6 +240,7 @@ public class Main {
             rootPkiConfiguration.setRootCaKeyPassword(cmd.getOptionValue(ROOT_KEY_PASSWORD));
         }
 
+        // Determine if we are going to use PKCS#11 or JKS for the sub CA
         PKIConfiguration subPkiConfiguration = null;
         if (cmd.hasOption(PKCS11_SUB_CONFIG)) {
             char[] subCaPin;
