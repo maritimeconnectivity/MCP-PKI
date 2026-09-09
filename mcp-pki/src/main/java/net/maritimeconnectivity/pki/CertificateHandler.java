@@ -178,7 +178,7 @@ public class CertificateHandler {
      * @throws IOException if the given byte array could not be formatted as PEM
      */
     public static String getPemFromEncoded(String type, byte[] encoded) throws IOException {
-        String pemFormat = "";
+        String pemFormat;
         // Write certificate to PEM
         StringWriter stringWriter = new StringWriter();
         try (PemWriter pemWriter = new PemWriter(stringWriter)) {
@@ -302,7 +302,7 @@ public class CertificateHandler {
 
         // Extract first and last name from full name
         String lastName = "";
-        String firstName = "";
+        String firstName;
         if (name != null && name.split("\\w +\\w").length > 1) {
             lastName = name.substring(name.lastIndexOf(' ') + 1);
             firstName = name.substring(0, name.lastIndexOf(' '));
