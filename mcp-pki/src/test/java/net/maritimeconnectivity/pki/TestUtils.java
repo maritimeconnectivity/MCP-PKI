@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.cert.X509Certificate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static net.maritimeconnectivity.pki.CertificateHandler.getCertFromPem;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -60,10 +61,9 @@ public class TestUtils {
     }
 
     public static String loadTxtFile(String path) {
-        try {
-            return Files.lines(Paths.get(path)).collect(Collectors.joining("\n"));
+        try (Stream<String> stream = Files.lines(Paths.get(path))) {
+            return stream.collect(Collectors.joining("\n"));
         } catch (IOException e) {
-            e.printStackTrace();
             fail("Loading Certificate from file failed!");
             throw new RuntimeException(e);
         }

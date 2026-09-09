@@ -117,7 +117,7 @@ class CRLVerifierTest {
         }
         assertNotNull(crlDistPoints);
         assertEquals(1, crlDistPoints.size());
-        assertEquals("http://localhost:8888/x509/api/certificates/crl/urn:mrn:mcp:ca:idp1:mcp-idreg", crlDistPoints.get(0));
+        assertEquals("http://localhost:8888/x509/api/certificates/crl/urn:mrn:mcp:ca:idp1:mcp-idreg", crlDistPoints.getFirst());
     }
 
 }

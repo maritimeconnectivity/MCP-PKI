@@ -63,7 +63,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.cert.CRLException;
 import java.security.cert.CertificateException;
@@ -140,7 +139,7 @@ public final class CRLVerifier {
      * @throws NamingException      if downloading CRL from ldap fails
      * @throws CRLException         if the retrieved CRL cannot be instantiated as a Java object
      */
-    public static X509CRL downloadCRL(String crlURL) throws IOException, CertificateException, NamingException, CRLException, URISyntaxException {
+    public static X509CRL downloadCRL(String crlURL) throws IOException, CertificateException, NamingException, CRLException {
         if (crlURL.startsWith("http://") || crlURL.startsWith("https://") || crlURL.startsWith("ftp://")) {
             return downloadCRLFromWeb(crlURL);
         } else if (crlURL.startsWith("ldap://")) {
