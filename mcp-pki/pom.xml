@@ -15,7 +15,7 @@
     </parent>
 
     <properties>
-        <bouncycastle.version>1.84</bouncycastle.version>
+        <bouncycastle.version>1.85</bouncycastle.version>
     </properties>
 
     <licenses>
