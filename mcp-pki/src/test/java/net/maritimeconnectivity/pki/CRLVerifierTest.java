@@ -17,8 +17,6 @@
 package net.maritimeconnectivity.pki;
 
 import net.maritimeconnectivity.pki.ocsp.CertStatus;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -35,31 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class CRLVerifierTest {
-    @BeforeEach
-    void setUp() {
-
-    }
-
-    @AfterEach
-    void tearDown() {
-
-    }
-
-    //@Test
-    void verifyCertificateCRL1() {
-        X509Certificate cert = getMyBoatCert();
-        RevocationInfo info = CRLVerifier.verifyCertificateCRL(cert);
-        assertNotNull(info);
-        assertEquals(CertStatus.GOOD, info.getStatus());
-    }
-
-    //@Test
-    void verifyCertificateCRL2() {
-        X509Certificate cert = getEcdisCert();
-        RevocationInfo info = CRLVerifier.verifyCertificateCRL(cert);
-        assertNotNull(info);
-        assertEquals(CertStatus.REVOKED, info.getStatus());
-    }
 
     @Test
     void verifyCertificateCRL3() {
