@@ -228,14 +228,26 @@ public class CertificateBuilder {
         KeyStore.PrivateKeyEntry signingCertEntry = keystoreHandler.getSigningCertEntry(signingAlias);
         Certificate signingCert = signingCertEntry.getCertificate();
         X509Certificate signingX509Cert = (X509Certificate) signingCert;
-        // Try to find the correct country code, else we just use the country name as code
-        String orgCountryCode = country;
-        String[] locales = Locale.getISOCountries();
-        for (String countryCode : locales) {
-            Locale loc = Locale.of("", countryCode);
-            if (loc.getDisplayCountry(Locale.ENGLISH).equals(orgCountryCode)) {
-                orgCountryCode = loc.getCountry();
-                break;
+
+        // Try to find the correct country code, else we just use the unknown country code
+        String orgCountryCode = "XX";
+
+        // If the country is already 2 characters, we check if it is a valid country code
+        if (country != null && country.trim().length() == 2) {
+            String tmp = country.trim();
+            if (!Locale.of("", tmp).getDisplayCountry(Locale.ENGLISH).isEmpty()) {
+                orgCountryCode = tmp;
+            }
+        } else if (CountryMapper.ISO_TITLE_OVERRIDES.containsKey(country)) {
+            orgCountryCode = CountryMapper.ISO_TITLE_OVERRIDES.get(country);
+        } else {
+            String[] locales = Locale.getISOCountries();
+            for (String countryCode : locales) {
+                Locale loc = Locale.of("", countryCode);
+                if (loc.getDisplayCountry(Locale.ENGLISH).equalsIgnoreCase(country)) {
+                    orgCountryCode = loc.getCountry();
+                    break;
+                }
             }
         }
 
