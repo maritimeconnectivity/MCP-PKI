@@ -124,6 +124,78 @@ class CertificateBuilderTest {
     }
 
     @Test
+    void generateCertWithNonDefaultCountryNameForEntity() {
+        KeyPair certKeyPair = CertificateBuilder.generateKeyPair(null);
+        String userMrn = "urn:mrn:mcp:entity:idp1:org1:user";
+        String permissions = "NONE";
+        String baseCrlOcspPath = "https://localhost/x509/api/certificates/";
+        String signingAlias = "urn:mrn:mcp:ca:idp1:mcp-idreg";
+        int validityPeriod = 12;
+        Map<String, String> attrs = new HashMap<>();
+        attrs.put(PKIConstants.MC_OID_MRN, userMrn);
+        attrs.put(PKIConstants.MC_OID_PERMISSIONS, permissions);
+
+        X509Certificate userCert;
+        try {
+            userCert = cb.generateCertForEntity(BigInteger.ONE, "Korea (the Republic of)", "urn:mrn:mcp:entity:idp1:org1", "user", "User User", "user@example.com", userMrn, validityPeriod, certKeyPair.getPublic(), attrs, signingAlias, baseCrlOcspPath, null);
+        } catch (Exception e) {
+            fail("An exception was thrown!", e);
+            return;
+        }
+        assertNotNull(userCert);
+
+        assertEquals("C=KR,O=urn:mrn:mcp:entity:idp1:org1,OU=user,CN=User User,UID=urn:mrn:mcp:entity:idp1:org1:user,E=user@example.com", userCert.getSubjectDN().getName());
+    }
+
+    @Test
+    void generateCertWithCountryCodeAsCountryNameForEntity() {
+        KeyPair certKeyPair = CertificateBuilder.generateKeyPair(null);
+        String userMrn = "urn:mrn:mcp:entity:idp1:org1:user";
+        String permissions = "NONE";
+        String baseCrlOcspPath = "https://localhost/x509/api/certificates/";
+        String signingAlias = "urn:mrn:mcp:ca:idp1:mcp-idreg";
+        int validityPeriod = 12;
+        Map<String, String> attrs = new HashMap<>();
+        attrs.put(PKIConstants.MC_OID_MRN, userMrn);
+        attrs.put(PKIConstants.MC_OID_PERMISSIONS, permissions);
+
+        X509Certificate userCert;
+        try {
+            userCert = cb.generateCertForEntity(BigInteger.ONE, "KR", "urn:mrn:mcp:entity:idp1:org1", "user", "User User", "user@example.com", userMrn, validityPeriod, certKeyPair.getPublic(), attrs, signingAlias, baseCrlOcspPath, null);
+        } catch (Exception e) {
+            fail("An exception was thrown!", e);
+            return;
+        }
+        assertNotNull(userCert);
+
+        assertEquals("C=KR,O=urn:mrn:mcp:entity:idp1:org1,OU=user,CN=User User,UID=urn:mrn:mcp:entity:idp1:org1:user,E=user@example.com", userCert.getSubjectDN().getName());
+    }
+
+    @Test
+    void generateCertWithUnknownCountryNameForEntity() {
+        KeyPair certKeyPair = CertificateBuilder.generateKeyPair(null);
+        String userMrn = "urn:mrn:mcp:entity:idp1:org1:user";
+        String permissions = "NONE";
+        String baseCrlOcspPath = "https://localhost/x509/api/certificates/";
+        String signingAlias = "urn:mrn:mcp:ca:idp1:mcp-idreg";
+        int validityPeriod = 12;
+        Map<String, String> attrs = new HashMap<>();
+        attrs.put(PKIConstants.MC_OID_MRN, userMrn);
+        attrs.put(PKIConstants.MC_OID_PERMISSIONS, permissions);
+
+        X509Certificate userCert;
+        try {
+            userCert = cb.generateCertForEntity(BigInteger.ONE, "Narnia", "urn:mrn:mcp:entity:idp1:org1", "user", "User User", "user@example.com", userMrn, validityPeriod, certKeyPair.getPublic(), attrs, signingAlias, baseCrlOcspPath, null);
+        } catch (Exception e) {
+            fail("An exception was thrown!", e);
+            return;
+        }
+        assertNotNull(userCert);
+
+        assertEquals("C=XX,O=urn:mrn:mcp:entity:idp1:org1,OU=user,CN=User User,UID=urn:mrn:mcp:entity:idp1:org1:user,E=user@example.com", userCert.getSubjectDN().getName());
+    }
+
+    @Test
     void generateKeyPairTest() {
         KeyPair keyPair = CertificateBuilder.generateKeyPair(null);
         assertNotNull(keyPair);
