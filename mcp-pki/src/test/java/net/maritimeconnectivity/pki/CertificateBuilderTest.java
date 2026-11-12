@@ -58,7 +58,7 @@ class CertificateBuilderTest {
         String permissions = "NONE";
         String baseCrlOcspPath = "https://localhost/x509/api/certificates/";
         String signingAlias = "urn:mrn:mcp:ca:idp1:mcp-idreg";
-        int validityPeriod = 12;
+        int validityPeriod = 6;
         Map<String, String> attrs = new HashMap<>();
         attrs.put(PKIConstants.MC_OID_MRN, userMrn);
         attrs.put(PKIConstants.MC_OID_PERMISSIONS, permissions);
@@ -76,7 +76,10 @@ class CertificateBuilderTest {
 
         // check the validity period
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, validityPeriod); // add one year to have an invalid date
+        // Add the validity period plus an hour to get an invalid date
+        cal.add(Calendar.MONTH, validityPeriod);
+        cal.add(Calendar.HOUR_OF_DAY, 1);
+
         Date outOfBorder = cal.getTime();
         cal.add(Calendar.DAY_OF_MONTH, -1); // and minus one day from the invalid date to make it valid.
         Date withinBorder = cal.getTime();
@@ -93,7 +96,7 @@ class CertificateBuilderTest {
         String permissions = "NONE";
         String baseCrlOcspPath = "https://localhost/x509/api/certificates/";
         String signingAlias = "urn:mrn:mcp:ca:idp1:mcp-idreg";
-        int validityPeriod = 12;
+        int validityPeriod = 6;
         Map<String, String> attrs = new HashMap<>();
         attrs.put(PKIConstants.MC_OID_MRN, userMrn);
         attrs.put(PKIConstants.MC_OID_PERMISSIONS, permissions);
@@ -113,7 +116,10 @@ class CertificateBuilderTest {
 
         // check the validity period
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, validityPeriod); // add one year to have an invalid date
+        // Add the validity period plus an hour to get an invalid date
+        cal.add(Calendar.MONTH, validityPeriod);
+        cal.add(Calendar.HOUR_OF_DAY, 1);
+
         Date outOfBorder = cal.getTime();
         cal.add(Calendar.DAY_OF_MONTH, -1); // and minus one day from the invalid date to make it valid.
         Date withinBorder = cal.getTime();
@@ -130,7 +136,7 @@ class CertificateBuilderTest {
         String permissions = "NONE";
         String baseCrlOcspPath = "https://localhost/x509/api/certificates/";
         String signingAlias = "urn:mrn:mcp:ca:idp1:mcp-idreg";
-        int validityPeriod = 12;
+        int validityPeriod = 6;
         Map<String, String> attrs = new HashMap<>();
         attrs.put(PKIConstants.MC_OID_MRN, userMrn);
         attrs.put(PKIConstants.MC_OID_PERMISSIONS, permissions);
@@ -154,7 +160,7 @@ class CertificateBuilderTest {
         String permissions = "NONE";
         String baseCrlOcspPath = "https://localhost/x509/api/certificates/";
         String signingAlias = "urn:mrn:mcp:ca:idp1:mcp-idreg";
-        int validityPeriod = 12;
+        int validityPeriod = 6;
         Map<String, String> attrs = new HashMap<>();
         attrs.put(PKIConstants.MC_OID_MRN, userMrn);
         attrs.put(PKIConstants.MC_OID_PERMISSIONS, permissions);
@@ -178,7 +184,7 @@ class CertificateBuilderTest {
         String permissions = "NONE";
         String baseCrlOcspPath = "https://localhost/x509/api/certificates/";
         String signingAlias = "urn:mrn:mcp:ca:idp1:mcp-idreg";
-        int validityPeriod = 12;
+        int validityPeriod = 6;
         Map<String, String> attrs = new HashMap<>();
         attrs.put(PKIConstants.MC_OID_MRN, userMrn);
         attrs.put(PKIConstants.MC_OID_PERMISSIONS, permissions);
