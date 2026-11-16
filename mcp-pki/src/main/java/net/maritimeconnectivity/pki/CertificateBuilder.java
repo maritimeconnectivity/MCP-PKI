@@ -98,7 +98,7 @@ public class CertificateBuilder {
      * @param issuer              DN of the signing certificate
      * @param subject             DN of the new certificate
      * @param customAttrs         The custom MC attributes to include in the certificate
-     * @param type                Type of certificate, can be "ROOT", "INTERMEDIATE" or "ENTITY".
+     * @param type                Type of certificate, can be "ROOTCA", "INTERMEDIATE" or "ENTITY".
      * @param ocspUrl             OCSP endpoint
      * @param crlUrl              CRL endpoint - can be null
      * @param p11AuthProvider     The provider that should be used - can be null
@@ -138,18 +138,17 @@ public class CertificateBuilder {
                 subjectPublicKey);
         JcaX509ExtensionUtils extensionUtil = new JcaX509ExtensionUtils();
         // Create certificate extensions
+        // CA keys are EC keys, so keyEncipherment must not be set (RFC 5480 section 3), and nonRepudiation
+        // (contentCommitment) must not be set on CA certificates (CA/B Forum Baseline Requirements 7.1.2)
         if ("ROOTCA".equals(type)) {
+            // The root CA only signs certificates and CRLs
             certV3Bldr = certV3Bldr.addExtension(Extension.basicConstraints, true, new BasicConstraints(true))
-                    .addExtension(Extension.keyUsage, true, new X509KeyUsage(X509KeyUsage.digitalSignature |
-                            X509KeyUsage.nonRepudiation |
-                            X509KeyUsage.keyEncipherment |
-                            X509KeyUsage.keyCertSign |
+                    .addExtension(Extension.keyUsage, true, new X509KeyUsage(X509KeyUsage.keyCertSign |
                             X509KeyUsage.cRLSign));
         } else if ("INTERMEDIATE".equals(type)) {
+            // digitalSignature is needed as intermediate CAs sign OCSP responses directly
             certV3Bldr = certV3Bldr.addExtension(Extension.basicConstraints, true, new BasicConstraints(true))
                     .addExtension(Extension.keyUsage, true, new X509KeyUsage(X509KeyUsage.digitalSignature |
-                            X509KeyUsage.nonRepudiation |
-                            X509KeyUsage.keyEncipherment |
                             X509KeyUsage.keyCertSign |
                             X509KeyUsage.cRLSign));
         } else {

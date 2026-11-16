@@ -16,6 +16,8 @@
  */
 package net.maritimeconnectivity.pki;
 
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.Extension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -199,6 +201,52 @@ class CertificateBuilderTest {
         assertNotNull(userCert);
 
         assertEquals("C=XX,O=urn:mrn:mcp:entity:idp1:org1,OU=user,CN=User User,UID=urn:mrn:mcp:entity:idp1:org1:user,E=user@example.com", userCert.getSubjectDN().getName());
+    }
+
+    @Test
+    void generateRootCACertHasCorrectKeyUsage() throws Exception {
+        X509Certificate rootCert = buildSelfSignedCACert("ROOTCA");
+
+        // keyCertSign and cRLSign only
+        assertKeyUsage(rootCert, false, true, true);
+        assertTrue(rootCert.getBasicConstraints() >= 0, "Root CA certificate must have cA=true");
+        assertTrue(rootCert.getCriticalExtensionOIDs().contains(Extension.keyUsage.getId()));
+        assertTrue(rootCert.getCriticalExtensionOIDs().contains(Extension.basicConstraints.getId()));
+    }
+
+    @Test
+    void generateIntermediateCACertHasCorrectKeyUsage() throws Exception {
+        KeyPair rootKeyPair = CertificateBuilder.generateKeyPair(null);
+        KeyPair subCaKeyPair = CertificateBuilder.generateKeyPair(null);
+        X509Certificate subCaCert = cb.buildAndSignCert(BigInteger.TWO, rootKeyPair.getPrivate(), rootKeyPair.getPublic(),
+                subCaKeyPair.getPublic(), new X500Name("CN=Test Root CA"), new X500Name("CN=Test Intermediate CA"),
+                null, "INTERMEDIATE", null, "https://localhost/crl", null, 6, null);
+
+        // digitalSignature (for OCSP response signing), keyCertSign and cRLSign
+        assertKeyUsage(subCaCert, true, true, true);
+        assertTrue(subCaCert.getBasicConstraints() >= 0, "Intermediate CA certificate must have cA=true");
+        assertTrue(subCaCert.getCriticalExtensionOIDs().contains(Extension.keyUsage.getId()));
+        assertTrue(subCaCert.getCriticalExtensionOIDs().contains(Extension.basicConstraints.getId()));
+    }
+
+    private X509Certificate buildSelfSignedCACert(String type) throws Exception {
+        KeyPair keyPair = CertificateBuilder.generateKeyPair(null);
+        X500Name name = new X500Name("CN=Test Root CA");
+        return cb.buildAndSignCert(BigInteger.ONE, keyPair.getPrivate(), keyPair.getPublic(), keyPair.getPublic(),
+                name, name, null, type, null, "https://localhost/crl", null, 6, null);
+    }
+
+    private static void assertKeyUsage(X509Certificate cert, boolean digitalSignature, boolean keyCertSign, boolean cRLSign) {
+        // Index order as defined in RFC 5280 section 4.2.1.3
+        boolean[] keyUsage = cert.getKeyUsage();
+        assertNotNull(keyUsage, "Certificate must have a key usage extension");
+        assertEquals(digitalSignature, keyUsage[0], "digitalSignature");
+        assertFalse(keyUsage[1], "nonRepudiation must not be set on CA certificates");
+        assertFalse(keyUsage[2], "keyEncipherment must not be set for EC keys");
+        assertFalse(keyUsage[3], "dataEncipherment must not be set for EC keys");
+        assertFalse(keyUsage[4], "keyAgreement");
+        assertEquals(keyCertSign, keyUsage[5], "keyCertSign");
+        assertEquals(cRLSign, keyUsage[6], "cRLSign");
     }
 
     @Test
